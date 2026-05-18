@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Briefcase, Building2, MapPin, Clock, DollarSign, Trash2} from "lucide-react";
 import { getJobListings, deleteJob } from "@/utils/actions/jobs/actions";
-import { createClient } from "@/utils/supabase/client";
 import {
   Select,
   SelectContent,
@@ -18,7 +17,7 @@ import { motion } from "framer-motion";
 
 
 type WorkLocationType = 'remote' | 'in_person' | 'hybrid';
-type EmploymentType = 'full_time' | 'part_time' | 'co_op' | 'internship';
+type EmploymentType = 'full_time' | 'part_time' | 'co_op' | 'internship' | 'contract';
 
 interface Job {
   id: string;
@@ -37,41 +36,11 @@ export function JobListingsCard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [workLocation, setWorkLocation] = useState<WorkLocationType | undefined>();
   const [employmentType, setEmploymentType] = useState<EmploymentType | undefined>();
 
-  // Fetch admin status
-  useEffect(() => {
-    async function checkAdminStatus() {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (!profileError) {
-          setIsAdmin(profile?.is_admin === true);
-          return;
-        }
-
-        // Backward compatibility for deployments still using public.admins
-        const { data: adminData } = await supabase
-          .from('admins')
-          .select('is_admin')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        setIsAdmin(adminData?.is_admin === true);
-      }
-    }
-    
-    checkAdminStatus();
-  }, []);
+  // In single-user / CF Access mode, the user is always the admin
+  const isAdmin = true;
 
   const fetchJobs = useCallback(async () => {
     try {

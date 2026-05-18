@@ -8,7 +8,7 @@ import {
 } from "@/lib/zod-schemas";
 import { Job, Resume } from "@/lib/types";
 import { AIConfig } from '@/utils/ai-tools';
-import { getSubscriptionPlan } from '../stripe/actions';
+import { getAuthenticatedUser } from '@/utils/auth';
 import { dedupeAIConfigs, withTaskModel, type AITaskModel } from '@/lib/ai/task-models';
 import {
   finishAIUsageRequest,
@@ -73,8 +73,9 @@ export async function tailorResumeToJob(
   jobListing: z.infer<typeof simplifiedJobSchema>,
   config?: AIConfig
 ) {
-  const { plan, id } = await getSubscriptionPlan(true);
-  const isPro = plan === 'pro';
+  const user = await getAuthenticatedUser();
+  const id = user.id;
+  const isPro = true;
   const overallStart = Date.now();
   const modelCandidates = getModelCandidates(config, isPro, "jobTailoring");
 
@@ -146,8 +147,9 @@ Your task: produce a polished, tailored resume that meets the schema exactly and
 }
 
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
-  const { plan, id } = await getSubscriptionPlan(true);
-  const isPro = plan === 'pro';
+  const user = await getAuthenticatedUser();
+  const id = user.id;
+  const isPro = true;
   const overallStart = Date.now();
   const modelCandidates = getModelCandidates(config, isPro, "structuredExtraction");
 

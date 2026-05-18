@@ -1,46 +1,36 @@
 import { headers } from 'next/headers';
-import { createClient } from './supabase/server';
-import AuthCache from './auth-cache';
+import { getProfileByUserId, createProfile } from '@/lib/db';
 
-// Cache the auth check using React cache()
-export async function getAuthenticatedUser() {
+const SINGLE_USER_ID = process.env.SINGLE_USER_ID || 'default-user';
+
+export async function getAuthenticatedUser(): Promise<{ id: string; email: string | null }> {
   const headersList = await headers();
-  const requestId = headersList.get('x-request-id');
-  const userId = headersList.get('x-user-id');
-  
-  // If we have a request ID and user ID in headers, check cache first
-  if (requestId && userId) {
-    const cachedUser = AuthCache.get(requestId);
-    if (cachedUser) {
-      return {
-        id: cachedUser.id,
-        email: cachedUser.email
-      };
-    }
+
+  // Cloudflare Access sets this header with the authenticated user's JWT
+  const cfAccessEmail = headersList.get('cf-access-authenticated-user-email');
+
+  if (cfAccessEmail) {
+    // Cloudflare Access authenticated — use email as identity
+    // In single-user mode, we still use a fixed user ID for DB consistency
+    return { id: SINGLE_USER_ID, email: cfAccessEmail };
   }
 
-  // If not in cache, get from Supabase
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    throw new Error('User not authenticated');
-  }
-
-  // If we have a request ID, cache the result
-  if (requestId) {
-    AuthCache.set(requestId, {
-      id: user.id,
-      email: user.email || null,
-      timestamp: Date.now()
-    });
-  }
-
-  return user;
+  // Fallback: single-user mode without Cloudflare Access (local dev)
+  // All requests are treated as the single user
+  return { id: SINGLE_USER_ID, email: process.env.USER_EMAIL || null };
 }
 
-// Helper to get user ID with error handling
-export const getUserId = async () => {
+export async function getUserId(): Promise<string> {
   const user = await getAuthenticatedUser();
   return user.id;
-}; 
+}
+
+export async function ensureProfile(): Promise<void> {
+  const user = await getAuthenticatedUser();
+  const profile = await getProfileByUserId(user.id);
+  if (!profile) {
+    await createProfile(user.id, {
+      email: user.email,
+    });
+  }
+}

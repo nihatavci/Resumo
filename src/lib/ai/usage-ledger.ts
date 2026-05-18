@@ -10,7 +10,7 @@ import {
   type ResolvedAIRequest,
 } from "@/lib/ai/access-control";
 import { createAIClientFromResolvedRequest, type AIConfig } from "@/utils/ai-tools";
-import { createServiceClient } from "@/utils/supabase/server";
+import { insertAIUsageEvent, updateAIUsageEvent } from "@/lib/db";
 
 type AIUsageStatus = "succeeded" | "failed" | "rate_limited" | "blocked";
 
@@ -30,27 +30,18 @@ export async function recordAIUsageStarted(input: {
   route: string;
   provider: string;
   model: string;
-  isPro: boolean;
+  isPro?: boolean;
   usedServerKey: boolean;
 }): Promise<string> {
-  const supabase = await createServiceClient();
-  const { data, error } = await supabase
-    .from("ai_usage_events")
-    .insert({
-      user_id: input.userId,
-      route: input.route,
-      provider: input.provider,
-      model: input.model,
-      is_pro: input.isPro,
-      used_server_key: input.usedServerKey,
-      status: "started",
-    })
-    .select("id")
-    .single();
-
-  if (error) {
-    throw error;
-  }
+  const id = await insertAIUsageEvent({
+    userId: input.userId,
+    route: input.route,
+    provider: input.provider,
+    model: input.model,
+    isPro: true,
+    usedServerKey: input.usedServerKey,
+    status: "started",
+  });
 
   await captureServerAnalyticsEvent({
     distinctId: input.userId,
@@ -59,12 +50,12 @@ export async function recordAIUsageStarted(input: {
       route: input.route,
       provider: input.provider,
       model: input.model,
-      is_pro: input.isPro,
+      is_pro: true,
       used_server_key: input.usedServerKey,
     },
   });
 
-  return data.id;
+  return id;
 }
 
 export async function recordAIUsageFinished(input: {
@@ -75,42 +66,17 @@ export async function recordAIUsageFinished(input: {
   outputTokens?: number;
   totalTokens?: number;
 }): Promise<void> {
-  const supabase = await createServiceClient();
-  const { data, error } = await supabase
-    .from("ai_usage_events")
-    .update({
-      status: input.status,
-      error_code: input.errorCode ?? null,
-      input_tokens: input.inputTokens ?? null,
-      output_tokens: input.outputTokens ?? null,
-      total_tokens: input.totalTokens ?? null,
-    })
-    .eq("id", input.id)
-    .select("user_id, route, provider, model, is_pro, used_server_key, status, input_tokens, output_tokens, total_tokens, error_code")
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  await captureServerAnalyticsEvent({
-    distinctId: data.user_id,
-    event: input.status === "succeeded"
-      ? AnalyticsEvents.AIRequestSucceeded
-      : AnalyticsEvents.AIRequestFailed,
-    properties: {
-      route: data.route,
-      provider: data.provider,
-      model: data.model,
-      is_pro: data.is_pro,
-      used_server_key: data.used_server_key,
-      status: data.status,
-      input_tokens: data.input_tokens,
-      output_tokens: data.output_tokens,
-      total_tokens: data.total_tokens,
-      error_code: data.error_code,
-    },
+  await updateAIUsageEvent(input.id, {
+    status: input.status,
+    errorCode: input.errorCode,
+    inputTokens: input.inputTokens,
+    outputTokens: input.outputTokens,
+    totalTokens: input.totalTokens,
   });
+
+  // Note: Analytics event is best-effort. We no longer re-read the row since
+  // D1 UPDATE doesn't return the updated row.  The usage event id is sufficient
+  // for reconciliation and the detailed analytics are captured at start time.
 }
 
 export function usageFromLanguageModelUsage(usage?: LanguageModelUsage) {
@@ -143,7 +109,7 @@ export async function startAIUsageRequest(input: {
   userId: string;
   route: string;
   config?: AIConfig;
-  isPro: boolean;
+  isPro?: boolean;
   useThinking?: boolean;
 }): Promise<{
   model: LanguageModelV1;
@@ -151,14 +117,14 @@ export async function startAIUsageRequest(input: {
   resolved: ResolvedAIRequest;
   telemetry: TelemetrySettings;
 }> {
-  const requestedModel = input.config?.model ?? getDefaultModel(input.isPro);
+  const requestedModel = input.config?.model ?? getDefaultModel(true);
 
   let resolved: ResolvedAIRequest;
   try {
     resolved = resolveAIRequest({
       requestedModel,
       apiKeys: input.config?.apiKeys ?? [],
-      isPro: input.isPro,
+      isPro: true,
     });
   } catch (error) {
     const usageEventId = await recordAIUsageStarted({
@@ -166,7 +132,7 @@ export async function startAIUsageRequest(input: {
       route: input.route,
       provider: "unknown",
       model: requestedModel,
-      isPro: input.isPro,
+      isPro: true,
       usedServerKey: false,
     });
 
@@ -188,7 +154,7 @@ export async function startAIUsageRequest(input: {
     route: input.route,
     provider: resolved.providerId,
     model: resolved.modelId,
-    isPro: input.isPro,
+    isPro: true,
     usedServerKey: resolved.usedServerKey,
   });
 
@@ -218,7 +184,7 @@ export async function startAIUsageRequest(input: {
       route: input.route,
       userId: input.userId,
       usageEventId,
-      isPro: input.isPro,
+      isPro: true,
       resolved,
     }),
   };

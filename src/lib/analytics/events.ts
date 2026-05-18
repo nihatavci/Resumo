@@ -6,10 +6,6 @@ export const AnalyticsEvents = {
   AIRequestStarted: "ai_request_started",
   AIRequestSucceeded: "ai_request_succeeded",
   AIRequestFailed: "ai_request_failed",
-  CheckoutStarted: "checkout_started",
-  CheckoutCompleted: "checkout_completed",
-  SubscriptionActivated: "subscription_activated",
-  SubscriptionCanceled: "subscription_canceled",
 } as const;
 
 export type AnalyticsEventName =
@@ -32,7 +28,6 @@ const SENSITIVE_PROPERTY_KEYS = new Set([
   "raw_email",
   "resume_content",
   "resume_text",
-  "stripe_customer_email",
 ]);
 
 export function sanitizeAnalyticsProperties(

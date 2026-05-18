@@ -6,7 +6,7 @@ import { useState, useEffect, useReducer } from "react";
 import { useRouter } from "next/navigation";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
-import { createClient } from "@/utils/supabase/client";
+import { getJobById } from "@/utils/actions/jobs/actions";
 import { EditorLayout } from "./layout/EditorLayout";
 import { EditorPanel } from './panels/editor-panel';
 import { PreviewPanel } from './panels/preview-panel';
@@ -54,19 +54,13 @@ export function ResumeEditorClient({
     async function fetchJob() {
       try {
         setIsLoadingJob(true);
-        const supabase = createClient();
-        const { data: jobData, error } = await supabase
-          .from('jobs')
-          .select('*')
-          .eq('id', state.resume.job_id)
-          .single();
+        const jobData = await getJobById(state.resume.job_id!);
 
         if (isCancelled) {
           return;
         }
 
-        if (error) {
-          void error;
+        if (!jobData) {
           setJob(null);
           return;
         }

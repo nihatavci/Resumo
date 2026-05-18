@@ -1,6 +1,3 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-import { getSubscriptionAccessState } from "@/lib/subscription-access";
 import {
   buildAnalyticsPayload,
   type AnalyticsEventName,
@@ -52,21 +49,11 @@ export async function captureServerAnalyticsEvent(input: {
   }
 }
 
-export async function getSubscriptionAnalyticsProperties(
-  supabase: SupabaseClient,
-  userId: string
-) {
-  const { data } = await supabase
-    .from("subscriptions")
-    .select("subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  const state = getSubscriptionAccessState(data);
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getSubscriptionAnalyticsProperties(_userId: string) {
   return {
-    plan: state.effectivePlan || data?.subscription_plan || "free",
-    is_pro: state.hasProAccess,
-    subscription_status: data?.subscription_status ?? null,
+    plan: 'pro' as const,
+    is_pro: true,
+    subscription_status: 'active' as const,
   };
 }

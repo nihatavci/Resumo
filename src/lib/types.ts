@@ -167,18 +167,6 @@ export interface Profile {
   updated_at: string;
 }
 
-export interface Subscription {
-  user_id: string;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
-  subscription_plan: 'free' | 'pro';
-  subscription_status: 'active' | 'canceled';
-  current_period_end: string | null;
-  trial_end: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 export const AI_PROVIDERS = {
   OPENAI: 'openai',
   // AZURE: 'azure',

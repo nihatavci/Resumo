@@ -3,7 +3,7 @@
 import { LanguageModelV1, streamText } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
 import { type AIConfig } from '@/utils/ai-tools';
-import { getSubscriptionPlan } from '../stripe/actions';
+import { getAuthenticatedUser } from '@/utils/auth';
 import { withTaskModel } from '@/lib/ai/task-models';
 import {
   finishAIUsageRequest,
@@ -13,8 +13,9 @@ import {
 export async function generate(input: string, config?: AIConfig) {
   try {
     const stream = createStreamableValue('');
-    const { plan, id } = await getSubscriptionPlan(true);
-    const isPro = plan === 'pro';
+    const user = await getAuthenticatedUser();
+    const id = user.id;
+    const isPro = true;
     const {
       model: aiClient,
       usageEventId,

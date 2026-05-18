@@ -11,9 +11,6 @@ let hasInitialized = false;
 
 interface AnalyticsUser {
   id: string;
-  subscriptionPlan: string;
-  subscriptionStatus: string | null;
-  isPro: boolean;
 }
 
 export function PostHogProvider({
@@ -44,12 +41,8 @@ export function PostHogProvider({
       return;
     }
 
-    posthog.identify(user.id, sanitizeAnalyticsProperties({
-      subscription_plan: user.subscriptionPlan,
-      subscription_status: user.subscriptionStatus,
-      is_pro: user.isPro,
-    }));
-  }, [user?.id, user?.isPro, user?.subscriptionPlan, user?.subscriptionStatus]);
+    posthog.identify(user.id, sanitizeAnalyticsProperties({}));
+  }, [user?.id]);
 
   return (
     <PostHogReactProvider client={posthog}>

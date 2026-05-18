@@ -3,7 +3,7 @@ export interface JobListingParams {
     pageSize: number;
     filters?: {
       workLocation?: 'remote' | 'in_person' | 'hybrid';
-      employmentType?: 'full_time' | 'part_time' | 'co_op' | 'internship';
+      employmentType?: 'full_time' | 'part_time' | 'co_op' | 'internship' | 'contract';
       keywords?: string[];
     };
   }

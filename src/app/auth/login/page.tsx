@@ -4,7 +4,6 @@ import { MockResumeMobile } from "@/components/landing/mock-resume-mobile";
 import { BenefitsList } from "@/components/landing/benefits-list";
 import { ActionButtons } from "@/components/landing/action-buttons";
 import { Logo } from "@/components/ui/logo";
-import { PricingSection } from "@/components/landing/pricing-section";
 import { ErrorDialog } from "@/components/auth/error-dialog";
 import { CreatorStory } from "@/components/landing/creator-story";
 import { HowItWorks } from "@/components/landing/how-it-works";
@@ -279,12 +278,6 @@ export default async function LoginPage({
           <div id="how-it-works" className="relative py-16">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-50/30 to-transparent"></div>
             <HowItWorks />
-          </div>
-
-          {/* Pricing Section with improved framing */}
-          <div id="pricing" className="relative py-16">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-50/30 to-transparent"></div>
-            <PricingSection />
           </div>
 
           {/* Creator Story with improved framing */}

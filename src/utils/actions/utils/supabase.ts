@@ -1,19 +1,13 @@
-import { createClient } from "@/utils/supabase/server";
-import { createServiceClient } from "../../supabase/server";
+import { getAuthenticatedUser } from "@/utils/auth";
 
-// Shared Supabase client initialization
+// Shared client initialization — adapted for D1/CF Access mode
 export async function getAuthenticatedClient() {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    throw new Error('User not authenticated');
-  }
-  
-  return { supabase, user };
+  const user = await getAuthenticatedUser();
+  return { user };
 }
 
+// Service client is no longer needed in D1 mode.
+// Kept as a no-op for backward compatibility with callers.
 export async function getServiceClient() {
-  const supabase = await createServiceClient();
-  return { supabase };
-} 
+  return {};
+}

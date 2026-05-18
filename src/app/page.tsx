@@ -8,7 +8,7 @@ import { FAQ } from "@/components/landing/FAQ";
 import { Footer } from "@/components/layout/footer";
 import { NavLinks } from "@/components/layout/nav-links";
 import { Logo } from "@/components/ui/logo";
-import { createClient } from "@/utils/supabase/server";
+import { getAuthenticatedUser } from "@/utils/auth";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import Script from "next/script";
@@ -32,9 +32,13 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   // Check if user is authenticated
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
+  let user: { id: string; email: string | null } | null = null;
+  try {
+    user = await getAuthenticatedUser();
+  } catch {
+    // Not authenticated
+  }
+
   // If user is authenticated, redirect to home page
   if (user) {
     redirect("/home");

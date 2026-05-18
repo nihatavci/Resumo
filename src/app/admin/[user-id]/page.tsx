@@ -3,9 +3,7 @@ import Link from 'next/link';
 // Removed getUserId import
 import { getUserDetailsById, getResumeCountForUser, getResumesForUser, ensureAdmin } from '../actions'; // Import getResumesForUser and ensureAdmin
 import UserResumeList from '../components/user-resume-list'; // Import the new component
-import EditSubscriptionPlanForm from '../components/edit-subscription-plan-form'; // Import the new component
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -61,7 +59,7 @@ export default async function AdminUserDetailPage({ params }: AdminUserDetailPag
     notFound(); // Use Next.js notFound function
   }
 
-  const { user, profile, subscription } = userData;
+  const { user, profile } = userData;
 
   // 4. Fetch Resume Count (in parallel potentially, or after user data)
   // 4. Fetch Resume Count & List (can run in parallel)
@@ -91,14 +89,12 @@ export default async function AdminUserDetailPage({ params }: AdminUserDetailPag
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Authentication Info</CardTitle>
-            <CardDescription>User account details from Supabase Auth.</CardDescription>
+            <CardDescription>User account details.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <DetailItem label="User ID" value={user.id} isCode />
             <DetailItem label="Email" value={user.email || 'N/A'} />
             <DetailItem label="Created At" value={formatDate(user.created_at)} />
-            <DetailItem label="Last Sign In" value={formatDate(user.last_sign_in_at)} />
-            <DetailItem label="Email Confirmed" value={user.email_confirmed_at ? `Yes (${formatDate(user.email_confirmed_at)})` : 'No'} />
             <Separator className="my-2" />
             <DetailItem label="Resume Count" value={resumeCount.toString()} />
           </CardContent>
@@ -128,59 +124,10 @@ export default async function AdminUserDetailPage({ params }: AdminUserDetailPag
                  <Separator className="my-4" />
                  <h4 className="font-semibold text-muted-foreground">Projects</h4>
                  <JsonDisplay data={profile.projects} />
-                 <Separator className="my-4" />
-                 <h4 className="font-semibold text-muted-foreground">Certifications</h4>
-                 <JsonDisplay data={profile.certifications} />
+                 {/* Certifications not available in current schema */}
               </>
             ) : (
               <p className="text-muted-foreground italic">No profile data found for this user.</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Subscription Info Card */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Subscription Info</CardTitle>
-             <CardDescription>Data from the &apos;subscriptions&apos; table.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {subscription ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-                  <DetailItem label="Plan" value={subscription.subscription_plan}>
-                    {subscription.subscription_plan && <Badge variant={subscription.subscription_plan === 'pro' ? 'default' : 'secondary'}>{subscription.subscription_plan.toUpperCase()}</Badge>}
-                  </DetailItem>
-                  <DetailItem label="Status" value={subscription.subscription_status}>
-                    {subscription.subscription_status && <Badge variant={subscription.subscription_status === 'active' ? 'default' : 'secondary'}>{subscription.subscription_status.toUpperCase()}</Badge>}
-                  </DetailItem>
-                  <DetailItem label="Current Period End" value={formatDate(subscription.current_period_end)} />
-                  <DetailItem label="Stripe Customer ID" value={subscription.stripe_customer_id} isCode />
-                  {/* Add other relevant subscription fields */}
-                </div>
-                
-                <Separator className="my-4" />
-                
-                <div>
-                  <h3 className="text-md font-semibold mb-2">Change Subscription Plan</h3>
-                  <EditSubscriptionPlanForm 
-                    userId={targetUserId} 
-                    currentPlan={subscription.subscription_plan}
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-muted-foreground italic mb-4">No subscription data found for this user.</p>
-                
-                <div>
-                  <h3 className="text-md font-semibold mb-2">Create Subscription</h3>
-                  <EditSubscriptionPlanForm 
-                    userId={targetUserId} 
-                    currentPlan={null}
-                  />
-                </div>
-              </>
             )}
           </CardContent>
         </Card>

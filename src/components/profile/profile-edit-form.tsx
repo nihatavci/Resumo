@@ -30,7 +30,6 @@ import { ProfileSkillsForm } from "@/components/profile/profile-skills-form";
 import { formatProfileWithAI } from "../../utils/actions/profiles/ai";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
-import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { AlertTriangle } from "lucide-react";
 import { importResume, updateProfile } from "@/utils/actions/profiles/actions";
 import { cn, withBasePath } from "@/lib/utils";
@@ -517,10 +516,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                           <p className="font-medium">API Key Required</p>
                           <p className="text-red-500/90">{apiKeyError}</p>
                           <div className="mt-2 flex flex-col gap-2 justify-start">
-                            <div className="w-auto mx-auto">
-                              <ProUpgradeButton />
-                            </div>
-                            <div className="text-center text-xs text-red-400">or</div>
                             <Button
                               variant="outline"
                               size="sm"
@@ -645,10 +640,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                           <p className="font-medium">API Key Required</p>
                           <p className="text-red-500/90">{apiKeyError}</p>
                           <div className="mt-2 flex flex-col gap-2 justify-start">
-                            <div className="w-auto mx-auto">
-                              <ProUpgradeButton />
-                            </div>
-                            <div className="text-center text-xs text-red-400">or</div>
                             <Button
                               variant="outline"
                               size="sm"

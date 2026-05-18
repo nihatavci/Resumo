@@ -6,9 +6,8 @@ import {  MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2, Plus, Sparkles,
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { Job, Resume } from "@/lib/types";
-import { createClient } from "@/utils/supabase/client";
 import { updateResume } from "@/utils/actions/resumes/actions";
-import { createJob, deleteJob } from "@/utils/actions/jobs/actions";
+import { createJob, deleteJob, getJobById } from "@/utils/actions/jobs/actions";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -57,21 +56,13 @@ export function TailoredJobCard({
 
       try {
         setInternalIsLoading(true);
-        const supabase = createClient();
-        const { data: jobData, error } = await supabase
-          .from('jobs')
-          .select('*')
-          .eq('id', jobId)
-          .single();
+        const jobData = await getJobById(jobId);
 
-        if (error) {
-          if (error.code !== 'PGRST116') {
-            throw error;
-          }
+        if (!jobData) {
           setInternalJob(null);
           return;
         }
-        
+
         setInternalJob(jobData);
       } catch (error) {
         console.error('Error fetching job:', error);

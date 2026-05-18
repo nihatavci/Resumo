@@ -14,7 +14,7 @@ import { ModelSelector } from "@/components/shared/model-selector"
 import { AI_MODELS, MODEL_DESIGNATIONS, getProvidersArray } from "@/lib/ai-models"
 import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys"
 
-export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
+export function ApiKeysForm() {
   // Use synchronized hooks for API keys and default model
   const { apiKeys, setApiKeys } = useApiKeys()
   const { defaultModel, setDefaultModel } = useDefaultModel()
@@ -34,13 +34,9 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     
     // Only set default if there's no model selected
     if (!defaultModel) {
-      if (isProPlan) {
-        setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_PRO)
-      } else {
-        setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_FREE)
-      }
+      setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_PRO)
     }
-  }, [defaultModel, isProPlan, setDefaultModel])
+  }, [defaultModel, setDefaultModel])
 
   const handleUpdateKey = (service: ServiceName) => {
     const keyValue = newKeyValues[service]
@@ -150,7 +146,6 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
           value={defaultModel}
           onValueChange={handleModelChange}
           apiKeys={apiKeys}
-          isProPlan={isProPlan}
           className="w-full mt-1"
           placeholder="Select an AI model"
         />
@@ -163,20 +158,10 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
         </Label>
         <div className="mt-2 mb-4 space-y-2">
           <p className="text-sm text-muted-foreground">
-            Add your API keys to use premium AI models. Your keys are stored securely in your browser.
+            Add your API keys to use AI models. Your keys are stored securely in your browser.
           </p>
           <div className="p-3 rounded-lg bg-amber-50/50 border border-amber-200/50 text-amber-900 text-sm">
-            {isProPlan ? (
-              <>
-                <p><strong>Pro Account Active:</strong> You have full access to all AI models without needing to manage API keys.</p>
-                <p className="mt-1">You can still add personal API keys below if you prefer to use your own credentials.</p>
-              </>
-            ) : (
-              <>
-                <p><strong>Security Note:</strong> API keys are stored locally in your browser. While convenient, this means anyone with access to this device could potentially view your keys.</p>
-                <p className="mt-1">For enhanced security, consider <a href="/subscription" className="text-amber-700 hover:text-amber-800 underline underline-offset-2">upgrading to a Pro account</a> where we securely manage API access for you.</p>
-              </>
-            )}
+            <p><strong>Security Note:</strong> API keys are stored locally in your browser. While convenient, this means anyone with access to this device could potentially view your keys.</p>
           </div>
         </div>
 

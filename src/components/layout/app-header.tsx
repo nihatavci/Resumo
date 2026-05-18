@@ -7,27 +7,18 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Menu, User } from "lucide-react";
 import { PageTitle } from "./page-title";
-import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect, useRef } from "react";
 import { ModelSelector } from "@/components/shared/model-selector";
 import { getDefaultModel } from "@/lib/ai-models";
 import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys";
-import { TrialStartButton } from "@/components/trial/trial-start-button";
-
 interface AppHeaderProps {
   children?: React.ReactNode;
-  showUpgradeButton?: boolean;
-  isProPlan?: boolean;
-  upgradeButtonVariant?: 'trial' | 'upgrade';
 }
 
 export function AppHeader({
   children,
-  showUpgradeButton = true,
-  isProPlan = false,
-  upgradeButtonVariant = 'upgrade',
 }: AppHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   
@@ -44,10 +35,10 @@ export function AppHeader({
     hasInitialized.current = true;
     
     if (!defaultModel) {
-      const defaultModelId = getDefaultModel(isProPlan);
+      const defaultModelId = getDefaultModel(true);
       setDefaultModel(defaultModelId);
     }
-  }, [defaultModel, isProPlan, setDefaultModel]);
+  }, [defaultModel, setDefaultModel]);
 
   const handleModelChange = (modelId: string) => {
     setDefaultModel(modelId);
@@ -88,20 +79,12 @@ export function AppHeader({
             <>
               {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-                {showUpgradeButton && (
-                  <>
-                    {upgradeButtonVariant === 'trial' ? <TrialStartButton /> : <ProUpgradeButton />}
-                    <div className="h-4 w-px bg-purple-200/50 ml-2 lg:ml-3" />
-                  </>
-                )}
-                
                 {/* Model Selector - Responsive Width */}
                 <div className="mr-2 lg:mr-3">
                   <ModelSelector
                     value={defaultModel}
                     onValueChange={handleModelChange}
                     apiKeys={apiKeys}
-                    isProPlan={isProPlan}
                     className="w-[220px] lg:w-[260px] xl:w-[300px] h-8 text-xs"
                     placeholder="Select AI model"
                     showToast={false}
@@ -141,20 +124,12 @@ export function AppHeader({
                     <SheetTitle>Menu</SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col gap-4 pt-6">
-                    {showUpgradeButton &&
-                      (upgradeButtonVariant === 'trial' ? (
-                        <TrialStartButton className="w-full" />
-                      ) : (
-                        <ProUpgradeButton className="w-full" />
-                      ))}
-                    
                     {/* Mobile Model Selector */}
                     <div className="px-1">
                       <ModelSelector
                         value={defaultModel}
                         onValueChange={handleModelChange}
                         apiKeys={apiKeys}
-                        isProPlan={isProPlan}
                         className="w-full h-10 text-sm"
                         placeholder="Select AI model"
                         showToast={false}

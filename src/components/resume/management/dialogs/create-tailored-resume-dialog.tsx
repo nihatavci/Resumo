@@ -628,7 +628,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         errorMessage={errorMessage}
         onUpgrade={() => {
           setShowErrorDialog(false);
-          window.location.href = withBasePath('/subscription');
+          window.location.href = withBasePath('/settings');
         }}
         onSettings={() => {
           setShowErrorDialog(false);

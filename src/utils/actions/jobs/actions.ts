@@ -1,22 +1,17 @@
 'use server';
 
-import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from 'next/cache';
 import { simplifiedJobSchema } from "@/lib/zod-schemas";
 import type { Job } from "@/lib/types";
 import { z } from "zod";
 import { JobListingParams } from "./schema";
+import { getAuthenticatedUser } from "@/utils/auth";
+import { insertJob as dbInsertJob, deleteJob as dbDeleteJob, getJobsByUserId, softDeleteJob as dbSoftDeleteJob, getDB, getJobById as dbGetJobById } from "@/lib/db";
 
 export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>) {
-  
-  const supabase = await createClient();
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
-  const jobData = {
+  const job = await dbInsertJob({
     user_id: user.id,
     company_name: jobListing.company_name,
     position_title: jobListing.position_title,
@@ -25,141 +20,77 @@ export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>)
     location: jobListing.location,
     salary_range: jobListing.salary_range,
     keywords: jobListing.keywords,
-    work_location: jobListing.work_location || 'in_person', 
-    employment_type: jobListing.employment_type || 'full_time', 
-    is_active: true
-  };
+    work_location: jobListing.work_location || 'in_person',
+    employment_type: jobListing.employment_type || 'full_time',
+    is_active: true,
+  });
 
-  const { data, error } = await supabase
-    .from('jobs')
-    .insert([jobData])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('[createJob] Error creating job:', error);
-    throw error;
-  }
-  
-  return data;
+  return job;
 }
 
 export async function deleteJob(jobId: string): Promise<void> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
   // First, get all resumes that reference this job
-  const { data: affectedResumes } = await supabase
-    .from('resumes')
-    .select('id')
-    .eq('job_id', jobId);
+  const db = getDB();
+  const { results: affectedResumes } = await db
+    .prepare('SELECT id FROM resumes WHERE job_id = ? AND user_id = ?')
+    .bind(jobId, user.id)
+    .all();
 
   // Delete the job
-  const { error: deleteError } = await supabase
-    .from('jobs')
-    .delete()
-    .eq('id', jobId);
-
-  if (deleteError) {
-    console.error('Delete error:', deleteError);
-    throw new Error('Failed to delete job');
-  }
+  await dbDeleteJob(jobId, user.id);
 
   // Revalidate all affected resume paths
-  affectedResumes?.forEach(resume => {
+  affectedResumes?.forEach((resume) => {
     revalidatePath(`/resumes/${resume.id}`);
   });
-  
+
   // Also revalidate the general paths
   revalidatePath('/', 'layout');
   revalidatePath('/resumes', 'layout');
 }
 
 
-export async function getJobListings({ 
-  page = 1, 
-  pageSize = 10, 
-  filters 
+export async function getJobListings({
+  page = 1,
+  pageSize = 10,
+  filters
 }: JobListingParams) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
 
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
-
-  // Calculate offset
   const offset = (page - 1) * pageSize;
 
-  // Start building the query
-  let query = supabase
-    .from('jobs')
-    .select('*', { count: 'exact' })
-    .eq('user_id', user.id)
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
-
-  // Apply filters if they exist
-  if (filters) {
-    if (filters.workLocation) {
-      query = query.eq('work_location', filters.workLocation);
-    }
-    if (filters.employmentType) {
-      query = query.eq('employment_type', filters.employmentType);
-    }
-    if (filters.keywords && filters.keywords.length > 0) {
-      query = query.contains('keywords', filters.keywords);
-    }
-  }
-
-  // Add pagination
-  const { data: jobs, error, count } = await query
-    .range(offset, offset + pageSize - 1);
-
-  if (error) {
-    console.error('Error fetching jobs:', error);
-    throw new Error('Failed to fetch job listings');
-  }
+  const { jobs, total } = await getJobsByUserId(user.id, {
+    workLocation: filters?.workLocation,
+    employmentType: filters?.employmentType,
+    limit: pageSize,
+    offset,
+  });
 
   return {
     jobs,
-    totalCount: count ?? 0,
+    totalCount: total,
     currentPage: page,
-    totalPages: Math.ceil((count ?? 0) / pageSize)
+    totalPages: Math.ceil(total / pageSize),
   };
 }
 
 export async function deleteTailoredJob(jobId: string): Promise<void> {
-  const supabase = await createClient();
-
-  const { error } = await supabase
-    .from('jobs')
-    .update({ is_active: false })
-    .eq('id', jobId);
-
-  if (error) {
-    throw new Error('Failed to delete job');
-  }
-
+  const user = await getAuthenticatedUser();
+  await dbSoftDeleteJob(jobId, user.id);
   revalidatePath('/', 'layout');
 }
 
-export async function createEmptyJob(): Promise<Job> {
-  const supabase = await createClient();
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+export async function getJobById(jobId: string): Promise<Job | null> {
+  const user = await getAuthenticatedUser();
+  return dbGetJobById(jobId, user.id);
+}
 
-  const emptyJob: Partial<Job> = {
+export async function createEmptyJob(): Promise<Job> {
+  const user = await getAuthenticatedUser();
+
+  const job = await dbInsertJob({
     user_id: user.id,
     company_name: 'New Company',
     position_title: 'New Position',
@@ -170,20 +101,9 @@ export async function createEmptyJob(): Promise<Job> {
     keywords: [],
     work_location: null,
     employment_type: null,
-    is_active: true
-  };
-
-  const { data, error } = await supabase
-    .from('jobs')
-    .insert([emptyJob])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating job:', error);
-    throw new Error('Failed to create job');
-  }
+    is_active: true,
+  });
 
   revalidatePath('/', 'layout');
-  return data;
+  return job;
 } 

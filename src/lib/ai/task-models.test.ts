@@ -5,8 +5,8 @@ import { getTaskModel, withTaskModel } from "./task-models";
 import type { AIConfig } from "@/lib/ai-models";
 
 describe("task model routing", () => {
-  it("routes full resume tailoring by plan", () => {
-    assert.equal(getTaskModel("jobTailoring", false), "gpt-5.4-nano");
+  it("routes full resume tailoring to the pro model regardless of plan", () => {
+    assert.equal(getTaskModel("jobTailoring", false), "gpt-5.5");
     assert.equal(getTaskModel("jobTailoring", true), "gpt-5.5");
   });
 
@@ -24,8 +24,8 @@ describe("task model routing", () => {
     assert.equal(getTaskModel("coverLetter", true), "gpt-5.4-mini");
   });
 
-  it("routes free chat assistant to GPT-5.4 Nano", () => {
-    assert.equal(getTaskModel("chatAssistant", false), "gpt-5.4-nano");
+  it("routes chat assistant to the pro model regardless of plan", () => {
+    assert.equal(getTaskModel("chatAssistant", false), "gpt-5.5");
     assert.equal(getTaskModel("chatAssistant", true), "gpt-5.5");
   });
 

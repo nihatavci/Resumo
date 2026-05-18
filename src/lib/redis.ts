@@ -1,34 +1,49 @@
-import { Redis as UpstashRedis } from "@upstash/redis";
-import IORedis from "ioredis";
+// Cloudflare KV-backed cache replacing Redis.
+// Provides the same hash-like interface used by the rate limiter.
 
-/**
- * Unified Redis client interface that works with both local Redis (ioredis)
- * and cloud Redis (Upstash). Set USE_LOCAL_REDIS=true to use local Redis.
- */
-interface RedisClient {
+interface KVCache {
   hgetall(key: string): Promise<Record<string, string> | null>;
-  hset(key: string, data: Record<string, string>): Promise<number | "OK">;
-  expire(key: string, seconds: number): Promise<number | boolean>;
+  hset(key: string, data: Record<string, string>): Promise<void>;
+  expire(key: string, seconds: number): Promise<void>;
 }
 
-const useLocalRedis = process.env.USE_LOCAL_REDIS === "true";
-
-function createRedisClient(): RedisClient {
-  if (useLocalRedis && process.env.REDIS_URL) {
-    const client = new IORedis(process.env.REDIS_URL);
-    return {
-      hgetall: (key) => client.hgetall(key).then(r => Object.keys(r).length ? r : null),
-      hset: (key, data) => client.hset(key, data),
-      expire: (key, seconds) => client.expire(key, seconds).then(r => r === 1),
-    };
+function getKV(): KVNamespace | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getRequestContext } = require('@cloudflare/next-on-pages');
+    return (getRequestContext().env as Record<string, KVNamespace>).CACHE;
+  } catch {
+    return null;
   }
-
-  const client = new UpstashRedis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
-  return client as unknown as RedisClient;
 }
 
-const redis = createRedisClient();
-export default redis;
+function createKVCache(): KVCache {
+  return {
+    async hgetall(key: string) {
+      const kv = getKV();
+      if (!kv) return null;
+      const raw = await kv.get(key, 'json') as Record<string, string> | null;
+      return raw;
+    },
+    async hset(key: string, data: Record<string, string>) {
+      const kv = getKV();
+      if (!kv) return;
+      const existing = await kv.get(key, 'json') as Record<string, string> | null;
+      const merged = { ...(existing ?? {}), ...data };
+      // Store with a default TTL; expire() will update it
+      await kv.put(key, JSON.stringify(merged), { expirationTtl: 7200 });
+    },
+    async expire(key: string, seconds: number) {
+      const kv = getKV();
+      if (!kv) return;
+      // KV doesn't support changing TTL without rewriting — read and rewrite
+      const raw = await kv.get(key, 'text');
+      if (raw) {
+        await kv.put(key, raw, { expirationTtl: seconds });
+      }
+    },
+  };
+}
+
+const cache = createKVCache();
+export default cache;

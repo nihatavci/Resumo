@@ -14,7 +14,7 @@ interface APIKeyInput {
 export interface ResolveAIRequestInput {
   requestedModel: string;
   apiKeys: APIKeyInput[];
-  isPro: boolean;
+  isPro?: boolean;
 }
 
 export interface ResolvedAIRequest {
@@ -61,10 +61,8 @@ export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIReques
     throw new Error(`Unsupported provider: ${model.provider}`);
   }
 
-  const freeServerModel =
-    model.features.isFree === true && model.availability.requiresPro === false;
-
-  if (input.isPro || freeServerModel) {
+  // Everything is now free and unlimited - always use server keys when available
+  {
     const { apiKey } = getServerKey(model.provider);
 
     if (apiKey) {

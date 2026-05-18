@@ -3,7 +3,7 @@ import { generateObject, LanguageModelUsage, LanguageModelV1, type TelemetrySett
 import { z } from 'zod';
 import { RESUME_FORMATTER_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { type AIConfig } from '@/utils/ai-tools';
-import { getSubscriptionPlan } from '@/utils/actions/stripe/actions';
+import { getAuthenticatedUser } from '@/utils/auth';
 import { sanitizeUnknownStrings } from '@/lib/utils';
 import { withTaskModel } from '@/lib/ai/task-models';
 import {
@@ -46,8 +46,9 @@ export async function formatProfileWithAI(
   config?: AIConfig
 ) {
     try {
-      const { plan, id } = await getSubscriptionPlan(true);
-      const isPro = plan === 'pro';
+      const user = await getAuthenticatedUser();
+      const id = user.id;
+      const isPro = true;
   
       
       const { object } = await runTrackedAIRequest({

@@ -9,10 +9,6 @@ import { Loader2 } from "lucide-react"
 import { useFormStatus } from 'react-dom'
 import { deleteUserAccount } from "@/app/auth/login/actions"
 
-interface DangerZoneProps {
-  subscriptionStatus?: string;
-}
-
 interface SubmitButtonProps {
   isEnabled: boolean;
 }
@@ -33,7 +29,7 @@ function SubmitButton({ isEnabled }: SubmitButtonProps) {
   )
 }
 
-export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
+export function DangerZone() {
   const [confirmation, setConfirmation] = useState("")
   const isConfirmed = confirmation === "DELETE"
 
@@ -45,11 +41,6 @@ export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
           <p className="text-sm text-muted-foreground">
             Permanently delete your account and all of your data
           </p>
-          {subscriptionStatus === 'active' && (
-            <p className="text-sm text-muted-foreground mt-2">
-              You currently have an active subscription. Cancel above to avoid future charges before deleting your account.
-            </p>
-          )}
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>

@@ -2,7 +2,7 @@ import { LanguageModelV1, ToolInvocation, smoothStream, streamText } from 'ai';
 import { Resume, Job } from '@/lib/types';
 import { type AIConfig } from '@/utils/ai-tools';
 import { tools } from '@/lib/tools';
-import { getSubscriptionPlan } from '@/utils/actions/stripe/actions';
+import { getAuthenticatedUser } from '@/utils/auth';
 import { AI_ASSISTANT_SYSTEM_MESSAGE } from '@/lib/prompts';
 import {
   AIUsageError,
@@ -27,12 +27,13 @@ interface ChatRequest {
 
 export async function POST(req: Request) {
   try {
-    const requestBody = await req.json();
-    const { messages, target_role, config, job, resume }: ChatRequest = requestBody;
+    const requestBody = await req.json() as ChatRequest;
+    const { messages, target_role, config, job, resume } = requestBody;
 
-    // Get subscription plan and user ID
-    const { plan, id } = await getSubscriptionPlan(true);
-    const isPro = plan === 'pro';
+    // Get user ID from auth
+    const user = await getAuthenticatedUser();
+    const id = user.id;
+    const isPro = true;
     const routedConfig = withTaskModel({ task: "chatAssistant", isPro, config });
 
     // Initialize the AI client using the provided config and plan.

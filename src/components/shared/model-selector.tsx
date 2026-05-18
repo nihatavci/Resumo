@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { Crown, ArrowRight } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import {
   getModelById,
@@ -22,7 +22,6 @@ interface ModelSelectorProps {
   value: string
   onValueChange: (value: string) => void
   apiKeys: ApiKey[]
-  isProPlan: boolean
   className?: string
   placeholder?: string
   showToast?: boolean
@@ -57,35 +56,13 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
               {model.name} is not available
             </h4>
             <p className="text-xs text-muted-foreground">
-              To use this model, you need either a Pro subscription or a {provider?.name} API key.
+              To use this model, you need a {provider?.name} API key.
             </p>
           </div>
-          
-          <div className="space-y-2">
-            {/* Pro Option */}
-            <div className="p-3 rounded-lg border border-purple-200/50 bg-gradient-to-br from-purple-50/50 to-purple-100/30">
-              <div className="flex items-center gap-2 mb-2">
-                <Crown className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-800">Recommended</span>
-                <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
-                  Instant Access
-                </span>
-              </div>
-              <p className="text-xs text-purple-700 mb-2">
-                Get unlimited access to all AI models without managing API keys
-              </p>
-              <Link href="/subscription">
-                <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700 h-7 text-xs">
-                  Upgrade to Pro
-                </Button>
-              </Link>
-            </div>
 
+          <div className="space-y-2">
             {/* API Key Option */}
             <div className="p-3 rounded-lg border border-gray-200/50 bg-gray-50/30">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium text-gray-800">Alternative</span>
-              </div>
               <p className="text-xs text-gray-600 mb-2">
                 Add your own {provider?.name} API key to use this model
               </p>
@@ -111,18 +88,17 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
   )
 }
 
-export function ModelSelector({ 
-  value, 
-  onValueChange, 
-  apiKeys, 
-  isProPlan, 
+export function ModelSelector({
+  value,
+  onValueChange,
+  apiKeys,
   className,
   placeholder = "Select an AI model",
   showToast = true
 }: ModelSelectorProps) {
-  
+
   const isModelSelectable = (modelId: string) => {
-    return isModelAvailable(modelId, isProPlan, apiKeys)
+    return isModelAvailable(modelId, true, apiKeys)
   }
 
   const handleModelChange = (modelId: string) => {
@@ -130,7 +106,7 @@ export function ModelSelector({
     if (!selectedModel) return
 
     // Check if model is available for the user
-    if (!isModelAvailable(modelId, isProPlan, apiKeys)) {
+    if (!isModelAvailable(modelId, true, apiKeys)) {
       if (showToast) {
         const provider = getProviderById(selectedModel.provider)
         toast.error(`Please add your ${provider?.name || selectedModel.provider} API key first`)

@@ -4,14 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
-import { User } from "@supabase/supabase-js"
 import { useState } from "react"
 import { updateEmail, updatePassword } from "@/app/(dashboard)/settings/actions"
 import { toast } from "sonner"
 // import { testApiKey } from "@/app/settings/page"
 
 interface SecurityFormProps {
-  user: User | null;
+  user: { id: string; email: string | null } | null;
 }
 
 export function SecurityForm({ user }: SecurityFormProps) {
@@ -21,10 +20,9 @@ export function SecurityForm({ user }: SecurityFormProps) {
   const [emailCurrentPassword, setEmailCurrentPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const providers = user?.identities?.map((identity) => identity.provider) ?? [];
-  const hasPasswordIdentity = providers.length === 0 || providers.includes("email");
-  const hasGoogleIdentity = providers.includes("google");
-  const isGoogleOnlyUser = hasGoogleIdentity && !hasPasswordIdentity;
+  // In CF Access mode, there are no identity providers — email/password not applicable
+  const hasPasswordIdentity = false;
+  const isGoogleOnlyUser = false;
 
   const handleEmailUpdate = async () => {
     try {

@@ -16,7 +16,7 @@ export type AITaskModel =
 
 interface TaskModelInput {
   config?: AIConfig;
-  isPro: boolean;
+  isPro?: boolean;
   task: AITaskModel;
   respectSelectedModel?: boolean;
 }
@@ -33,7 +33,8 @@ function getConfigParts(config?: AIConfig): TaskModelConfigParts {
   };
 }
 
-export function getTaskModel(task: AITaskModel, isPro: boolean): string {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function getTaskModel(task: AITaskModel, _isPro?: boolean): string {
   switch (task) {
     case "structuredExtraction":
       return MODEL_DESIGNATIONS.STRUCTURED_EXTRACTION;
@@ -46,13 +47,9 @@ export function getTaskModel(task: AITaskModel, isPro: boolean): string {
     case "coverLetter":
       return MODEL_DESIGNATIONS.COVER_LETTER;
     case "jobTailoring":
-      return isPro
-        ? MODEL_DESIGNATIONS.JOB_TAILORING_PRO
-        : MODEL_DESIGNATIONS.JOB_TAILORING_FREE;
+      return MODEL_DESIGNATIONS.JOB_TAILORING_PRO;
     case "chatAssistant":
-      return isPro
-        ? MODEL_DESIGNATIONS.CHAT_ASSISTANT_PRO
-        : MODEL_DESIGNATIONS.CHAT_ASSISTANT_FREE;
+      return MODEL_DESIGNATIONS.CHAT_ASSISTANT_PRO;
   }
 }
 

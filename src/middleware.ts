@@ -1,23 +1,17 @@
-import { type NextRequest } from 'next/server'
-import { updateSession } from '@/utils/supabase/middleware'
+import { NextResponse } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  console.log('🧩 Root middleware invoked for:', request.nextUrl.pathname)
-  return await updateSession(request)
+export async function middleware() {
+  // In single-user mode with Cloudflare Access, auth is handled at the edge.
+  // This middleware is a pass-through. Cloudflare Access blocks unauthenticated
+  // requests before they reach the application.
+  //
+  // For local development without CF Access, all requests are allowed
+  // (the auth layer treats every request as the single user).
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - api/webhooks (webhook endpoints)
-     * - blog (blog section)
-     * - image files (svg, png, jpg, etc.)
-     * Run on all other routes to protect them
-     */
-    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|blog(?:/.*)?|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

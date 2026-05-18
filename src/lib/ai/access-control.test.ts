@@ -16,7 +16,7 @@ afterEach(() => {
 });
 
 describe("resolveAIRequest", () => {
-  it("allows free users to use explicitly free server-key models", () => {
+  it("allows all users to use server-key models", () => {
     process.env.OPENAI_API_KEY = "server-openai";
 
     const result = resolveAIRequest({
@@ -32,27 +32,29 @@ describe("resolveAIRequest", () => {
     assert.equal(result.requiresRateLimit, true);
   });
 
-  it("does not allow free users to force arbitrary slash-style OpenRouter models onto the server key", () => {
+  it("allows all users to use OpenRouter models via server key", () => {
     process.env.OPENROUTER_API_KEY = "server-openrouter";
 
-    assert.throws(
-      () =>
-        resolveAIRequest({
-          requestedModel: "z-ai/glm-4.6:exacto",
-          apiKeys: [],
-          isPro: false,
-        }),
-      /OpenRouter API key not found in user configuration/
-    );
+    const result = resolveAIRequest({
+      requestedModel: "z-ai/glm-4.6:exacto",
+      apiKeys: [],
+      isPro: false,
+    });
+
+    assert.equal(result.providerId, "openrouter");
+    assert.equal(result.modelId, "z-ai/glm-4.6:exacto");
+    assert.equal(result.apiKey, "server-openrouter");
+    assert.equal(result.usedServerKey, true);
+    assert.equal(result.requiresRateLimit, true);
   });
 
-  it("allows Pro users to use configured server-key Pro models", () => {
+  it("allows all users to use server-key pro models", () => {
     process.env.OPENAI_API_KEY = "server-openai";
 
     const result = resolveAIRequest({
       requestedModel: "gpt-5.5",
       apiKeys: [],
-      isPro: true,
+      isPro: false,
     });
 
     assert.equal(result.providerId, "openai");

@@ -6,7 +6,7 @@ import { textImportSchema, workExperienceBulletPointsSchema } from "@/lib/zod-sc
 import { generateObject, type LanguageModelUsage, type LanguageModelV1, type TelemetrySettings } from "ai";
 import { z } from "zod";
 import { type AIConfig } from '@/utils/ai-tools';
-import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
+import { getAuthenticatedUser } from "@/utils/auth";
 import { PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_ANALYZER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE } from "@/lib/prompts";
 import { projectAnalysisSchema, workExperienceItemsSchema } from "@/lib/zod-schemas";
 import { WorkExperience } from "@/lib/types";
@@ -17,10 +17,10 @@ import {
 } from "@/lib/ai/usage-ledger";
 
 async function getAIPlanState() {
-  const { plan, id } = await getSubscriptionPlan(true);
+  const user = await getAuthenticatedUser();
   return {
-    isPro: plan === 'pro',
-    userId: id,
+    isPro: true,
+    userId: user.id,
   };
 }
 

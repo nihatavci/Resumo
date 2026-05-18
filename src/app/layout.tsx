@@ -2,18 +2,11 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { Footer } from "@/components/layout/footer";
 import { AppHeader } from "@/components/layout/app-header";
-import { createClient } from "@/utils/supabase/server";
+import { getAuthenticatedUser } from "@/utils/auth";
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import Link from "next/link";
-import { cookies } from "next/headers";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { PostHogPageView } from "@/components/analytics/posthog-pageview";
-import {
-  IMPERSONATION_STATE_COOKIE_NAME,
-  parseImpersonationStateCookieValue,
-} from "@/lib/impersonation";
-import { getSubscriptionAccessState } from "@/lib/subscription-access";
 import { Suspense } from "react";
 
 // Only enable Vercel Analytics when running on Vercel platform
@@ -84,47 +77,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Detect impersonation via signed cookie set during /admin/impersonate flow
-  const cookieStore = await cookies();
-  const impersonationState = parseImpersonationStateCookieValue(
-    cookieStore.get(IMPERSONATION_STATE_COOKIE_NAME)?.value
-  );
-  const isImpersonating = Boolean(impersonationState);
-
-  
-  let showUpgradeButton = false;
-  let isProPlan = false;
-  let subscriptionPlan = "free";
-  let subscriptionStatus: string | null = null;
-  let upgradeButtonVariant: 'trial' | 'upgrade' = 'upgrade';
-  if (user) {
-    try {
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      const subscriptionState = getSubscriptionAccessState(subscription);
-      const hasProAccess = subscriptionState.hasProAccess;
-      const needsTrial = subscriptionState.needsTrial;
-
-      isProPlan = hasProAccess;
-      subscriptionPlan = subscriptionState.effectivePlan || subscription?.subscription_plan || "free";
-      subscriptionStatus = subscription?.subscription_status ?? null;
-      showUpgradeButton = !hasProAccess;
-      upgradeButtonVariant = needsTrial ? 'trial' : 'upgrade';
-    } catch {
-      // If there's an error, we'll show the upgrade button by default
-      showUpgradeButton = true;
-      isProPlan = false;
-      subscriptionPlan = "free";
-      subscriptionStatus = null;
-      upgradeButtonVariant = 'upgrade';
-    }
+  let user: { id: string; email: string | null } | null = null;
+  try {
+    user = await getAuthenticatedUser();
+  } catch {
+    // Not authenticated — user stays null
   }
 
   return (
@@ -133,29 +90,14 @@ export default async function RootLayout({
         <PostHogProvider
           user={user ? {
             id: user.id,
-            subscriptionPlan,
-            subscriptionStatus,
-            isPro: isProPlan,
           } : null}
         >
           <Suspense fallback={null}>
             <PostHogPageView />
           </Suspense>
-          {isImpersonating && user && (
-            <div className="bg-amber-500 text-white text-center text-sm py-2">
-              Impersonating&nbsp;<span className="font-semibold">{user.email ?? user.id}</span>.&nbsp;
-              <Link href="/stop-impersonation" className="underline font-medium">
-                Stop impersonating
-              </Link>
-            </div>
-          )}
           <div className="relative min-h-screen h-screen flex flex-col">
             {user && (
-              <AppHeader
-                showUpgradeButton={showUpgradeButton}
-                isProPlan={isProPlan}
-                upgradeButtonVariant={upgradeButtonVariant}
-              />
+              <AppHeader />
             )}
             {/* Padding for header and footer */}
             <main className="py-14 h-full">

@@ -1,14 +1,9 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
 
-import { signInWithGoogle } from "@/app/auth/login/actions";
 import { LoginForm } from "@/components/auth/login-form";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type AuthTab = "login" | "signup";
@@ -35,85 +30,6 @@ function TabButton({ value, children }: { value: AuthTab; children: React.ReactN
     >
       {children}
     </TabsTrigger>
-  );
-}
-
-function SocialAuth({ showDivider = true }: { showDivider?: boolean }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>();
-
-  const handleGoogleSignIn = async () => {
-    setErrorMessage(undefined);
-
-    try {
-      setIsLoading(true);
-      const result = await signInWithGoogle();
-
-      if (!result.success) {
-        const message = result.error || "Failed to sign in with Google.";
-        setErrorMessage(message);
-        return;
-      }
-
-      if (result.url) {
-        window.location.href = result.url;
-        return;
-      }
-
-      setErrorMessage("Failed to start Google sign in.");
-    } catch (error) {
-      console.error("Failed to sign in with Google:", error);
-      setErrorMessage("Failed to start Google sign in.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="space-y-3 mt-4">
-      {showDivider && (
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <Separator className="bg-slate-200" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-white px-3 text-slate-500">or</span>
-          </div>
-        </div>
-      )}
-
-      <Button
-        variant="outline"
-        className="
-          w-full h-10 bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300
-          text-slate-700 font-medium transition-all duration-200
-          focus:ring-2 focus:ring-slate-500 focus:ring-offset-1
-          rounded-lg
-        "
-        onClick={handleGoogleSignIn}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Connecting...
-          </>
-        ) : (
-          <>
-            <span className="mr-2 inline-flex h-4 w-4 items-center justify-center rounded-full text-sm font-semibold text-slate-700">
-              G
-            </span>
-            Continue with Google
-          </>
-        )}
-      </Button>
-
-      {errorMessage && (
-        <Alert variant="destructive" className="bg-red-50/50 text-red-900 border-red-200/50" role="alert">
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
-    </div>
   );
 }
 
@@ -190,15 +106,13 @@ export function AuthDialogProvider({ children }: { children: React.ReactNode }) 
                     <p className="text-sm text-slate-600 mt-1">Sign in to continue</p>
                   </div>
                   <LoginForm key={`login-${formVersion}`} />
-                  <SocialAuth />
                 </TabsContent>
 
                 <TabsContent value="signup" className="mt-0 space-y-4">
                   <div className="text-center mb-4">
                     <h3 className="text-lg font-semibold text-slate-900">Get started</h3>
-                    <p className="text-sm text-slate-600 mt-1">Create your free account with Google</p>
+                    <p className="text-sm text-slate-600 mt-1">Authentication is handled by Cloudflare Access</p>
                   </div>
-                  <SocialAuth showDivider={false} />
                 </TabsContent>
               </div>
             </Tabs>

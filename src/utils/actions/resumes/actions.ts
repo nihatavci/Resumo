@@ -1,6 +1,7 @@
 'use server'
 
-import { createClient } from "@/utils/supabase/server";
+import * as db from "@/lib/db";
+import { getAuthenticatedUser } from "@/utils/auth";
 import { Profile, Resume, WorkExperience, Education, Skill, Project, Job } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -8,60 +9,16 @@ import { simplifiedResumeSchema, Job as ZodJob } from "@/lib/zod-schemas";
 import { AIConfig } from "@/utils/ai-tools";
 import { generateObject, type LanguageModelUsage, type LanguageModelV1, type TelemetrySettings } from "ai";
 import { resumeScoreSchema } from "@/lib/zod-schemas";
-import { getSubscriptionPlan } from "../stripe/actions";
-import { getSubscriptionAccessState } from "@/lib/subscription-access";
 import {
   finishAIUsageRequest,
   startAIUsageRequest,
 } from "@/lib/ai/usage-ledger";
 import { withTaskModel } from "@/lib/ai/task-models";
-import {
-  FREE_PLAN_RESUME_LIMITS,
-  getResumeLimitExceededMessage,
-  type ResumeLimitType,
-} from "@/lib/resume-limits";
 import { AnalyticsEvents } from "@/lib/analytics/events";
 import {
   captureServerAnalyticsEvent,
   getSubscriptionAnalyticsProperties,
 } from "@/lib/analytics/server";
-
-async function assertResumeQuota(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  type: ResumeLimitType
-) {
-  const { data: subscription, error: subscriptionError } = await supabase
-    .from('subscriptions')
-    .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  if (subscriptionError) {
-    throw new Error('Failed to validate subscription access');
-  }
-
-  const accessState = getSubscriptionAccessState(subscription);
-  if (accessState.hasProAccess) {
-    return;
-  }
-
-  const isBaseResume = type === 'base';
-  const { count, error: countError } = await supabase
-    .from('resumes')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('is_base_resume', isBaseResume);
-
-  if (countError) {
-    throw new Error('Failed to validate resume limits');
-  }
-
-  const limit = FREE_PLAN_RESUME_LIMITS[type];
-  if ((count ?? 0) >= limit) {
-    throw new Error(getResumeLimitExceededMessage(type));
-  }
-}
 
 async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
   input: {
@@ -93,82 +50,41 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
 }
 
 
-//  SUPABASE ACTIONS
 export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile; job: Job | null }> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    throw new Error('User not authenticated');
+  const user = await getAuthenticatedUser();
+
+  const [resume, profile] = await Promise.all([
+    db.getResumeById(resumeId, user.id),
+    db.getProfileByUserId(user.id),
+  ]);
+
+  if (!resume) {
+    throw new Error('Resume not found');
   }
 
-  try {
-    const [resumeResult, profileResult] = await Promise.all([
-      supabase
-        .from('resumes')
-        .select('*')
-        .eq('id', resumeId)
-        .eq('user_id', user.id)
-        .single(),
-      supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-    ]);
-
-    if (resumeResult.error || !resumeResult.data) {
-      throw new Error('Resume not found');
-    }
-
-    if (profileResult.error || !profileResult.data) {
-      throw new Error('Profile not found');
-    }
-
-    let job: Job | null = null;
-
-    if (resumeResult.data.job_id) {
-      const { data: jobData, error: jobError } = await supabase
-        .from('jobs')
-        .select('*')
-        .eq('id', resumeResult.data.job_id)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (jobError) {
-        console.error('Failed to fetch associated job:', jobError);
-      } else {
-        job = jobData;
-      }
-    }
-
-    return { 
-      resume: resumeResult.data, 
-      profile: profileResult.data,
-      job
-    };
-  } catch (error) {
-    throw error;
+  if (!profile) {
+    throw new Error('Profile not found');
   }
+
+  let job: Job | null = null;
+
+  if (resume.job_id) {
+    try {
+      job = await db.getJobById(resume.job_id, user.id);
+    } catch (jobError) {
+      console.error('Failed to fetch associated job:', jobError);
+    }
+  }
+
+  return { resume, profile, job };
 }
 
 export async function updateResume(resumeId: string, data: Partial<Resume>): Promise<Resume> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
-  const { data: resume, error: updateError } = await supabase
-    .from('resumes')
-    .update(data)
-    .eq('id', resumeId)
-    .eq('user_id', user.id)
-    .select()
-    .single();
+  const resume = await db.updateResume(resumeId, user.id, data);
 
-  if (updateError) {
+  if (!resume) {
     throw new Error('Failed to update resume');
   }
 
@@ -176,61 +92,34 @@ export async function updateResume(resumeId: string, data: Partial<Resume>): Pro
 }
 
 export async function deleteResume(resumeId: string): Promise<void> {
-    const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    throw new Error('User not authenticated');
+  const user = await getAuthenticatedUser();
+
+  const resume = await db.getResumeById(resumeId, user.id);
+
+  if (!resume) {
+    throw new Error('Resume not found or access denied');
   }
 
-  try {
-    const { data: resume, error: fetchError } = await supabase
-      .from('resumes')
-      .select('id, name, job_id, is_base_resume')
-      .eq('id', resumeId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (fetchError || !resume) {
-      throw new Error('Resume not found or access denied');
+  if (!resume.is_base_resume && resume.job_id) {
+    try {
+      await db.deleteJob(resume.job_id, user.id);
+    } catch (jobDeleteError) {
+      console.error('Failed to delete associated job:', jobDeleteError);
     }
-
-    if (!resume.is_base_resume && resume.job_id) {
-      const { error: jobDeleteError } = await supabase
-        .from('jobs')
-        .delete()
-        .eq('id', resume.job_id)
-        .eq('user_id', user.id);
-
-      if (jobDeleteError) {
-        console.error('Failed to delete associated job:', jobDeleteError);
-      }
-    }
-
-    const { error: deleteError } = await supabase
-      .from('resumes')
-      .delete()
-      .eq('id', resumeId)
-      .eq('user_id', user.id);
-
-    if (deleteError) {
-      throw new Error('Failed to delete resume');
-    }
-
-    revalidatePath('/', 'layout');
-    revalidatePath('/resumes', 'layout');
-    revalidatePath('/dashboard', 'layout');
-    revalidatePath('/resumes/base', 'layout');
-    revalidatePath('/resumes/tailored', 'layout');
-    revalidatePath('/jobs', 'layout');
-
-  } catch (error) {
-    throw error instanceof Error ? error : new Error('Failed to delete resume');
   }
+
+  await db.deleteResume(resumeId, user.id);
+
+  revalidatePath('/', 'layout');
+  revalidatePath('/resumes', 'layout');
+  revalidatePath('/dashboard', 'layout');
+  revalidatePath('/resumes/base', 'layout');
+  revalidatePath('/resumes/tailored', 'layout');
+  revalidatePath('/jobs', 'layout');
 }
 
 export async function createBaseResume(
-  name: string, 
+  name: string,
   importOption: 'import-profile' | 'fresh' | 'import-resume' = 'import-profile',
   selectedContent?: {
     first_name?: string;
@@ -247,30 +136,18 @@ export async function createBaseResume(
     projects: Project[];
   }
 ): Promise<Resume> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
-  await assertResumeQuota(supabase, user.id, 'base');
-
-  let profile = null;
+  let profile: Profile | null = null;
   if (importOption !== 'fresh') {
-    const { data, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    
-    if (profileError) {
+    try {
+      profile = await db.getProfileByUserId(user.id);
+    } catch (profileError) {
       console.error('Profile fetch error:', profileError);
     }
-    profile = data;
   }
 
-  const newResume: Partial<Resume> = {
+  const newResume: Partial<Resume> & { user_id: string; name: string } = {
     user_id: user.id,
     name,
     target_role: name,
@@ -283,7 +160,7 @@ export async function createBaseResume(
     website: importOption === 'import-resume' ? selectedContent?.website || '' : importOption === 'fresh' ? '' : profile?.website || '',
     linkedin_url: importOption === 'import-resume' ? selectedContent?.linkedin_url || '' : importOption === 'fresh' ? '' : profile?.linkedin_url || '',
     github_url: importOption === 'import-resume' ? selectedContent?.github_url || '' : importOption === 'fresh' ? '' : profile?.github_url || '',
-    work_experience: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent 
+    work_experience: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent
       ? selectedContent.work_experience
       : [],
     education: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent
@@ -335,32 +212,13 @@ export async function createBaseResume(
     }
   };
 
-  const { data: resume, error: createError } = await supabase
-    .from('resumes')
-    .insert([newResume])
-    .select()
-    .single();
-
-  if (createError) {
-    console.error('\nDatabase Insert Error:', {
-      code: createError.code,
-      message: createError.message,
-      details: createError.details,
-      hint: createError.hint
-    });
-    throw new Error(`Failed to create resume: ${createError.message}`);
-  }
-
-  if (!resume) {
-    console.error('\nNo resume data returned after insert');
-    throw new Error('Resume creation failed: No data returned');
-  }
+  const resume = await db.insertResume(newResume);
 
   await captureServerAnalyticsEvent({
     distinctId: user.id,
     event: AnalyticsEvents.ResumeCreated,
     properties: {
-      ...(await getSubscriptionAnalyticsProperties(supabase, user.id)),
+      ...(await getSubscriptionAnalyticsProperties(user.id)),
       resume_type: "base",
       has_job: false,
     },
@@ -380,14 +238,9 @@ export async function createTailoredResume(
   console.log('[createTailoredResume] baseResume ID:', baseResume?.id);
   console.log('[createTailoredResume] Is jobId valid UUID?:', /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(jobId || ''));
 
-  const supabase = await createClient();
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
-  await assertResumeQuota(supabase, user.id, 'tailored');
+  const now = new Date().toISOString();
 
   const newResume = {
     ...tailoredContent,
@@ -405,24 +258,18 @@ export async function createTailoredResume(
     document_settings: baseResume.document_settings,
     section_configs: baseResume.section_configs,
     section_order: baseResume.section_order,
-    resume_title: `${jobTitle} at ${companyName}`,
     name: `${jobTitle} at ${companyName}`,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: now,
+    updated_at: now,
   };
 
-  const { data, error } = await supabase
-    .from('resumes')
-    .insert([newResume])
-    .select()
-    .single();
+  const data = await db.insertResume(newResume as Parameters<typeof db.insertResume>[0]);
 
-  if (error) throw error;
   await captureServerAnalyticsEvent({
     distinctId: user.id,
     event: AnalyticsEvents.ResumeTailored,
     properties: {
-      ...(await getSubscriptionAnalyticsProperties(supabase, user.id)),
+      ...(await getSubscriptionAnalyticsProperties(user.id)),
       resume_type: "tailored",
       has_job: Boolean(jobId),
     },
@@ -432,51 +279,28 @@ export async function createTailoredResume(
 }
 
 export async function copyResume(resumeId: string): Promise<Resume> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
-  const { data: sourceResume, error: fetchError } = await supabase
-    .from('resumes')
-    .select('*')
-    .eq('id', resumeId)
-    .eq('user_id', user.id)
-    .single();
+  const sourceResume = await db.getResumeById(resumeId, user.id);
 
-  if (fetchError || !sourceResume) {
+  if (!sourceResume) {
     throw new Error('Resume not found or access denied');
   }
-
-  await assertResumeQuota(supabase, user.id, sourceResume.is_base_resume ? 'base' : 'tailored');
 
   // Exclude auto-generated fields that shouldn't be copied
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id: _id, created_at: _created_at, updated_at: _updated_at, ...resumeDataToCopy } = sourceResume;
 
+  const now = new Date().toISOString();
   const newResume = {
     ...resumeDataToCopy,
     name: `${sourceResume.name} (Copy)`,
     user_id: user.id,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: now,
+    updated_at: now,
   };
 
-  const { data: copiedResume, error: createError } = await supabase
-    .from('resumes')
-    .insert([newResume])
-    .select()
-    .single();
-
-  if (createError) {
-    throw new Error(`Failed to copy resume: ${createError.message}`);
-  }
-
-  if (!copiedResume) {
-    throw new Error('Resume creation failed: No data returned');
-  }
+  const copiedResume = await db.insertResume(newResume);
 
   revalidatePath('/', 'layout');
   revalidatePath('/resumes', 'layout');
@@ -488,29 +312,8 @@ export async function copyResume(resumeId: string): Promise<Resume> {
 }
 
 export async function countResumes(type: 'base' | 'tailored' | 'all'): Promise<number> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
-    throw new Error('User not authenticated');
-  }
-
-  let query = supabase
-    .from('resumes')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id);
-
-  if (type !== 'all') {
-    query = query.eq('is_base_resume', type === 'base');
-  }
-
-  const { count, error: countError } = await query;
-
-  if (countError) {
-    throw new Error('Failed to count resumes');
-  }
-
-  return count || -1;
+  const user = await getAuthenticatedUser();
+  return db.countResumes(user.id, type);
 }
 
 
@@ -521,8 +324,9 @@ export async function generateResumeScore(
 ) {
   
 
-  const { plan, id } = await getSubscriptionPlan(true);
-  const isPro = plan === 'pro';
+  const user = await getAuthenticatedUser();
+  const id = user.id;
+  const isPro = true;
 
   const isTailoredResume = job && !resume.is_base_resume;
 

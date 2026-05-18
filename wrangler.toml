@@ -1,0 +1,20 @@
+name = "resumelm"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Pages will be deployed via `wrangler pages deploy`
+# Bindings below are picked up by `wrangler pages dev` for local development
+
+[[d1_databases]]
+binding = "DB"
+database_name = "resumelm-db"
+database_id = "local"  # Replace with actual D1 database ID after `wrangler d1 create resumelm-db`
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "local"  # Replace with actual KV namespace ID after `wrangler kv namespace create CACHE`
+
+# Uncomment when R2 bucket is created
+# [[r2_buckets]]
+# binding = "STORAGE"
+# bucket_name = "resumelm-files"

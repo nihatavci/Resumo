@@ -23,8 +23,6 @@ import { type SortOption, type SortDirection } from "@/components/resume/managem
 import type { ResumeSummary } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
 import { getDashboardData } from "@/utils/actions";
-import { checkSubscriptionPlan } from "@/utils/actions/stripe/actions";
-import { FREE_PLAN_RESUME_LIMITS } from "@/lib/resume-limits";
 
 
 
@@ -44,22 +42,9 @@ export default async function Home({
   const isNewSignup = params?.type === 'signup' && params?.token_hash;
 
   // Fetch dashboard data and handle authentication
-  const fallbackSubscription = {
-    plan: '',
-    status: '',
-    currentPeriodEnd: '',
-    trialEnd: '',
-    isTrialing: false,
-    hasProAccess: false,
-  };
-
   let data;
-  let subscription: Awaited<ReturnType<typeof checkSubscriptionPlan>> = fallbackSubscription;
   try {
-    [data, subscription] = await Promise.all([
-      getDashboardData(),
-      checkSubscriptionPlan().catch(() => fallbackSubscription)
-    ]);
+    data = await getDashboardData();
     if (!data.profile) {
       redirect("/");
     }
@@ -69,8 +54,6 @@ export default async function Home({
   }
 
   const { profile, baseResumes: unsortedBaseResumes, tailoredResumes: unsortedTailoredResumes } = data;
-  const baseResumesCount = unsortedBaseResumes.length;
-  const tailoredResumesCount = unsortedTailoredResumes.length;
 
   // Get sort parameters for both sections
   const baseSort = (params.baseSort as SortOption) || 'createdAt';
@@ -99,15 +82,6 @@ export default async function Home({
   // Sort both resume lists
   const baseResumes = sortResumes(unsortedBaseResumes, baseSort, baseDirection);
   const tailoredResumes = sortResumes(unsortedTailoredResumes, tailoredSort, tailoredDirection);
-  
-  // Check if user has Pro access (paid, canceling-but-active, or trialing)
-  const isProPlan = subscription.hasProAccess;
-
-  // console.log(subscription);
-  
-  // Free plan limits
-  const canCreateBase = isProPlan || baseResumesCount < FREE_PLAN_RESUME_LIMITS.base;
-  const canCreateTailored = isProPlan || tailoredResumesCount < FREE_PLAN_RESUME_LIMITS.tailored;
 
 
   // Display a friendly message if no profile exists
@@ -154,7 +128,7 @@ export default async function Home({
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
             {/* API Key Alert */}
-            {!isProPlan && <ApiKeyAlert variant="upgrade" />}
+            <ApiKeyAlert />
             
             {/* Greeting & Edit Button */}
             <div className="flex items-center justify-between">
@@ -183,7 +157,6 @@ export default async function Home({
                 directionParam="baseDirection"
                 currentSort={baseSort}
                 currentDirection={baseDirection}
-                canCreateMore={canCreateBase}
               />
 
               {/* Thin Divider */}
@@ -201,7 +174,6 @@ export default async function Home({
                 currentSort={tailoredSort}
                 currentDirection={tailoredDirection}
                 baseResumes={baseResumes}
-                canCreateMore={canCreateTailored}
               />
             </div>
           </div>

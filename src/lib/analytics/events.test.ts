@@ -8,7 +8,7 @@ import {
 } from "./events";
 
 describe("AnalyticsEvents", () => {
-  it("defines the operational lifecycle events used by product and billing analytics", () => {
+  it("defines the operational lifecycle events used by product analytics", () => {
     assert.equal(AnalyticsEvents.SignupCompleted, "signup_completed");
     assert.equal(AnalyticsEvents.ProfileCreated, "profile_created");
     assert.equal(AnalyticsEvents.ResumeCreated, "resume_created");
@@ -16,10 +16,6 @@ describe("AnalyticsEvents", () => {
     assert.equal(AnalyticsEvents.AIRequestStarted, "ai_request_started");
     assert.equal(AnalyticsEvents.AIRequestSucceeded, "ai_request_succeeded");
     assert.equal(AnalyticsEvents.AIRequestFailed, "ai_request_failed");
-    assert.equal(AnalyticsEvents.CheckoutStarted, "checkout_started");
-    assert.equal(AnalyticsEvents.CheckoutCompleted, "checkout_completed");
-    assert.equal(AnalyticsEvents.SubscriptionActivated, "subscription_activated");
-    assert.equal(AnalyticsEvents.SubscriptionCanceled, "subscription_canceled");
   });
 });
 
@@ -50,12 +46,10 @@ describe("sanitizeAnalyticsProperties", () => {
         resume_content: "full resume text",
         job_description: "full job text",
         api_key: "secret",
-        stripe_subscription_id: "sub_123",
-        subscription_status: "active",
+        resume_type: "tailored",
       }),
       {
-        stripe_subscription_id: "sub_123",
-        subscription_status: "active",
+        resume_type: "tailored",
       }
     );
   });
