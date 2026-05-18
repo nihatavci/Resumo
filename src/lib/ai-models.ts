@@ -1,6 +1,7 @@
 /**
  * Centralized AI Model Management
- * This file contains all AI model and provider configurations used throughout the application
+ * This file contains all AI model and provider configurations used throughout the application.
+ * All models run on Cloudflare Workers AI via the binding — no API keys required.
  */
 
 import { ServiceName } from './types'
@@ -61,33 +62,12 @@ export interface GroupedModels {
 // ========================
 
 export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
-  anthropic: {
-    id: 'anthropic',
-    name: 'Anthropic',
-    apiLink: 'https://console.anthropic.com/',
-    logo: '/logos/claude.png',
-    envKey: 'ANTHROPIC_API_KEY',
-    sdkInitializer: 'anthropic',
-    unstable: false
-  },
-  openai: {
-    id: 'openai',
-    name: 'OpenAI',
-    apiLink: 'https://platform.openai.com/api-keys',
-    logo: '/logos/chat-gpt-logo.png',
-    envKey: 'OPENAI_API_KEY',
-    sdkInitializer: 'openai',
-    unstable: false
-  },
-  openrouter: {
-    id: 'openrouter',
-    name: 'OpenRouter',
-    apiLink: 'https://openrouter.ai/account/api-keys',
-    logo: '/logos/gemini-logo.webp',
-    envKey: 'OPENROUTER_API_KEY',
-    sdkInitializer: 'openrouter',
-    unstable: false
-    
+  workersai: {
+    id: 'workersai' as ServiceName,
+    name: 'Workers AI',
+    apiLink: 'https://developers.cloudflare.com/workers-ai/',
+    envKey: '',
+    sdkInitializer: 'workersai',
   },
 }
 
@@ -96,281 +76,84 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
 // ========================
 
 export const AI_MODELS: AIModel[] = [
-  // OpenAI Models
   {
-    id: 'gpt-5.5',
-    name: 'GPT-5.5',
-    provider: 'openai',
-    features: {
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 1050000,
-      supportsVision: true,
-      supportsTools: true,
-      isPro: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: true
-    }
-  },
-  {
-    id: 'gpt-5.5-pro',
-    name: 'GPT-5.5 Pro',
-    provider: 'openai',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 1050000,
-      supportsVision: true,
-      supportsTools: true,
-      isPro: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: true
-    }
-  },
-  {
-    id: 'gpt-5.4',
-    name: 'GPT-5.4',
-    provider: 'openai',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 1050000,
-      supportsVision: true,
-      supportsTools: true,
-      isPro: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: true
-    }
-  },
-  {
-    id: 'gpt-5.4-pro',
-    name: 'GPT-5.4 Pro',
-    provider: 'openai',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 1050000,
-      supportsVision: true,
-      supportsTools: true,
-      isPro: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: true
-    }
-  },
-  {
-    id: 'gpt-5.4-mini',
-    name: 'GPT-5.4 Mini',
-    provider: 'openai',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 400000,
-      supportsVision: true,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'gpt-5.4-nano',
-    name: 'GPT-5.4 Nano',
-    provider: 'openai',
+    id: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+    name: 'Llama 3.3 70B',
+    provider: 'workersai' as ServiceName,
     features: {
       isFree: true,
       isRecommended: true,
-      isUnstable: false,
-      maxTokens: 400000,
-      supportsVision: true,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: false,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'google/gemini-3-pro-preview',
-    name: 'Gemini 3 Pro Preview',
-    provider: 'openrouter',
-    features: {
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 1000000,
-      supportsVision: false,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'openai/gpt-oss-120b',
-    name: 'GPT-OSS 120B',
-    provider: 'openrouter',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      isFree: true,
       maxTokens: 131072,
-      supportsVision: false,
-      supportsTools: true
+      supportsTools: true,
     },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
+    availability: { requiresApiKey: false, requiresPro: false },
   },
   {
-    id: 'openai/gpt-oss-20b',
-    name: 'GPT-OSS 20B',
-    provider: 'openrouter',
+    id: '@cf/meta/llama-3.1-8b-instruct-fast',
+    name: 'Llama 3.1 8B Fast',
+    provider: 'workersai' as ServiceName,
     features: {
-      isRecommended: false,
-      isUnstable: false,
       isFree: true,
+      isRecommended: false,
       maxTokens: 131072,
-      supportsVision: false,
-      supportsTools: true
+      supportsTools: true,
     },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
+    availability: { requiresApiKey: false, requiresPro: false },
   },
   {
-    id: 'z-ai/glm-4.6:exacto',
-    name: 'GLM-4.6 Exacto',
-    provider: 'openrouter',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      supportsVision: false,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'deepseek/deepseek-v3.2:nitro',
-    name: 'DeepSeek V3.2',
-    provider: 'openrouter',
+    id: '@cf/meta/llama-4-scout-17b-16e-instruct',
+    name: 'Llama 4 Scout 17B',
+    provider: 'workersai' as ServiceName,
     features: {
       isFree: true,
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 163840,
-      supportsVision: false,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: false,
-      requiresPro: false
-    }
-  },
-
-  // Anthropic Models
-  {
-    id: 'claude-sonnet-4-6',
-    name: 'Claude Sonnet 4.6',
-    provider: 'anthropic',
-    features: {
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 1000000,
-      supportsVision: true,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'claude-haiku-4-5-20251001',
-    name: 'Claude Haiku 4.5',
-    provider: 'anthropic',
-    features: {
       isRecommended: false,
-      isUnstable: false,
-      maxTokens: 200000,
-      supportsVision: true,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'claude-opus-4-7',
-    name: 'Claude Opus 4.7',
-    provider: 'anthropic',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 1000000,
+      maxTokens: 131072,
       supportsVision: true,
       supportsTools: true,
-      isPro: true
     },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: true
-    }
+    availability: { requiresApiKey: false, requiresPro: false },
   },
-
+  {
+    id: '@cf/mistralai/mistral-small-3.1-24b-instruct',
+    name: 'Mistral Small 3.1',
+    provider: 'workersai' as ServiceName,
+    features: {
+      isFree: true,
+      isRecommended: false,
+      maxTokens: 131072,
+      supportsVision: true,
+      supportsTools: true,
+    },
+    availability: { requiresApiKey: false, requiresPro: false },
+  },
+  {
+    id: '@cf/google/gemma-3-12b-it',
+    name: 'Gemma 3 12B',
+    provider: 'workersai' as ServiceName,
+    features: {
+      isFree: true,
+      isRecommended: false,
+      maxTokens: 131072,
+      supportsTools: true,
+    },
+    availability: { requiresApiKey: false, requiresPro: false },
+  },
 ]
 
 // ========================
 // Legacy ID Aliases
 // ========================
 
-// Map legacy or shorthand model IDs to current canonical IDs
-const MODEL_ALIASES: Record<string, string> = {
-  // Older Claude IDs → current best equivalents
-  'claude-4-sonnet': 'claude-sonnet-4-6',
-  'claude-3-sonnet-20240229': 'claude-sonnet-4-6',
-  'claude-sonnet-4-20250514': 'claude-sonnet-4-6',
-  'claude-sonnet-4.5': 'claude-sonnet-4-6',
-  'claude-sonnet-4-5-20250929': 'claude-sonnet-4-6',
-  'claude-opus-4.5': 'claude-opus-4-7',
-  'claude-opus-4-5-20251101': 'claude-opus-4-7',
-  // Older GPT IDs → current app defaults/equivalents
-  'gpt-5': 'gpt-5.5',
-  'gpt-5.2': 'gpt-5.5',
-  'gpt-5.2-2025-12-11': 'gpt-5.5',
-  'gpt-5.2-pro': 'gpt-5.5-pro',
-  'gpt-5.2-pro-2025-12-11': 'gpt-5.5-pro',
-  'gpt-5.1-chat': 'gpt-5.4-mini',
-  'gpt-5-mini-2025-08-07': 'gpt-5.4-mini',
-  'gpt-5-mini': 'gpt-5.4-mini',
-  'gpt-5-nano': 'gpt-5.4-nano',
-  // Allow DeepSeek without the nitro suffix
-  'deepseek/deepseek-v3.2': 'deepseek/deepseek-v3.2:nitro',
-  // Legacy Gemini 3 model ID without provider prefix
-  'gemini-3-pro-preview': 'google/gemini-3-pro-preview',
-}
+// No legacy aliases needed — fresh model set
+const MODEL_ALIASES: Record<string, string> = {}
 
 // ========================
 // Default Model Configuration
 // ========================
 
 export const DEFAULT_MODELS = {
-  PRO_USER: 'gpt-5.5',
-  FREE_USER: 'gpt-5.4-nano'
+  PRO_USER: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  FREE_USER: '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
 } as const
 
 // ========================
@@ -379,40 +162,40 @@ export const DEFAULT_MODELS = {
 
 /**
  * Designated models for specific use cases throughout the application.
- * Change these to update which models are used globally.
+ * 70B for quality tasks, 8B for fast tasks.
  */
 export const MODEL_DESIGNATIONS = {
   // Fast & cheap model for parsing, simple tasks, quick analysis
-  FAST_CHEAP: 'gpt-5.4-nano',
+  FAST_CHEAP: '@cf/meta/llama-3.1-8b-instruct-fast',
   // Alternative fast & cheap option (free for all users)
-  FAST_CHEAP_FREE: 'gpt-5.4-nano',
+  FAST_CHEAP_FREE: '@cf/meta/llama-3.1-8b-instruct-fast',
   // Structured extraction, parsing, and data normalization
-  STRUCTURED_EXTRACTION: 'gpt-5.4-nano',
+  STRUCTURED_EXTRACTION: '@cf/meta/llama-3.1-8b-instruct-fast',
   // Resume scoring and analysis
-  RESUME_SCORING: 'gpt-5.4-nano',
+  RESUME_SCORING: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   // Single-item rewrites and lightweight editing
-  SIMPLE_REWRITE: 'gpt-5.4-nano',
+  SIMPLE_REWRITE: '@cf/meta/llama-3.1-8b-instruct-fast',
   // Multi-bullet and polished content generation
-  CONTENT_GENERATION: 'gpt-5.4-mini',
+  CONTENT_GENERATION: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   // Cover letter generation
-  COVER_LETTER: 'gpt-5.4-mini',
+  COVER_LETTER: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   // Full resume tailoring by plan
-  JOB_TAILORING_FREE: 'gpt-5.4-nano',
-  JOB_TAILORING_PRO: 'gpt-5.5',
+  JOB_TAILORING_FREE: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  JOB_TAILORING_PRO: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   // Interactive assistant by plan
-  CHAT_ASSISTANT_FREE: 'gpt-5.4-nano',
-  CHAT_ASSISTANT_PRO: 'gpt-5.5',
+  CHAT_ASSISTANT_FREE: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  CHAT_ASSISTANT_PRO: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   // Frontier model for complex tasks, deep analysis, best quality
-  FRONTIER: 'gpt-5.5',
+  FRONTIER: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   // Alternative frontier model
-  FRONTIER_ALT: 'claude-opus-4-7',
+  FRONTIER_ALT: '@cf/mistralai/mistral-small-3.1-24b-instruct',
   // Balanced model - good quality but faster/cheaper than frontier
-  BALANCED: 'gpt-5.4-mini',
+  BALANCED: '@cf/meta/llama-3.1-8b-instruct-fast',
   // Vision-capable model for image analysis
-  VISION: 'gpt-5.4-mini',
+  VISION: '@cf/meta/llama-4-scout-17b-16e-instruct',
   // Default models by user type
-  DEFAULT_PRO: 'gpt-5.5',
-  DEFAULT_FREE: 'gpt-5.4-nano'
+  DEFAULT_PRO: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  DEFAULT_FREE: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
 } as const
 
 // Type for model designations
@@ -452,30 +235,19 @@ export function getModelsByProvider(provider: ServiceName): AIModel[] {
 }
 
 /**
- * Check if a model is available for a user
+ * Check if a model is available for a user.
+ * All Workers AI models are free via the binding, so always return true.
  */
 export function isModelAvailable(
   modelId: string,
-  isPro: boolean,
-  apiKeys: ApiKey[]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _isPro: boolean,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _apiKeys: ApiKey[]
 ): boolean {
   modelId = MODEL_ALIASES[modelId] || modelId
-  // Pro users have access to all models
-  if (isPro) return true
-
   const model = getModelById(modelId)
-  if (!model) return false
-
-  // Free model allowance
-  if (model.features.isFree) return true
-
-  // Check if this is an OpenRouter model (contains forward slash)
-  if (modelId.includes('/')) {
-    return apiKeys.some(key => key.service === 'openrouter')
-  }
-
-  // Check if user has the required API key
-  return apiKeys.some(key => key.service === model.provider)
+  return model !== undefined
 }
 
 /**
@@ -498,7 +270,7 @@ export function getModelProvider(modelId: string): AIProvider | undefined {
  * Group models by provider for display
  */
 export function groupModelsByProvider(): GroupedModels[] {
-  const providerOrder: ServiceName[] = ['anthropic', 'openai', 'openrouter']
+  const providerOrder: ServiceName[] = ['workersai' as ServiceName]
   const grouped = new Map<ServiceName, AIModel[]>()
 
   // Group models by provider
@@ -514,7 +286,7 @@ export function groupModelsByProvider(): GroupedModels[] {
     .map(providerId => {
       const provider = getProviderById(providerId)
       if (!provider) return null
-      
+
       return {
         provider: providerId,
         name: provider.name,
@@ -537,9 +309,9 @@ export function getSelectableModels(isPro: boolean, apiKeys: ApiKey[]): AIModel[
 export function getModelSDKConfig(modelId: string): { provider: AIProvider; modelId: string } | undefined {
   const model = getModelById(modelId)
   if (!model) return undefined
-  
+
   const provider = getProviderById(model.provider)
   if (!provider) return undefined
-  
+
   return { provider, modelId }
 }

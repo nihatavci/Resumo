@@ -49,67 +49,6 @@ export async function POST(req: Request) {
       isPro,
     });
 
-    // Some models (e.g., GPT-5 family / GPT-5 Mini) only support the default temperature (1)
-    const requiresDefaultTemp = [
-      'gpt-5',
-      'gpt-5.4',
-      'gpt-5.4-mini',
-      'gpt-5.4-nano',
-      'gpt-5.4-pro',
-      'gpt-5.5',
-      'gpt-5.5-pro',
-    ].includes(routedConfig.model);
-    
-    // Gemini models support a thinking phase—explicitly disable it to avoid added latency/cost
-    // For OpenRouter models, use the unified 'reasoning' parameter via providerOptions.openrouter
-    const isGeminiModel = routedConfig.model.toLowerCase().includes('gemini-3');
-    const isOpenRouterModel = routedConfig.model.includes('/');
-    
-    // Configure provider options based on model type
-    type ProviderOptions = 
-      | {
-          openrouter: {
-            reasoning: {
-              exclude: boolean;
-            };
-          };
-        }
-      | {
-          google: {
-            thinkingConfig: {
-              thinkingBudget: number;
-              includeThoughts: boolean;
-            };
-          };
-        }
-      | undefined;
-    
-    let providerOptions: ProviderOptions = undefined;
-    
-    if (isGeminiModel) {
-      if (isOpenRouterModel) {
-        // OpenRouter models: use reasoning parameter via providerOptions.openrouter
-        // Set exclude: true to disable reasoning tokens in response (model still thinks internally)
-        providerOptions = {
-          openrouter: {
-            reasoning: {
-              exclude: true,
-            },
-          },
-        };
-      } else {
-        // Direct Google models: use provider-specific options
-        providerOptions = {
-          google: {
-            thinkingConfig: {
-              thinkingBudget: 0,
-              includeThoughts: false,
-            },
-          },
-        };
-      }
-    }
-
     // Use custom prompt if provided, otherwise fall back to default
     const baseSystemPrompt = config?.customPrompts?.aiAssistant 
       ?? (AI_ASSISTANT_SYSTEM_MESSAGE.content as string);
@@ -149,8 +88,6 @@ export async function POST(req: Request) {
     // Build and send the AI call.
     const result = streamText({
       model: aiClient as LanguageModelV1,
-      ...(requiresDefaultTemp ? { temperature: 1 } : {}),
-      ...(providerOptions ? { providerOptions } : {}),
       system: systemPrompt,
       messages,
       maxSteps: 5,

@@ -3,6 +3,7 @@ declare global {
     DB: D1Database;
     CACHE: KVNamespace;
     STORAGE?: R2Bucket;
+    AI: Ai;
   }
 }
 

@@ -1,15 +1,20 @@
-import { createOpenAI } from '@ai-sdk/openai';
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { createWorkersAI } from 'workers-ai-provider';
 import { LanguageModelV1 } from 'ai';
 import { type AIConfig } from '@/lib/ai-models';
-import {
-  resolveAIRequest,
-  type ResolvedAIRequest,
-} from '@/lib/ai/access-control';
+import { resolveAIRequest, type ResolvedAIRequest } from '@/lib/ai/access-control';
 
 // Re-export types for backward compatibility
 export type { ApiKey, AIConfig } from '@/lib/ai-models';
+
+function getAIBinding(): Ai {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCloudflareContext } = require('@opennextjs/cloudflare');
+    return getCloudflareContext().env.AI;
+  } catch {
+    throw new Error('Workers AI binding not available');
+  }
+}
 
 export function createAIClientFromResolvedRequest(
   resolved: ResolvedAIRequest,
@@ -17,29 +22,9 @@ export function createAIClientFromResolvedRequest(
 ) {
   void useThinking; // Keep for future use
 
-  switch (resolved.providerId) {
-    case 'anthropic':
-      return createAnthropic({ apiKey: resolved.apiKey })(resolved.modelId) as LanguageModelV1;
-    
-    case 'openai':
-      return createOpenAI({ 
-        apiKey: resolved.apiKey,
-        compatibility: 'strict'
-      })(resolved.modelId) as LanguageModelV1;
-    
-    case 'openrouter':
-      return createOpenRouter({
-        apiKey: resolved.apiKey,
-        baseURL: 'https://openrouter.ai/api/v1',
-        headers: {
-          'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-          'X-Title': 'ResumeLM'
-        }
-      })(resolved.modelId) as LanguageModelV1;
-    
-    default:
-      throw new Error(`Unsupported provider: ${resolved.providerId}`);
-  }
+  const workersai = createWorkersAI({ binding: getAIBinding() });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return workersai(resolved.modelId as any) as LanguageModelV1;
 }
 
 export function resolveAIClient(config?: AIConfig, isPro?: boolean, useThinking?: boolean) {

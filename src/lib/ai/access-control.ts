@@ -33,22 +33,6 @@ function getKnownModel(modelId: string): HiddenModel | undefined {
   return getModelById(modelId) ?? HIDDEN_MODELS[modelId];
 }
 
-function findUserKey(apiKeys: ResolveAIRequestInput["apiKeys"], providerId: ServiceName) {
-  return apiKeys.find((apiKey) => apiKey.service === providerId)?.key;
-}
-
-function getServerKey(providerId: ServiceName) {
-  const provider = getProviderById(providerId);
-  if (!provider) {
-    throw new Error(`Unsupported provider: ${providerId}`);
-  }
-
-  return {
-    provider,
-    apiKey: process.env[provider.envKey],
-  };
-}
-
 export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIRequest {
   const model = getKnownModel(input.requestedModel);
 
@@ -61,22 +45,30 @@ export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIReques
     throw new Error(`Unsupported provider: ${model.provider}`);
   }
 
-  // Everything is now free and unlimited - always use server keys when available
-  {
-    const { apiKey } = getServerKey(model.provider);
-
-    if (apiKey) {
-      return {
-        providerId: model.provider,
-        modelId: model.id,
-        apiKey,
-        usedServerKey: true,
-        requiresRateLimit: true,
-      };
-    }
+  // Workers AI uses the Cloudflare binding — no API key required.
+  if (model.provider === 'workersai') {
+    return {
+      providerId: model.provider,
+      modelId: model.id,
+      apiKey: '',
+      usedServerKey: true,
+      requiresRateLimit: true,
+    };
   }
 
-  const userApiKey = findUserKey(input.apiKeys, model.provider);
+  // Fallback for any non-workersai provider (should not happen with current config)
+  const envKey = provider.envKey ? process.env[provider.envKey] : undefined;
+  if (envKey) {
+    return {
+      providerId: model.provider,
+      modelId: model.id,
+      apiKey: envKey,
+      usedServerKey: true,
+      requiresRateLimit: true,
+    };
+  }
+
+  const userApiKey = input.apiKeys.find((k) => k.service === model.provider)?.key;
   if (!userApiKey) {
     throw new Error(`${provider.name} API key not found in user configuration`);
   }

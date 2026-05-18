@@ -1,94 +1,45 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
+import { describe, it } from "node:test";
 
 import { resolveAIRequest } from "./access-control";
 
-const originalEnv = {
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
-};
-
-afterEach(() => {
-  process.env.OPENAI_API_KEY = originalEnv.OPENAI_API_KEY;
-  process.env.ANTHROPIC_API_KEY = originalEnv.ANTHROPIC_API_KEY;
-  process.env.OPENROUTER_API_KEY = originalEnv.OPENROUTER_API_KEY;
-});
-
 describe("resolveAIRequest", () => {
-  it("allows all users to use server-key models", () => {
-    process.env.OPENAI_API_KEY = "server-openai";
-
+  it("allows all users to use Workers AI models without API keys", () => {
     const result = resolveAIRequest({
-      requestedModel: "gpt-5.4-nano",
+      requestedModel: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
       apiKeys: [],
       isPro: false,
     });
 
-    assert.equal(result.providerId, "openai");
-    assert.equal(result.modelId, "gpt-5.4-nano");
-    assert.equal(result.apiKey, "server-openai");
+    assert.equal(result.providerId, "workersai");
+    assert.equal(result.modelId, "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+    assert.equal(result.apiKey, "");
     assert.equal(result.usedServerKey, true);
     assert.equal(result.requiresRateLimit, true);
   });
 
-  it("allows all users to use OpenRouter models via server key", () => {
-    process.env.OPENROUTER_API_KEY = "server-openrouter";
-
+  it("resolves the 8B fast model", () => {
     const result = resolveAIRequest({
-      requestedModel: "z-ai/glm-4.6:exacto",
+      requestedModel: "@cf/meta/llama-3.1-8b-instruct-fast",
       apiKeys: [],
       isPro: false,
     });
 
-    assert.equal(result.providerId, "openrouter");
-    assert.equal(result.modelId, "z-ai/glm-4.6:exacto");
-    assert.equal(result.apiKey, "server-openrouter");
+    assert.equal(result.providerId, "workersai");
+    assert.equal(result.modelId, "@cf/meta/llama-3.1-8b-instruct-fast");
     assert.equal(result.usedServerKey, true);
-    assert.equal(result.requiresRateLimit, true);
   });
 
-  it("allows all users to use server-key pro models", () => {
-    process.env.OPENAI_API_KEY = "server-openai";
-
+  it("resolves the Mistral model", () => {
     const result = resolveAIRequest({
-      requestedModel: "gpt-5.5",
+      requestedModel: "@cf/mistralai/mistral-small-3.1-24b-instruct",
       apiKeys: [],
-      isPro: false,
+      isPro: true,
     });
 
-    assert.equal(result.providerId, "openai");
-    assert.equal(result.modelId, "gpt-5.5");
-    assert.equal(result.apiKey, "server-openai");
+    assert.equal(result.providerId, "workersai");
+    assert.equal(result.modelId, "@cf/mistralai/mistral-small-3.1-24b-instruct");
     assert.equal(result.usedServerKey, true);
-    assert.equal(result.requiresRateLimit, true);
-  });
-
-  it("allows BYOK users only when their key matches the requested model provider", () => {
-    const result = resolveAIRequest({
-      requestedModel: "claude-sonnet-4-6",
-      apiKeys: [
-        { service: "anthropic", key: "user-anthropic", addedAt: "2026-05-03" },
-      ],
-      isPro: false,
-    });
-
-    assert.equal(result.providerId, "anthropic");
-    assert.equal(result.apiKey, "user-anthropic");
-    assert.equal(result.usedServerKey, false);
-    assert.equal(result.requiresRateLimit, false);
-
-    assert.throws(
-      () =>
-        resolveAIRequest({
-          requestedModel: "claude-sonnet-4-6",
-          apiKeys: [
-            { service: "openai", key: "user-openai", addedAt: "2026-05-03" },
-          ],
-          isPro: false,
-        }),
-      /Anthropic API key not found in user configuration/
-    );
   });
 
   it("rejects unknown models", () => {
@@ -103,11 +54,9 @@ describe("resolveAIRequest", () => {
     );
   });
 
-  it("reports server-key usage for every allowed server-key call", () => {
-    process.env.OPENAI_API_KEY = "server-openai";
-
+  it("reports server-key usage for Workers AI calls", () => {
     const result = resolveAIRequest({
-      requestedModel: "gpt-5.4-nano",
+      requestedModel: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
       apiKeys: [],
       isPro: false,
     });

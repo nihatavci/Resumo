@@ -187,11 +187,12 @@ export const AI_PROVIDERS = {
 export type AIProviderOld = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
 
 // ServiceName is used across the app for API key management
-export type ServiceName = 
+export type ServiceName =
   | 'openai'
   // | 'azure'
   | 'anthropic'
-  | 'openrouter';
+  | 'openrouter'
+  | 'workersai';
   // | 'bedrock'
   // | 'google'
   // | 'vertex'

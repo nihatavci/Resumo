@@ -5,36 +5,34 @@ import { getTaskModel, withTaskModel } from "./task-models";
 import type { AIConfig } from "@/lib/ai-models";
 
 describe("task model routing", () => {
-  it("routes full resume tailoring to the pro model regardless of plan", () => {
-    assert.equal(getTaskModel("jobTailoring", false), "gpt-5.5");
-    assert.equal(getTaskModel("jobTailoring", true), "gpt-5.5");
+  it("routes full resume tailoring to the 70B model regardless of plan", () => {
+    assert.equal(getTaskModel("jobTailoring", false), "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+    assert.equal(getTaskModel("jobTailoring", true), "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
   });
 
-  it("routes extraction and scoring to GPT-5.4 Nano", () => {
-    assert.equal(getTaskModel("structuredExtraction", false), "gpt-5.4-nano");
-    assert.equal(getTaskModel("structuredExtraction", true), "gpt-5.4-nano");
-    assert.equal(getTaskModel("resumeScoring", false), "gpt-5.4-nano");
-    assert.equal(getTaskModel("resumeScoring", true), "gpt-5.4-nano");
+  it("routes extraction and simple tasks to the 8B fast model", () => {
+    assert.equal(getTaskModel("structuredExtraction", false), "@cf/meta/llama-3.1-8b-instruct-fast");
+    assert.equal(getTaskModel("structuredExtraction", true), "@cf/meta/llama-3.1-8b-instruct-fast");
+    assert.equal(getTaskModel("simpleRewrite", false), "@cf/meta/llama-3.1-8b-instruct-fast");
+    assert.equal(getTaskModel("simpleRewrite", true), "@cf/meta/llama-3.1-8b-instruct-fast");
   });
 
-  it("routes bullet generation and cover letters to GPT-5.4 Mini", () => {
-    assert.equal(getTaskModel("contentGeneration", false), "gpt-5.4-mini");
-    assert.equal(getTaskModel("contentGeneration", true), "gpt-5.4-mini");
-    assert.equal(getTaskModel("coverLetter", false), "gpt-5.4-mini");
-    assert.equal(getTaskModel("coverLetter", true), "gpt-5.4-mini");
+  it("routes content generation and cover letters to the 70B model", () => {
+    assert.equal(getTaskModel("contentGeneration", false), "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+    assert.equal(getTaskModel("contentGeneration", true), "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+    assert.equal(getTaskModel("coverLetter", false), "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+    assert.equal(getTaskModel("coverLetter", true), "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
   });
 
-  it("routes chat assistant to the pro model regardless of plan", () => {
-    assert.equal(getTaskModel("chatAssistant", false), "gpt-5.5");
-    assert.equal(getTaskModel("chatAssistant", true), "gpt-5.5");
+  it("routes chat assistant to the 70B model regardless of plan", () => {
+    assert.equal(getTaskModel("chatAssistant", false), "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+    assert.equal(getTaskModel("chatAssistant", true), "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
   });
 
   it("preserves API keys and custom prompts while replacing the model", () => {
     const config: AIConfig = {
-      model: "claude-sonnet-4-6",
-      apiKeys: [
-        { service: "anthropic", key: "user-anthropic", addedAt: "2026-05-10" },
-      ],
+      model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      apiKeys: [],
       customPrompts: {
         textAnalyzer: "Extract carefully.",
       },
@@ -46,7 +44,7 @@ describe("task model routing", () => {
       config,
     });
 
-    assert.equal(resolved.model, "gpt-5.4-nano");
+    assert.equal(resolved.model, "@cf/meta/llama-3.1-8b-instruct-fast");
     assert.deepEqual(resolved.apiKeys, config.apiKeys);
     assert.deepEqual(resolved.customPrompts, config.customPrompts);
   });
@@ -56,12 +54,12 @@ describe("task model routing", () => {
       task: "chatAssistant",
       isPro: true,
       config: {
-        model: "claude-opus-4-7",
+        model: "@cf/mistralai/mistral-small-3.1-24b-instruct",
         apiKeys: [],
       },
       respectSelectedModel: true,
     });
 
-    assert.equal(resolved.model, "claude-opus-4-7");
+    assert.equal(resolved.model, "@cf/mistralai/mistral-small-3.1-24b-instruct");
   });
 });

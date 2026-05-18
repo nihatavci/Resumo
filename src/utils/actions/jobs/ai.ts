@@ -57,12 +57,9 @@ function getFallbackConfig(config: AIConfig | undefined, model: string): AIConfi
 function getModelCandidates(config: AIConfig | undefined, isPro: boolean, task: AITaskModel) {
   const primaryModel = withTaskModel({ task, isPro, config });
   const fallbackModels: AIConfig[] = [
-    getFallbackConfig(config, 'gpt-5.4-mini'),
-    getFallbackConfig(config, 'gpt-5.4-nano'),
-    getFallbackConfig(config, 'z-ai/glm-4.6:exacto'),
-    getFallbackConfig(config, 'openai/gpt-oss-120b'),
-    getFallbackConfig(config, 'openai/gpt-oss-20b'),
-    getFallbackConfig(config, 'deepseek/deepseek-v3.2:nitro'),
+    getFallbackConfig(config, '@cf/meta/llama-3.3-70b-instruct-fp8-fast'),
+    getFallbackConfig(config, '@cf/meta/llama-3.1-8b-instruct-fast'),
+    getFallbackConfig(config, '@cf/mistralai/mistral-small-3.1-24b-instruct'),
   ];
 
   return dedupeAIConfigs([primaryModel, ...fallbackModels]);

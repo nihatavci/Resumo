@@ -12,13 +12,6 @@
     "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^1.0.6",
-    "@ai-sdk/deepseek": "^0.0.4",
-    "@ai-sdk/google": "^1.0.12",
-    "@ai-sdk/google-vertex": "^2.0.12",
-    "@ai-sdk/groq": "^1.1.9",
-    "@ai-sdk/openai": "^1.0.12",
-    "@openrouter/ai-sdk-provider": "^0.0.6",
     "@opentelemetry/resources": "^2.7.1",
     "@opentelemetry/sdk-node": "^0.217.0",
     "@posthog/ai": "^7.18.3",
@@ -78,8 +71,6 @@
     "lucide-react": "^0.469.0",
     "marked": "^15.0.4",
     "next": "15.1.11",
-    "openai": "^4.77.0",
-    "openai-edge": "^1.2.2",
     "pdf-parse": "^1.1.1",
     "pdf.js-extract": "^0.2.1",
     "pdfjs-dist": "4.8.69",
@@ -107,6 +98,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tiptap-markdown": "^0.8.10",
     "use-stick-to-bottom": "1.0.30",
+    "workers-ai-provider": "0.7.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {

@@ -25,45 +25,33 @@ interface ApiTestResult {
 }
 
 export async function testApiKey(): Promise<ApiTestResult> {
-  // API keys are now managed via environment variables, not stored in a vault.
-  // This function tests the server-side OpenAI key from env.
+  // Workers AI is accessed via the Cloudflare binding — no API key needed.
+  // This function tests that the AI binding is functional.
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-
-    if (!apiKey) {
-      return {
-        success: false,
-        error: 'No OpenAI API key configured in environment variables',
-      };
-    }
-
-    const { default: OpenAI } = await import('openai');
+    const { generateText } = await import('ai');
+    const { initializeAIClient } = await import('@/utils/ai-tools');
     const { MODEL_DESIGNATIONS } = await import('@/lib/ai-models');
 
-    const openai = new OpenAI({
-      apiKey: apiKey.trim(),
+    const model = initializeAIClient({
+      model: MODEL_DESIGNATIONS.FAST_CHEAP_FREE,
+      apiKeys: [],
     });
 
-    const response = await openai.chat.completions.create({
-      model: MODEL_DESIGNATIONS.FAST_CHEAP_FREE,
-      messages: [{ role: 'user', content: 'Say this is a test!' }],
-      response_format: { type: 'text' },
-      temperature: 1,
-      max_tokens: 8000,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
+    const response = await generateText({
+      model,
+      prompt: 'Say this is a test!',
+      maxTokens: 100,
     });
 
     return {
       success: true,
-      message: response.choices[0]?.message?.content || 'API connection successful',
+      message: response.text || 'Workers AI connection successful',
     };
   } catch (error) {
-    console.error('Error testing API key:', error);
+    console.error('Error testing Workers AI:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to test API key',
+      error: error instanceof Error ? error.message : 'Failed to test Workers AI connection',
     };
   }
 }
