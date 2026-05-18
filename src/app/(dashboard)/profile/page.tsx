@@ -3,6 +3,7 @@ import { getDashboardData } from "@/utils/actions";
 import { ProfileEditForm } from "@/components/profile/profile-edit-form";
 import { Suspense } from "react";
 
+
 // Force dynamic behavior and disable caching
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

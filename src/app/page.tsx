@@ -15,6 +15,7 @@ import Script from "next/script";
 import { toSafeJsonScript } from "@/lib/html-safety";
 import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
 
+
 // Page-specific metadata that extends the base metadata from layout.tsx
 export const metadata: Metadata = {
   title: "ResumeLM - AI Resume Builder for Tech Jobs",

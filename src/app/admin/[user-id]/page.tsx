@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation'; // Import notFound
 
+
 interface AdminUserDetailPageProps {
   params: Promise<{
     'user-id': string;

@@ -8,6 +8,7 @@ import { MiniResumePreview } from "@/components/resume/shared/mini-resume-previe
 import { ResumeSortControls } from "@/components/resume/management/resume-sort-controls";
 import type { SortOption, SortDirection } from "@/components/resume/management/resume-sort-controls";
 
+
 const RESUMES_PER_PAGE = 12;
 
 type SearchParams = { [key: string]: string | string[] | undefined }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+
 /**
  * GET /admin/impersonate/:user-id
  *

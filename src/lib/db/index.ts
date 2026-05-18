@@ -16,14 +16,13 @@ export function setDBProvider(provider: () => D1Database) {
 
 export function getDB(): D1Database {
   if (!_getDB) {
-    // Dynamic import to avoid bundling issues in non-Cloudflare environments
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { getRequestContext } = require('@cloudflare/next-on-pages');
-      const ctx = getRequestContext();
+      const { getCloudflareContext } = require('@opennextjs/cloudflare');
+      const ctx = getCloudflareContext();
       return (ctx.env as Record<string, D1Database>).DB;
     } catch {
-      throw new Error('D1 database not available. Ensure you are running on Cloudflare Pages or have configured a local D1 binding.');
+      throw new Error('D1 database not available. Ensure you are running on Cloudflare Workers or have configured a local D1 binding.');
     }
   }
   return _getDB();

@@ -10,8 +10,8 @@ interface KVCache {
 function getKV(): KVNamespace | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getRequestContext } = require('@cloudflare/next-on-pages');
-    return (getRequestContext().env as Record<string, KVNamespace>).CACHE;
+    const { getCloudflareContext } = require('@opennextjs/cloudflare');
+    return (getCloudflareContext().env as Record<string, KVNamespace>).CACHE;
   } catch {
     return null;
   }

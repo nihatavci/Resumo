@@ -16,6 +16,7 @@ import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
 
 // import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
+
 export const metadata: Metadata = {
   title: "Login | ResumeLM - AI-Powered Resume Builder",
   description: "Create tailored, ATS-optimized resumes powered by AI. ResumeLM helps you land your dream tech job with personalized resume optimization.",

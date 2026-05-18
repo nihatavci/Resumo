@@ -1,7 +1,3 @@
-// src/app/settings/page.tsx
-
-"use server"
-
 import { SettingsContent } from '@/components/settings/settings-content'
 import { getAuthenticatedUser } from '@/utils/auth'
 

@@ -5,6 +5,7 @@ import { ResumeEditorClient } from "@/components/resume/editor/resume-editor-cli
 import { Metadata } from "next";
 import { Resume } from "@/lib/types";
 
+
 const getResumePageData = cache(async (resumeId: string) => {
   return getResumeById(resumeId);
 });
