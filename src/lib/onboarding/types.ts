@@ -1,4 +1,4 @@
-export type OnboardingStep = 'upload' | 'questionnaire' | 'generating';
+export type OnboardingStep = 'upload' | 'review' | 'generating';
 
 export interface OnboardingState {
   step: OnboardingStep;
