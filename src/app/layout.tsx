@@ -8,7 +8,7 @@ import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { PostHogPageView } from "@/components/analytics/posthog-pageview";
 import { Suspense } from "react";
 import { MotionProvider } from "@/components/motion/motion-config";
-import { PageTransition } from "@/components/motion/page-transition";
+
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -99,9 +99,7 @@ export default async function RootLayout({
           <div className="relative min-h-screen h-screen flex flex-col">
             <MotionProvider>
               <main className="h-full">
-                <PageTransition>
-                  {children}
-                </PageTransition>
+                {children}
                 {isVercel && <Analytics />}
               </main>
             </MotionProvider>
