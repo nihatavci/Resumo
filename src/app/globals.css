@@ -30,6 +30,17 @@ html {
     --radius: 0.75rem;
 
     --spectrum: linear-gradient(90deg, #c679c4 0%, #fa3d1d 25%, #ffb005 50%, #e1e1fe 75%, #0358f7 100%);
+
+    /* Dia Typography */
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+
+    /* Dia Surfaces */
+    --surface-canvas: #f8f8f8;
+    --surface-header: #efefef;
+    --surface-card: #ffffff;
+    --surface-button-fill: #d9d9d9;
   }
 }
 
@@ -48,8 +59,13 @@ html {
 
 @layer utilities {
   .glass-card {
-    @apply bg-white/90 backdrop-blur-[24px] border border-white/60 shadow-dia;
+    @apply bg-white/90 backdrop-blur-[24px] shadow-dia;
     border-radius: 30px;
+  }
+
+  .glass-card-sm {
+    @apply bg-white/90 backdrop-blur-[24px] shadow-dia;
+    border-radius: 16px;
   }
 
   .spectrum-gradient {
