@@ -115,12 +115,12 @@ export function AiPromptsForm() {
   return (
     <div className="space-y-6">
       {/* Header Info */}
-      <div className="p-4 rounded-xl bg-gradient-to-br from-amber-50/50 to-orange-50/50 border border-amber-200/50">
+      <div className="p-4 rounded-dia-sm bg-muted/50 border border-dia-divider">
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <AlertCircle className="h-5 w-5 text-dia-tertiary mt-0.5 flex-shrink-0" />
           <div className="space-y-1">
-            <p className="text-sm font-medium text-amber-900">Advanced Feature</p>
-            <p className="text-sm text-amber-800/80">
+            <p className="text-sm font-normal text-foreground">Advanced Feature</p>
+            <p className="text-sm text-dia-body">
               Customize the AI system prompts to change how the AI assists you with your resume. 
               This is an advanced feature - incorrect prompts may lead to unexpected results.
               Your custom prompts are stored locally in your browser.
@@ -131,8 +131,8 @@ export function AiPromptsForm() {
 
       {/* Customization Status */}
       {customizedCount > 0 && (
-        <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50/50 border border-purple-200/50">
-          <span className="text-sm text-purple-800">
+        <div className="flex items-center justify-between p-3 rounded-dia-sm bg-muted/50 border border-dia-divider">
+          <span className="text-sm text-dia-body">
             {customizedCount} prompt{customizedCount > 1 ? 's' : ''} customized
           </span>
           <AlertDialog>
@@ -140,7 +140,7 @@ export function AiPromptsForm() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-purple-600 hover:text-purple-700 hover:bg-purple-100/50"
+                className="text-dia-body hover:text-foreground hover:bg-muted"
               >
                 <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                 Reset All
@@ -179,9 +179,9 @@ export function AiPromptsForm() {
               key={key}
               className={cn(
                 "rounded-xl border transition-all",
-                isExpanded 
-                  ? "bg-white/60 border-purple-200/60 shadow-sm" 
-                  : "bg-white/40 border-white/40 hover:bg-white/50"
+                isExpanded
+                  ? "bg-white/90 border-dia-divider shadow-dia"
+                  : "bg-white/60 border-dia-divider hover:bg-white/80"
               )}
             >
               {/* Header */}
@@ -197,12 +197,12 @@ export function AiPromptsForm() {
                         {PROMPT_METADATA[key].name}
                       </span>
                       {isPromptCustomized && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-purple-100 text-purple-700">
+                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-dia-btn bg-muted text-dia-body">
                           Customized
                         </span>
                       )}
                       {hasUnsavedChanges && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-amber-100 text-amber-700">
+                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-dia-btn bg-muted text-dia-tertiary">
                           Unsaved
                         </span>
                       )}
@@ -236,7 +236,7 @@ export function AiPromptsForm() {
                       onChange={(e) => handlePromptChange(key, e.target.value)}
                       className={cn(
                         "min-h-[200px] font-mono text-xs bg-white/60",
-                        "border-gray-200 focus:border-purple-300 focus:ring-2 focus:ring-purple-500/10",
+                        "border-dia-divider focus:border-foreground/30 focus:ring-2 focus:ring-foreground/10",
                         "resize-y"
                       )}
                       placeholder="Enter custom system prompt..."
@@ -262,7 +262,7 @@ export function AiPromptsForm() {
                       className={cn(
                         "transition-colors",
                         hasUnsavedChanges
-                          ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700"
+                          ? "bg-foreground text-white hover:bg-foreground/90"
                           : ""
                       )}
                     >

@@ -51,23 +51,23 @@ export function DescriptionPoint({
             attributes: {
               placeholder,
               class: cn(
-                "min-h-[80px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
-                "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
-                "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
-                "placeholder:text-gray-400",
+                "min-h-[80px] text-xs md:text-sm bg-white/50 border-dia-divider rounded-dia-sm",
+                "focus:border-dia-tertiary focus:ring-2 focus:ring-dia-tertiary/20",
+                "hover:border-dia-tertiary hover:bg-white/60 transition-colors",
+                "placeholder:text-dia-tertiary",
                 isImproved && [
-                  "border-purple-400",
-                  "bg-gradient-to-r from-purple-50/80 to-indigo-50/80",
-                  "shadow-[0_0_15px_-3px_rgba(168,85,247,0.2)]",
-                  "hover:bg-gradient-to-r hover:from-purple-50/90 hover:to-indigo-50/90"
+                  "border-foreground/30",
+                  "bg-muted/60",
+                  "shadow-dia",
+                  "hover:bg-muted/80"
                 ]
               )
             }
           }}
         />
         {isImproved && (
-          <div className="absolute -top-2.5 right-12 px-2 py-0.5 bg-purple-100 rounded-full">
-            <span className="text-[10px] font-medium text-purple-600 flex items-center gap-1">
+          <div className="absolute -top-2.5 right-12 px-2 py-0.5 bg-muted rounded-full">
+            <span className="text-[10px] font-medium text-muted-foreground flex items-center gap-1">
               <Sparkles className="h-3 w-3" />
               AI Suggestion
             </span>
@@ -83,11 +83,11 @@ export function DescriptionPoint({
               onClick={onAcceptImprovement}
               className={cn(
                 "p-0 group-hover/item:opacity-100",
-                "h-8 w-8 rounded-lg",
-                "bg-green-50/80 hover:bg-green-100/80",
-                "text-green-600 hover:text-green-700",
-                "border border-green-200/60",
-                "shadow-sm",
+                "h-8 w-8 rounded-dia-sm",
+                "bg-muted/80 hover:bg-muted",
+                "text-foreground hover:text-foreground",
+                "border border-dia-divider",
+                "shadow-dia",
                 "transition-all duration-300",
                 "hover:scale-105 hover:shadow-md",
                 "hover:-translate-y-0.5"
@@ -101,11 +101,11 @@ export function DescriptionPoint({
               onClick={onUndoImprovement}
               className={cn(
                 "p-0 group-hover/item:opacity-100",
-                "h-8 w-8 rounded-lg",
-                "bg-rose-50/80 hover:bg-rose-100/80",
-                "text-rose-600 hover:text-rose-700",
-                "border border-rose-200/60",
-                "shadow-sm",
+                "h-8 w-8 rounded-dia-sm",
+                "bg-muted/80 hover:bg-muted",
+                "text-muted-foreground hover:text-foreground",
+                "border border-dia-divider",
+                "shadow-dia",
                 "transition-all duration-300",
                 "hover:scale-105 hover:shadow-md",
                 "hover:-translate-y-0.5"
@@ -120,7 +120,7 @@ export function DescriptionPoint({
               variant="ghost"
               size="icon"
               onClick={onDelete}
-              className="p-0 group-hover/item:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300"
+              className="p-0 group-hover/item:opacity-100 text-dia-tertiary hover:text-foreground transition-all duration-300"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -134,11 +134,11 @@ export function DescriptionPoint({
                     disabled={isLoading}
                     className={cn(
                       "p-0 group-hover/item:opacity-100",
-                      "h-8 w-8 rounded-lg",
-                      "bg-purple-50/80 hover:bg-purple-100/80",
-                      "text-purple-600 hover:text-purple-700",
-                      "border border-purple-200/60",
-                      "shadow-sm",
+                      "h-8 w-8 rounded-dia-sm",
+                      "bg-muted/80 hover:bg-muted",
+                      "text-muted-foreground hover:text-foreground",
+                      "border border-dia-divider",
+                      "shadow-dia",
                       "transition-all duration-300",
                       "hover:scale-105 hover:shadow-md",
                       "hover:-translate-y-0.5"
@@ -152,16 +152,16 @@ export function DescriptionPoint({
                   </Button>
                 </TooltipTrigger>
                 {onImprovementPromptChange && (
-                  <TooltipContent 
-                    side="bottom" 
+                  <TooltipContent
+                    side="bottom"
                     align="start"
                     sideOffset={2}
                     className={cn(
                       "w-72 p-3.5",
-                      "bg-purple-50",
-                      "border-2 border-purple-300",
-                      "shadow-lg shadow-purple-100/50",
-                      "rounded-lg"
+                      "bg-muted",
+                      "border border-dia-divider",
+                      "shadow-dia",
+                      "rounded-dia-sm"
                     )}
                   >
                     <AIImprovementPrompt

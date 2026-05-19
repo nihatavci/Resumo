@@ -52,8 +52,8 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
 
   return (
     <div className="space-y-3">
-      <Accordion 
-        type="multiple" 
+      <Accordion
+        type="multiple"
         className="space-y-3"
         defaultValue={experiences.map((_, index) => `experience-${index}`)}
       >
@@ -61,14 +61,14 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
           <AccordionItem
             key={index}
             value={`experience-${index}`}
-            className="bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5 backdrop-blur-md border border-cyan-500/30 hover:border-cyan-500/40 hover:shadow-lg transition-all duration-300 shadow-sm rounded-md overflow-hidden"
+            className="bg-dia-canvas border border-dia-divider hover:border-border hover:shadow-dia transition-all duration-300 shadow-sm rounded-dia-sm overflow-hidden"
           >
             <AccordionTrigger className="px-4 py-2 hover:no-underline">
               <div className="flex items-center justify-between gap-3 flex-1">
-                <div className="flex-1 text-left text-sm font-medium text-cyan-900">
+                <div className="flex-1 text-left text-sm font-normal text-foreground">
                   {exp.position || "Untitled Position"} {exp.company && `at ${exp.company}`}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {exp.date && <span>{exp.date}</span>}
                   {exp.technologies && exp.technologies.length > 0 && (
                     <span className="max-w-[200px] truncate">
@@ -86,21 +86,21 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                     <Input
                       value={exp.position}
                       onChange={(e) => updateExperience(index, 'position', e.target.value)}
-                      className="text-base bg-white/50 border-gray-200 rounded-md h-8
-                        focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20
-                        hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                        placeholder:text-gray-400"
+                      className="text-base bg-white border-dia-divider rounded-dia-btn h-8
+                        focus:border-foreground/40 focus:ring-1 focus:ring-foreground/10
+                        hover:border-border hover:bg-white transition-colors
+                        placeholder:text-muted-foreground"
                       placeholder="Position Title"
                     />
-                    <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[9px] font-medium text-cyan-700">
+                    <div className="absolute -top-2.5 left-2 px-1 bg-white text-[9px] font-normal text-muted-foreground">
                       POSITION
                     </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => removeExperience(index)}
-                    className="text-gray-400 hover:text-red-500 transition-colors duration-300 h-8 w-8"
+                    className="text-muted-foreground hover:text-red-500 transition-colors duration-300 h-8 w-8"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -111,31 +111,31 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                   <Input
                     value={exp.company}
                     onChange={(e) => updateExperience(index, 'company', e.target.value)}
-                    className="bg-white/50 border-gray-200 rounded-md h-8
-                      focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20
-                      hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                      placeholder:text-gray-400 text-sm"
+                    className="bg-white border-dia-divider rounded-dia-btn h-8
+                      focus:border-foreground/40 focus:ring-1 focus:ring-foreground/10
+                      hover:border-border hover:bg-white transition-colors
+                      placeholder:text-muted-foreground text-sm"
                     placeholder="Company Name"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[9px] font-medium text-cyan-700">
+                  <div className="absolute -top-2.5 left-2 px-1 bg-white text-[9px] font-normal text-muted-foreground">
                     COMPANY
                   </div>
                 </div>
 
                 {/* Date and Location Row */}
-                <div className="flex flex-col md:flex-row md:items-start gap-3 text-gray-600">
+                <div className="flex flex-col md:flex-row md:items-start gap-3 text-dia-body">
                   <div className="relative group md:w-1/3">
                     <Input
                       type="text"
                       value={exp.date}
                       onChange={(e) => updateExperience(index, 'date', e.target.value)}
-                      className="bg-white/50 border-gray-200 rounded-md h-8
-                        focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20
-                        hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                        placeholder:text-gray-400 text-sm"
+                      className="bg-white border-dia-divider rounded-dia-btn h-8
+                        focus:border-foreground/40 focus:ring-1 focus:ring-foreground/10
+                        hover:border-border hover:bg-white transition-colors
+                        placeholder:text-muted-foreground text-sm"
                       placeholder="e.g., Jan 2023 - Present"
                     />
-                    <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[9px] font-medium text-cyan-700">
+                    <div className="absolute -top-2.5 left-2 px-1 bg-white text-[9px] font-normal text-muted-foreground">
                       DATE
                     </div>
                   </div>
@@ -143,13 +143,13 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                     <Input
                       value={exp.location}
                       onChange={(e) => updateExperience(index, 'location', e.target.value)}
-                      className="bg-white/50 border-gray-200 rounded-md h-8
-                        focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20
-                        hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                        placeholder:text-gray-400 text-sm"
+                      className="bg-white border-dia-divider rounded-dia-btn h-8
+                        focus:border-foreground/40 focus:ring-1 focus:ring-foreground/10
+                        hover:border-border hover:bg-white transition-colors
+                        placeholder:text-muted-foreground text-sm"
                       placeholder="e.g., Vancouver, BC"
                     />
-                    <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[9px] font-medium text-cyan-700">
+                    <div className="absolute -top-2.5 left-2 px-1 bg-white text-[9px] font-normal text-muted-foreground">
                       LOCATION
                     </div>
                   </div>
@@ -158,15 +158,15 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                 {/* Technologies */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-baseline">
-                    <Label className="text-xs font-medium text-cyan-700">Technologies & Skills Used</Label>
-                    <span className="text-[9px] text-gray-500">Separate with commas</span>
+                    <Label className="text-xs font-normal text-muted-foreground">Technologies & Skills Used</Label>
+                    <span className="text-[9px] text-dia-tertiary">Separate with commas</span>
                   </div>
                   <Input
                     value={techInputs[index] || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setTechInputs(prev => ({ ...prev, [index]: newValue }));
-                      
+
                       if (newValue.endsWith(',')) {
                         const technologies = newValue
                           .split(',')
@@ -187,23 +187,23 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                         .map(t => t.trim())
                         .filter(Boolean);
                       updateExperience(index, 'technologies', technologies);
-                      setTechInputs(prev => ({ 
-                        ...prev, 
-                        [index]: technologies.join(', ') 
+                      setTechInputs(prev => ({
+                        ...prev,
+                        [index]: technologies.join(', ')
                       }));
                     }}
                     placeholder="React, TypeScript, Node.js, etc."
-                    className="bg-white/50 border-gray-200 rounded-md h-8
-                      focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20
-                      hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                      placeholder:text-gray-400 text-sm"
+                    className="bg-white border-dia-divider rounded-dia-btn h-8
+                      focus:border-foreground/40 focus:ring-1 focus:ring-foreground/10
+                      hover:border-border hover:bg-white transition-colors
+                      placeholder:text-muted-foreground text-sm"
                   />
                 </div>
 
                 {/* Description */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-baseline">
-                    <Label className="text-xs font-medium text-cyan-700">Key Responsibilities & Achievements</Label>
+                    <Label className="text-xs font-normal text-muted-foreground">Key Responsibilities & Achievements</Label>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -212,7 +212,7 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                         updated[index].description = [...updated[index].description, ""];
                         onChange(updated);
                       }}
-                      className="text-cyan-600 hover:text-cyan-700 transition-colors h-7 text-xs"
+                      className="text-foreground hover:text-foreground/80 transition-colors h-7 text-xs"
                     >
                       <Plus className="h-3.5 w-3.5 mr-1" />
                       Add Point
@@ -230,10 +230,10 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                               onChange(updated);
                             }}
                             placeholder="Start with a strong action verb"
-                            className="bg-white/50 border-gray-200 rounded-md h-8
-                              focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20
-                              hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                              placeholder:text-gray-400 text-sm"
+                            className="bg-white border-dia-divider rounded-dia-btn h-8
+                              focus:border-foreground/40 focus:ring-1 focus:ring-foreground/10
+                              hover:border-border hover:bg-white transition-colors
+                              placeholder:text-muted-foreground text-sm"
                           />
                         </div>
                         <Button
@@ -244,14 +244,14 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                             updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
                             onChange(updated);
                           }}
-                          className="text-gray-400 hover:text-red-500 transition-colors duration-300 h-8 w-8"
+                          className="text-muted-foreground hover:text-red-500 transition-colors duration-300 h-8 w-8"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     ))}
                     {exp.description.length === 0 && (
-                      <div className="text-xs text-gray-500 italic">
+                      <div className="text-xs text-muted-foreground italic">
                         Add points to describe your responsibilities and achievements
                       </div>
                     )}
@@ -263,14 +263,14 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
         ))}
       </Accordion>
 
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         onClick={addExperience}
-        className="w-full bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5 hover:from-cyan-500/10 hover:via-cyan-500/15 hover:to-blue-500/10 border-dashed border-cyan-500/30 hover:border-cyan-500/40 text-cyan-700 hover:text-cyan-800 transition-all duration-300 h-8 text-sm"
+        className="w-full bg-dia-canvas hover:bg-muted border-dashed border-dia-divider hover:border-border text-foreground hover:text-foreground transition-all duration-300 h-8 text-sm"
       >
         <Plus className="h-3.5 w-3.5 mr-1.5" />
         Add Work Experience
       </Button>
     </div>
   );
-} 
+}

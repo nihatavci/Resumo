@@ -76,57 +76,56 @@ export function SavedStylesDialog({ currentSettings, onApplyStyle }: SavedStyles
         <Button
           variant="outline"
           size="sm"
-          className="text-xs bg-white/80 hover:bg-gradient-to-r from-teal-500/10 to-cyan-500/10 
-          border-teal-600 hover:border-teal-800 text-teal-700 hover:text-teal-800 
-          backdrop-blur-sm transition-all duration-500 hover:-translate-y-[1px] w-full 
-          shadow-sm hover:shadow-md"
+          className="text-xs bg-white hover:bg-muted
+          border-border hover:border-foreground/30 text-muted-foreground hover:text-foreground
+          transition-all duration-300 hover:-translate-y-[1px] w-full
+          shadow-dia hover:shadow-md rounded-dia-btn"
         >
           <Save className="w-3 h-3 mr-1" />
           Saved Styles
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-white/95 to-white/90 
-        backdrop-blur-2xl border-white/60 shadow-2xl pt-12">
+      <DialogContent className="sm:max-w-[425px] bg-white
+        border-border shadow-dia pt-12 rounded-dia-sm">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl bg-gradient-to-r from-teal-700 to-cyan-700 
-              bg-clip-text text-transparent font-semibold">
+            <DialogTitle className="text-xl text-foreground font-light">
               Saved Document Styles
             </DialogTitle>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsAddingNew(true)}
-              className="text-xs bg-gradient-to-r hover:from-teal-500/10 hover:to-cyan-500/10 
-                border-teal-600/40 hover:border-teal-600 text-teal-700 hover:text-teal-800
-                transition-all duration-500 hover:-translate-y-[1px]"
+              className="text-xs hover:bg-muted
+                border-border hover:border-foreground/30 text-muted-foreground hover:text-foreground
+                transition-all duration-300 hover:-translate-y-[1px] rounded-dia-btn"
             >
               <Plus className="w-3 h-3 mr-1" />
               Save Current
             </Button>
           </div>
-          <DialogDescription className="text-slate-600">
+          <DialogDescription className="text-muted-foreground">
             Save current document settings or apply saved styles to your resume.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {isAddingNew && (
-            <div className="flex items-center gap-2 bg-gradient-to-r from-teal-50/50 to-cyan-50/50 
-              p-4 rounded-xl border border-teal-200/30 shadow-sm">
+            <div className="flex items-center gap-2 bg-dia-canvas
+              p-4 rounded-dia-btn border border-border shadow-dia">
               <Input
                 placeholder="Enter style name..."
                 value={newStyleName}
                 onChange={(e) => setNewStyleName(e.target.value)}
-                className="flex-1 border-teal-200/40 focus:border-teal-400 bg-white/80"
+                className="flex-1 border-border focus:border-foreground/30 bg-white rounded-dia-btn"
                 autoFocus
               />
               <Button
                 onClick={handleSaveStyle}
                 disabled={!newStyleName.trim()}
                 size="sm"
-                className="whitespace-nowrap bg-gradient-to-r from-teal-600 to-cyan-600 
-                  text-white hover:from-teal-700 hover:to-cyan-700 transition-all 
-                  duration-500 hover:-translate-y-[1px] shadow-sm hover:shadow-md"
+                className="whitespace-nowrap bg-foreground
+                  text-white hover:bg-foreground/90 transition-all
+                  duration-300 hover:-translate-y-[1px] shadow-dia hover:shadow-md rounded-dia-btn"
               >
                 Save Style
               </Button>
@@ -137,19 +136,18 @@ export function SavedStylesDialog({ currentSettings, onApplyStyle }: SavedStyles
                   setIsAddingNew(false);
                   setNewStyleName("");
                 }}
-                className="text-slate-600 hover:text-slate-800"
+                className="text-muted-foreground hover:text-foreground"
               >
                 Cancel
               </Button>
             </div>
           )}
-          <div className={isAddingNew ? "" : "border-t border-teal-100 pt-4"}>
-            <Label className="text-sm font-medium mb-2 block text-slate-700">Saved Styles</Label>
-            <ScrollArea className="h-[300px] rounded-xl border border-teal-200/30 bg-gradient-to-b 
-              from-white/50 to-white/30 backdrop-blur-sm">
+          <div className={isAddingNew ? "" : "border-t border-border pt-4"}>
+            <Label className="text-sm font-medium mb-2 block text-muted-foreground">Saved Styles</Label>
+            <ScrollArea className="h-[300px] rounded-dia-sm border border-border bg-dia-canvas">
               <div className="p-4 space-y-3">
                 {savedStyles.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                     <Save className="w-8 h-8 mb-2 opacity-50" />
                     <p className="text-sm">No saved styles yet</p>
                   </div>
@@ -157,19 +155,19 @@ export function SavedStylesDialog({ currentSettings, onApplyStyle }: SavedStyles
                   savedStyles.map((style) => (
                     <div
                       key={style.timestamp}
-                      className="flex items-center justify-between group rounded-xl border 
-                        border-teal-600 p-3 hover:bg-gradient-to-r hover:from-teal-50/50 
-                        hover:to-cyan-50/50 transition-all duration-500 hover:-translate-y-[1px] 
-                        hover:shadow-sm"
+                      className="flex items-center justify-between group rounded-dia-btn border
+                        border-border p-3 hover:bg-muted
+                        transition-all duration-300 hover:-translate-y-[1px]
+                        hover:shadow-dia"
                     >
-                      <span className="text-sm font-medium text-slate-700">{style.name}</span>
+                      <span className="text-sm font-medium text-foreground">{style.name}</span>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleApplyStyle(style.settings)}
-                          className="opacity-0 group-hover:opacity-100 transition-all duration-300 
-                            text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                          className="opacity-0 group-hover:opacity-100 transition-all duration-300
+                            text-muted-foreground hover:text-foreground hover:bg-dia-canvas"
                           title="Apply Style"
                         >
                           <Check className="w-4 h-4" />
@@ -178,8 +176,8 @@ export function SavedStylesDialog({ currentSettings, onApplyStyle }: SavedStyles
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteStyle(style.timestamp)}
-                          className="opacity-0 group-hover:opacity-100 transition-all duration-300 
-                            text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                          className="opacity-0 group-hover:opacity-100 transition-all duration-300
+                            text-red-500 hover:text-red-600 hover:bg-red-50"
                           title="Delete Style"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -193,12 +191,12 @@ export function SavedStylesDialog({ currentSettings, onApplyStyle }: SavedStyles
           </div>
         </div>
         <DialogFooter>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setIsOpen(false)}
-            className="border-teal-200/40 hover:border-teal-400 text-teal-700 
-              hover:text-teal-800 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 
-              transition-all duration-500 hover:-translate-y-[1px]"
+            className="border-border hover:border-foreground/30 text-muted-foreground
+              hover:text-foreground hover:bg-muted
+              transition-all duration-300 hover:-translate-y-[1px] rounded-dia-btn"
           >
             Close
           </Button>
@@ -206,4 +204,4 @@ export function SavedStylesDialog({ currentSettings, onApplyStyle }: SavedStyles
       </DialogContent>
     </Dialog>
   );
-} 
+}

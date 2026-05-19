@@ -76,16 +76,16 @@ export const EducationForm = memo(function EducationFormComponent({
           "flex flex-col @[400px]:flex-row gap-2",
           "transition-all duration-300 ease-in-out"
         )}>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className={cn(
               "flex-1 h-9 min-w-[120px]",
-              "bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5",
-              "hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10",
-              "border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/40",
-              "text-indigo-700 hover:text-indigo-800",
+              "bg-muted/50",
+              "hover:bg-muted",
+              "border-2 border-dashed border-dia-divider hover:border-dia-tertiary",
+              "text-foreground hover:text-foreground",
               "transition-all duration-300",
-              "rounded-xl",
+              "rounded-dia-btn",
               "whitespace-nowrap text-[11px] @[300px]:text-sm"
             )}
             onClick={addEducation}
@@ -101,10 +101,10 @@ export const EducationForm = memo(function EducationFormComponent({
             buttonClassName={cn(
               "flex-1 mb-0 h-9 min-w-[120px]",
               "whitespace-nowrap text-[11px] @[300px]:text-sm",
-              "bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5",
-              "hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10",
-              "border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/40",
-              "text-indigo-700 hover:text-indigo-800"
+              "bg-muted/50",
+              "hover:bg-muted",
+              "border-2 border-dashed border-dia-divider hover:border-dia-tertiary",
+              "text-foreground hover:text-foreground"
             )}
           />
         </div>
@@ -115,9 +115,9 @@ export const EducationForm = memo(function EducationFormComponent({
           key={index} 
           className={cn(
             "relative group transition-all duration-300",
-            "bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5",
-            "backdrop-blur-md border-2 border-indigo-500/30",
-            "shadow-sm"
+            "bg-muted/30",
+            "backdrop-blur-md border border-dia-divider",
+            "shadow-dia rounded-dia"
           )}
         >
           <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
@@ -129,15 +129,15 @@ export const EducationForm = memo(function EducationFormComponent({
                     value={edu.school}
                     onChange={(e) => updateEducation(index, 'school', e.target.value)}
                     className={cn(
-                      "text-sm font-semibold h-9",
-                      "bg-white/50 border-gray-200 rounded-lg",
-                      "focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20",
-                      "hover:border-indigo-500/30 hover:bg-white/60 transition-colors",
-                      "placeholder:text-gray-400"
+                      "text-sm font-medium h-9",
+                      "bg-white/50 border-dia-divider rounded-dia-sm",
+                      "focus:border-dia-tertiary focus:ring-2 focus:ring-dia-tertiary/20",
+                      "hover:border-dia-tertiary hover:bg-white/60 transition-colors",
+                      "placeholder:text-dia-tertiary"
                     )}
                     placeholder="Institution Name"
                   />
-                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-indigo-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-muted-foreground">
                     INSTITUTION
                   </div>
                 </div>
@@ -145,7 +145,7 @@ export const EducationForm = memo(function EducationFormComponent({
                   variant="ghost" 
                   size="icon"
                   onClick={() => removeEducation(index)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-300"
+                  className="text-dia-tertiary hover:text-foreground transition-colors duration-300"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -157,15 +157,15 @@ export const EducationForm = memo(function EducationFormComponent({
                   value={edu.location}
                   onChange={(e) => updateEducation(index, 'location', e.target.value)}
                   className={cn(
-                    "h-9 bg-white/50 border-gray-200 rounded-lg",
-                    "focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20",
-                    "hover:border-indigo-500/30 hover:bg-white/60 transition-colors",
-                    "placeholder:text-gray-400",
+                    "h-9 bg-white/50 border-dia-divider rounded-dia-sm",
+                    "focus:border-dia-tertiary focus:ring-2 focus:ring-dia-tertiary/20",
+                    "hover:border-dia-tertiary hover:bg-white/60 transition-colors",
+                    "placeholder:text-dia-tertiary",
                     "text-[10px] sm:text-xs"
                   )}
                   placeholder="City, Country"
                 />
-                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-indigo-700">
+                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-muted-foreground">
                   LOCATION
                 </div>
               </div>
@@ -177,15 +177,15 @@ export const EducationForm = memo(function EducationFormComponent({
                     value={edu.degree}
                     onChange={(e) => updateEducation(index, 'degree', e.target.value)}
                     className={cn(
-                      "h-9 bg-white/50 border-gray-200 rounded-lg",
-                      "focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20",
-                      "hover:border-indigo-500/30 hover:bg-white/60 transition-colors",
-                      "placeholder:text-gray-400",
+                      "h-9 bg-white/50 border-dia-divider rounded-dia-sm",
+                      "focus:border-dia-tertiary focus:ring-2 focus:ring-dia-tertiary/20",
+                      "hover:border-dia-tertiary hover:bg-white/60 transition-colors",
+                      "placeholder:text-dia-tertiary",
                       "text-[10px] sm:text-xs"
                     )}
                     placeholder="Bachelor's, Master's, etc."
                   />
-                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-indigo-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-muted-foreground">
                     DEGREE
                   </div>
                 </div>
@@ -194,15 +194,15 @@ export const EducationForm = memo(function EducationFormComponent({
                     value={edu.field}
                     onChange={(e) => updateEducation(index, 'field', e.target.value)}
                     className={cn(
-                      "h-9 bg-white/50 border-gray-200 rounded-lg",
-                      "focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20",
-                      "hover:border-indigo-500/30 hover:bg-white/60 transition-colors",
-                      "placeholder:text-gray-400",
+                      "h-9 bg-white/50 border-dia-divider rounded-dia-sm",
+                      "focus:border-dia-tertiary focus:ring-2 focus:ring-dia-tertiary/20",
+                      "hover:border-dia-tertiary hover:bg-white/60 transition-colors",
+                      "placeholder:text-dia-tertiary",
                       "text-[10px] sm:text-xs"
                     )}
                     placeholder="Field of Study"
                   />
-                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-indigo-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-muted-foreground">
                     FIELD OF STUDY
                   </div>
                 </div>
@@ -215,21 +215,21 @@ export const EducationForm = memo(function EducationFormComponent({
                   value={edu.date}
                   onChange={(e) => updateEducation(index, 'date', e.target.value)}
                   className={cn(
-                    "w-full h-9 bg-white/50 border-gray-200 rounded-lg",
-                    "focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20",
-                    "hover:border-indigo-500/30 hover:bg-white/60 transition-colors",
+                    "w-full h-9 bg-white/50 border-dia-divider rounded-dia-sm",
+                    "focus:border-dia-tertiary focus:ring-2 focus:ring-dia-tertiary/20",
+                    "hover:border-dia-tertiary hover:bg-white/60 transition-colors",
                     "text-[10px] sm:text-xs"
                   )}
                   placeholder="e.g., &apos;2019 - 2023&apos; or &apos;2020 - Present&apos;"
                 />
-                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-indigo-700">
+                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-muted-foreground">
                   DATE
                 </div>
               </div>
 
               {/* Current Status Note */}
               <div className="flex items-center space-x-2 -mt-1">
-                <span className="text-[8px] sm:text-[10px] text-gray-500">Use &apos;Present&apos; in the date field for current education</span>
+                <span className="text-[8px] sm:text-[10px] text-dia-tertiary">Use &apos;Present&apos; in the date field for current education</span>
               </div>
 
               {/* GPA */}
@@ -242,15 +242,15 @@ export const EducationForm = memo(function EducationFormComponent({
                   value={edu.gpa || ''}
                   onChange={(e) => updateEducation(index, 'gpa', e.target.value ? parseFloat(e.target.value) : undefined)}
                   className={cn(
-                    "h-9 bg-white/50 border-gray-200 rounded-lg",
-                    "focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20",
-                    "hover:border-indigo-500/30 hover:bg-white/60 transition-colors",
-                    "placeholder:text-gray-400",
+                    "h-9 bg-white/50 border-dia-divider rounded-dia-sm",
+                    "focus:border-dia-tertiary focus:ring-2 focus:ring-dia-tertiary/20",
+                    "hover:border-dia-tertiary hover:bg-white/60 transition-colors",
+                    "placeholder:text-dia-tertiary",
                     "text-[10px] sm:text-xs"
                   )}
                   placeholder="0.00"
                 />
-                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-indigo-700">
+                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-muted-foreground">
                   GPA (OPTIONAL)
                 </div>
               </div>
@@ -258,8 +258,8 @@ export const EducationForm = memo(function EducationFormComponent({
               {/* Achievements */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-baseline">
-                  <Label className="text-[10px] sm:text-xs font-medium text-indigo-700">Achievements & Activities</Label>
-                  <span className="text-[8px] sm:text-[10px] text-gray-500">One achievement per line</span>
+                  <Label className="text-[10px] sm:text-xs font-medium text-muted-foreground">Achievements & Activities</Label>
+                  <span className="text-[8px] sm:text-[10px] text-dia-tertiary">One achievement per line</span>
                 </div>
                 <Tiptap
                   content={(edu.achievements || []).join('\n')}
@@ -272,10 +272,10 @@ export const EducationForm = memo(function EducationFormComponent({
                     }
                   }}
                   className={cn(
-                    "min-h-[120px] bg-white/50 border-gray-200 rounded-lg",
-                    "focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20",
-                    "hover:border-indigo-500/30 hover:bg-white/60 transition-colors",
-                    "placeholder:text-gray-400",
+                    "min-h-[120px] bg-white/50 border-dia-divider rounded-dia-sm",
+                    "focus:border-dia-tertiary focus:ring-2 focus:ring-dia-tertiary/20",
+                    "hover:border-dia-tertiary hover:bg-white/60 transition-colors",
+                    "placeholder:text-dia-tertiary",
                     "text-[10px] sm:text-xs"
                   )}
                 />
@@ -289,9 +289,9 @@ export const EducationForm = memo(function EducationFormComponent({
               onClick={() => moveEducation(index, -1)}
               disabled={index === 0}
               className={cn(
-                "h-6 w-8 text-indigo-700 hover:text-indigo-800",
+                "h-6 w-8 text-muted-foreground hover:text-foreground",
                 "bg-white/70 hover:bg-white",
-                "border border-indigo-200/70",
+                "border border-dia-divider",
                 "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
@@ -303,9 +303,9 @@ export const EducationForm = memo(function EducationFormComponent({
               onClick={() => moveEducation(index, 1)}
               disabled={index === education.length - 1}
               className={cn(
-                "h-6 w-8 text-indigo-700 hover:text-indigo-800",
+                "h-6 w-8 text-muted-foreground hover:text-foreground",
                 "bg-white/70 hover:bg-white",
-                "border border-indigo-200/70",
+                "border border-dia-divider",
                 "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >

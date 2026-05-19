@@ -30,7 +30,7 @@ export function PersonalInfoForm() {
       <div className="flex justify-end">
         <Button 
           type="submit"
-          className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white hover:from-teal-600 hover:to-emerald-600"
+          className="bg-foreground text-white hover:bg-foreground/90 rounded-dia-btn"
         >
           <Loader2 className="mr-2 h-4 w-4 animate-spin opacity-0" />
           Save Changes

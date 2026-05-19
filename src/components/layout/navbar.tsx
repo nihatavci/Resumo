@@ -14,30 +14,30 @@ export function Navbar() {
   };
 
   return (
-    <nav className="h-16 border-b bg-white/50 backdrop-blur-lg sticky top-0 w-full z-50">
+    <nav className="h-16 border-b border-dia-divider bg-white/50 backdrop-blur-lg sticky top-0 w-full z-50">
       <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between">
         <div className="flex items-center gap-8">
           {/* Logo/Brand */}
-          <Link href="/home" className="text-xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+          <Link href="/home" className="text-xl font-light text-foreground">
             Resume.AI
           </Link>
 
           {/* Navigation Links */}
           <div className="flex items-center gap-6">
-            <Link 
-              href="/home" 
+            <Link
+              href="/home"
               className={cn(
-                "text-sm transition-colors hover:text-teal-600",
-                isActive('/home') ? "text-teal-600" : "text-muted-foreground"
+                "text-sm transition-colors hover:text-foreground",
+                isActive('/home') ? "text-foreground" : "text-muted-foreground"
               )}
             >
               Dashboard
             </Link>
-            <Link 
-              href="/jobs" 
+            <Link
+              href="/jobs"
               className={cn(
-                "text-sm transition-colors hover:text-teal-600",
-                isActive('/jobs') ? "text-teal-600" : "text-muted-foreground"
+                "text-sm transition-colors hover:text-foreground",
+                isActive('/jobs') ? "text-foreground" : "text-muted-foreground"
               )}
             >
               Jobs
@@ -52,4 +52,4 @@ export function Navbar() {
       </div>
     </nav>
   );
-} 
+}

@@ -20,10 +20,10 @@ function areBasicInfoPropsEqual(
 }
 
 // Create memoized field component
-const BasicInfoField = memo(function BasicInfoField({ 
-  field, 
-  value, 
-  label, 
+const BasicInfoField = memo(function BasicInfoField({
+  field,
+  value,
+  label,
   icon: Icon,
   placeholder,
   type = 'text'
@@ -36,7 +36,7 @@ const BasicInfoField = memo(function BasicInfoField({
   type?: string;
 }) {
   const { dispatch } = useResumeContext();
-  
+
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: 'UPDATE_FIELD', field, value: e.target.value });
   }, [dispatch, field]);
@@ -44,21 +44,21 @@ const BasicInfoField = memo(function BasicInfoField({
   return (
     <div className="relative group">
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
-        <div className="p-1 rounded-full bg-teal-100/80 transition-transform duration-300 group-focus-within:scale-110">
-          <Icon className="h-3.5 w-3.5 text-teal-600" />
+        <div className="p-1 rounded-full bg-muted transition-transform duration-300 group-focus-within:scale-110">
+          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
       </div>
       <Input
         type={type}
         value={value || ''}
         onChange={handleChange}
-        className="pr-10 text-sm bg-white/50 border-gray-200 rounded-lg h-9
-          focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
-          hover:border-teal-500/30 hover:bg-white/60 transition-colors
-          placeholder:text-gray-400"
+        className="pr-10 text-sm bg-white/50 border-gray-200 rounded-dia-btn h-9
+          focus:border-foreground/30 focus:ring-2 focus:ring-foreground/10
+          hover:border-foreground/20 hover:bg-white/60 transition-colors
+          placeholder:text-dia-tertiary"
         placeholder={placeholder}
       />
-      <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[9px] font-medium text-teal-700">
+      <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[9px] font-medium text-muted-foreground">
         {label}
       </div>
     </div>
@@ -77,7 +77,7 @@ export const BasicInfoForm = memo(function BasicInfoFormComponent({
 
   const handleFillFromProfile = () => {
     if (!profile) return;
-    
+
     // List of fields to copy from profile
     const fieldsToFill = [
       'first_name',
@@ -100,13 +100,13 @@ export const BasicInfoForm = memo(function BasicInfoFormComponent({
 
   return (
     <div className="space-y-6">
-      <Card className="relative group bg-gradient-to-r from-teal-500/5 via-teal-500/10 to-cyan-500/5 backdrop-blur-md border border-teal-500/30 hover:border-teal-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
+      <Card className="relative group bg-dia-canvas border border-border hover:border-foreground/20 hover:shadow-md transition-all duration-300 shadow-dia rounded-dia-sm">
         <CardContent className="p-3 sm:p-4">
           {profile && (
             <div className="mb-3 sm:mb-4">
               <Button
                 onClick={handleFillFromProfile}
-                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-sm hover:from-teal-700 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-teal-500/20 hover:-translate-y-0.5"
+                className="w-full bg-foreground text-white text-sm hover:bg-foreground/90 transition-all duration-300 shadow-dia hover:shadow-md hover:-translate-y-0.5 rounded-dia-btn"
               >
                 <UserCircle2 className="mr-2 h-3.5 w-3.5" />
                 Fill from Profile
@@ -192,4 +192,4 @@ export const BasicInfoForm = memo(function BasicInfoFormComponent({
       </Card>
     </div>
   );
-}, areBasicInfoPropsEqual); 
+}, areBasicInfoPropsEqual);

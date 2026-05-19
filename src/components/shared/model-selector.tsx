@@ -53,7 +53,7 @@ export function ModelSelector({
   return (
     <Select value={value} onValueChange={handleModelChange}>
       <SelectTrigger className={cn(
-        "bg-white/50 border-purple-600/60 hover:border-purple-600/80 focus:border-purple-600/40 transition-colors",
+        "bg-white border-dia-divider hover:border-border focus:border-foreground/40 transition-colors",
         className
       )}>
         <SelectValue placeholder={placeholder} />
@@ -62,7 +62,7 @@ export function ModelSelector({
         {getModelsByProvider().map((group, groupIndex) => (
           <div key={group.provider}>
             <SelectGroup>
-              <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
+              <SelectLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">
                 <div className="flex items-center gap-2">
                   {group.name}
                 </div>
@@ -72,23 +72,23 @@ export function ModelSelector({
                   <SelectItem
                     key={model.id}
                     value={model.id}
-                    className="transition-colors hover:bg-purple-50"
+                    className="transition-colors hover:bg-muted"
                   >
                     <div className="flex items-center gap-3 w-full">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="truncate font-medium">{model.name}</span>
+                        <span className="truncate font-normal">{model.name}</span>
                         {model.features.isRecommended && (
-                          <span className="text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0">
+                          <span className="text-foreground bg-muted px-2 py-0.5 rounded-full text-xs font-normal flex-shrink-0">
                             Recommended
                           </span>
                         )}
                         {model.features.isFree && (
-                          <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0">
+                          <span className="text-foreground bg-muted px-2 py-0.5 rounded-full text-xs font-normal flex-shrink-0">
                             Free
                           </span>
                         )}
                         {model.features.supportsVision && (
-                          <span className="text-violet-700 bg-violet-100 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0">
+                          <span className="text-muted-foreground bg-muted px-2 py-0.5 rounded-full text-xs font-normal flex-shrink-0">
                             Vision
                           </span>
                         )}

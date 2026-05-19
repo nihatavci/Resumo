@@ -75,7 +75,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       await updateProfile(profile);
       toast.success("Changes saved successfully", {
         position: "bottom-right",
-        className: "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none",
       });
       // Force a server revalidation
       router.refresh();
@@ -111,18 +110,17 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         created_at: profile.created_at,
         updated_at: profile.updated_at
       };
-      
+
       // Update local state
       setProfile(resetProfile);
-      
+
       // Save to database
       await updateProfile(resetProfile);
-      
+
       toast.success("Profile reset successfully", {
         position: "bottom-right",
-        className: "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none",
       });
-      
+
       // Force a server revalidation
       router.refresh();
     } catch (error: unknown) {
@@ -138,33 +136,32 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   const handleLinkedInImport = () => {
     toast.info("LinkedIn import feature coming soon!", {
       position: "bottom-right",
-      className: "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none",
     });
   };
 
   const handleResumeUpload = async (content: string) => {
     try {
       setIsProcessingResume(true);
-      
+
       // Get model and API key from local storage
       const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
-      
+
       const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY) || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
       const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
       let apiKeys = [];
-      
+
       try {
         apiKeys = storedKeys ? JSON.parse(storedKeys) : [];
       } catch (error) {
         console.error('Error parsing API keys:', error);
       }
-      
+
       const result = await formatProfileWithAI(content, {
         model: selectedModel,
         apiKeys
       });
-      
+
       if (result) {
         // Clean and transform the data to match our database schema
         const cleanedProfile: Partial<Profile> = {
@@ -176,17 +173,17 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           website: result.website || null,
           linkedin_url: result.linkedin_url || null,
           github_url: result.github_url || null,
-          work_experience: Array.isArray(result.work_experience) 
+          work_experience: Array.isArray(result.work_experience)
             ? result.work_experience.map((exp: Partial<WorkExperience>) => ({
                 company: exp.company || '',
                 position: exp.position || '',
                 location: exp.location || '',
                 date: exp.date || '',
-                description: Array.isArray(exp.description) 
-                  ? exp.description 
+                description: Array.isArray(exp.description)
+                  ? exp.description
                   : [exp.description || ''],
-                technologies: Array.isArray(exp.technologies) 
-                  ? exp.technologies 
+                technologies: Array.isArray(exp.technologies)
+                  ? exp.technologies
                   : []
               }))
             : [],
@@ -198,29 +195,29 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 location: edu.location || '',
                 date: edu.date || '',
                 gpa: edu.gpa ? parseFloat(edu.gpa.toString()) : undefined,
-                achievements: Array.isArray(edu.achievements) 
-                  ? edu.achievements 
+                achievements: Array.isArray(edu.achievements)
+                  ? edu.achievements
                   : []
               }))
             : [],
           skills: Array.isArray(result.skills)
             ? result.skills.map((skill: { category: string; skills?: string[]; items?: string[] }) => ({
                 category: skill.category || '',
-                items: Array.isArray(skill.skills) 
-                  ? skill.skills 
-                  : Array.isArray(skill.items) 
-                    ? skill.items 
+                items: Array.isArray(skill.skills)
+                  ? skill.skills
+                  : Array.isArray(skill.items)
+                    ? skill.items
                     : []
               }))
             : [],
           projects: Array.isArray(result.projects)
             ? result.projects.map((proj: Partial<Project>) => ({
                 name: proj.name || '',
-                description: Array.isArray(proj.description) 
-                  ? proj.description 
+                description: Array.isArray(proj.description)
+                  ? proj.description
                   : [proj.description || ''],
-                technologies: Array.isArray(proj.technologies) 
-                  ? proj.technologies 
+                technologies: Array.isArray(proj.technologies)
+                  ? proj.technologies
                   : [],
                 url: proj.url || undefined,
                 github_url: proj.github_url || undefined,
@@ -228,16 +225,15 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
               }))
             : []
         };
-        
+
         await importResume(cleanedProfile);
-        
+
         setProfile(prev => ({
           ...prev,
           ...cleanedProfile
         }));
         toast.success("Content imported successfully - Don't forget to save your changes", {
           position: "bottom-right",
-          className: "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none",
         });
         setIsResumeDialogOpen(false);
         setIsTextImportDialogOpen(false);
@@ -316,18 +312,17 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
 
   return (
     <div className="relative mx-auto">
-      
 
       {/* Action Bar */}
       <div className="z-50 mt-4">
         <div className="max-w-[2000px] mx-auto">
           <div className="mx-6 mb-6">
-            <div className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-lg rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="bg-white/80 backdrop-blur-xl border border-dia-divider shadow-dia rounded-dia-sm p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-teal-500 to-cyan-600" />
-                <span className="text-sm font-medium text-muted-foreground">Profile Editor</span>
+                <div className="w-2 h-2 rounded-full bg-foreground" />
+                <span className="text-sm font-normal text-muted-foreground">Profile Editor</span>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 {/* Reset Profile Button */}
                 <AlertDialog>
@@ -335,10 +330,9 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     <Button
                       size="sm"
                       variant="outline"
-                      className="relative bg-white/50 hover:bg-white/60 border-rose-500/20 hover:border-rose-500/30 text-rose-600 transition-all duration-500 h-9 px-4 shadow-sm hover:shadow-md group"
+                      className="relative bg-white hover:bg-muted border-dia-divider hover:border-border text-muted-foreground transition-all duration-500 h-9 px-4 shadow-sm hover:shadow-dia group"
                       disabled={isResetting}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/5 to-rose-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                       {isResetting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -373,13 +367,12 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 </AlertDialog>
 
                 {/* Save Button */}
-                <Button 
-                  onClick={handleSubmit} 
+                <Button
+                  onClick={handleSubmit}
                   disabled={isSubmitting}
                   size="sm"
-                  className="relative bg-gradient-to-r from-teal-500 to-cyan-600 text-white hover:from-teal-600 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-teal-500/20 h-9 px-4 group"
+                  className="relative bg-foreground text-white hover:bg-foreground/90 transition-all duration-500 shadow-dia hover:shadow-dia h-9 px-4 group"
                 >
-                  <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -402,14 +395,14 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       <div className="relative px-6 md:px-8 lg:px-10 pb-10">
         {/* Import Actions Row */}
         <div className="relative mb-6">
-          <div className="bg-white/40 backdrop-blur-md rounded-2xl border border-white/40 p-6 shadow-xl">
+          <div className="bg-white/40 backdrop-blur-md rounded-dia-sm border border-dia-divider p-6 shadow-dia">
             <div className="flex flex-col gap-4">
-              
+
               {/* Import Options Text */}
-              <div className="flex items-center gap-2 text-sm text-purple-600/60">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
-                  <span className="font-medium">Import Options</span>
+                  <span className="inline-block w-2 h-2 rounded-full bg-foreground" />
+                  <span className="font-normal">Import Options</span>
                 </div>
               </div>
 
@@ -421,13 +414,12 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   onClick={handleLinkedInImport}
                   className="group relative bg-[#0077b5]/5 hover:bg-[#0077b5]/10 border-[#0077b5]/20 hover:border-[#0077b5]/30 text-[#0077b5] transition-all duration-500 hover:scale-[1.02] h-auto py-4"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0077b5]/0 via-[#0077b5]/5 to-[#0077b5]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative flex items-center gap-4">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#0077b5]/10 group-hover:scale-110 transition-transform duration-500">
                       <Linkedin className="h-6 w-6" />
                     </div>
                     <div className="text-left">
-                      <div className="font-semibold text-[#0077b5]">LinkedIn Import</div>
+                      <div className="font-normal text-[#0077b5]">LinkedIn Import</div>
                       <div className="text-sm text-[#0077b5]/70">Sync with your LinkedIn profile</div>
                     </div>
                   </div>
@@ -438,27 +430,26 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className="group relative bg-violet-500/5 hover:bg-violet-500/10 border-violet-500/20 hover:border-violet-500/30 text-violet-600 transition-all duration-500 hover:scale-[1.02] h-auto py-4"
+                      className="group relative bg-dia-canvas hover:bg-muted border-dia-divider hover:border-border text-foreground transition-all duration-500 hover:scale-[1.02] h-auto py-4"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/5 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="relative flex items-center gap-4">
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-violet-500/10 group-hover:scale-110 transition-transform duration-500">
-                          <Upload className="h-6 w-6" />
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted group-hover:scale-110 transition-transform duration-500">
+                          <Upload className="h-6 w-6 text-muted-foreground" />
                         </div>
                         <div className="text-left">
-                          <div className="font-semibold text-violet-600">Resume Upload</div>
-                          <div className="text-sm text-violet-600/70">Import from existing resume</div>
+                          <div className="font-normal text-foreground">Resume Upload</div>
+                          <div className="text-sm text-muted-foreground">Import from existing resume</div>
                         </div>
                       </div>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
+                  <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-dia-divider shadow-dia">
                     <DialogHeader>
-                      <DialogTitle className="text-2xl bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                      <DialogTitle className="text-2xl font-light text-foreground">
                         Upload Resume Content
                       </DialogTitle>
                       <DialogDescription asChild>
-                        <div className="space-y-2 text-base text-muted-foreground/80">
+                        <div className="space-y-2 text-base text-muted-foreground">
                           <span className="block">Let our AI analyze your resume and enhance your profile by adding new information.</span>
                           <span className="block text-sm">Your existing profile information will be preserved. New entries will be added alongside your current data. Want to start fresh instead? Use the &quot;Reset Profile&quot; option before uploading.</span>
                         </div>
@@ -472,10 +463,10 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                           onDragOver={(e) => handleDrag(e, setIsResumeDragging)}
                           onDrop={(e) => handleDrop(e, setResumeContent)}
                           className={cn(
-                            "border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
+                            "border-2 border-dashed rounded-dia-sm p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
                             isResumeDragging
-                              ? "border-violet-500 bg-violet-50/50"
-                              : "border-gray-200 hover:border-violet-500/50 hover:bg-violet-50/10"
+                              ? "border-foreground bg-muted/50"
+                              : "border-dia-divider hover:border-border hover:bg-muted/10"
                           )}
                         >
                           <input
@@ -484,9 +475,9 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                             accept="application/pdf"
                             onChange={(e) => handleFileInput(e, setResumeContent)}
                           />
-                          <Upload className="w-10 h-10 text-violet-500 group-hover:scale-110 transition-transform duration-200" />
+                          <Upload className="w-10 h-10 text-muted-foreground group-hover:scale-110 transition-transform duration-200" />
                           <div className="text-center">
-                            <p className="text-sm font-medium text-foreground">
+                            <p className="text-sm font-normal text-foreground">
                               Drop your PDF resume here
                             </p>
                             <p className="text-sm text-muted-foreground">
@@ -502,18 +493,18 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                             value={resumeContent}
                             onChange={(e) => setResumeContent(e.target.value)}
                             placeholder="Paste your resume content here..."
-                            className="min-h-[100px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300 pt-4"
+                            className="min-h-[100px] bg-white border-dia-divider focus:border-foreground/40 focus:ring-foreground/10 transition-all duration-300 pt-4"
                           />
                         </div>
                       </div>
                     </div>
                     {apiKeyError && (
-                      <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-lg flex items-start gap-3 text-red-600 text-sm">
+                      <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-dia-btn flex items-start gap-3 text-red-600 text-sm">
                         <div className="p-1.5 rounded-full bg-red-100">
                           <AlertTriangle className="w-4 h-4 text-red-500" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium">API Key Required</p>
+                          <p className="font-normal">API Key Required</p>
                           <p className="text-red-500/90">{apiKeyError}</p>
                           <div className="mt-2 flex flex-col gap-2 justify-start">
                             <Button
@@ -532,14 +523,14 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                       <Button
                         variant="outline"
                         onClick={() => setIsResumeDialogOpen(false)}
-                        className="bg-white/50 hover:bg-white/60 transition-all duration-300"
+                        className="bg-white hover:bg-muted transition-all duration-300"
                       >
                         Cancel
                       </Button>
                       <Button
                         onClick={() => handleResumeUpload(resumeContent)}
                         disabled={isProcessingResume || !resumeContent.trim()}
-                        className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-90 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100"
+                        className="bg-foreground text-white hover:bg-foreground/90 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100"
                       >
                         {isProcessingResume ? (
                           <div className="flex items-center gap-2">
@@ -562,27 +553,26 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className="group relative bg-violet-500/5 hover:bg-violet-500/10 border-violet-500/20 hover:border-violet-500/30 text-violet-600 transition-all duration-500 hover:scale-[1.02] h-auto py-4"
+                      className="group relative bg-dia-canvas hover:bg-muted border-dia-divider hover:border-border text-foreground transition-all duration-500 hover:scale-[1.02] h-auto py-4"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/5 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="relative flex items-center gap-4">
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-violet-500/10 group-hover:scale-110 transition-transform duration-500">
-                          <Upload className="h-6 w-6" />
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted group-hover:scale-110 transition-transform duration-500">
+                          <Upload className="h-6 w-6 text-muted-foreground" />
                         </div>
                         <div className="text-left">
-                          <div className="font-semibold text-violet-600">Import From Text</div>
-                          <div className="text-sm text-violet-600/70">Import from any text content</div>
+                          <div className="font-normal text-foreground">Import From Text</div>
+                          <div className="text-sm text-muted-foreground">Import from any text content</div>
                         </div>
                       </div>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
+                  <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-dia-divider shadow-dia">
                     <DialogHeader>
-                      <DialogTitle className="text-2xl bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                      <DialogTitle className="text-2xl font-light text-foreground">
                         Import From Text
                       </DialogTitle>
                       <DialogDescription asChild>
-                        <div className="space-y-2 text-base text-muted-foreground/80">
+                        <div className="space-y-2 text-base text-muted-foreground">
                           <span className="block">Paste any text content below (resume, job description, achievements, etc.). Our AI will analyze it and enhance your profile by adding relevant information.</span>
                           <span className="block text-sm">Your existing profile information will be preserved. New entries will be added alongside your current data.</span>
                         </div>
@@ -596,10 +586,10 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                           onDragOver={(e) => handleDrag(e, setIsTextImportDragging)}
                           onDrop={(e) => handleDrop(e, setTextImportContent)}
                           className={cn(
-                            "border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
+                            "border-2 border-dashed rounded-dia-sm p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
                             isTextImportDragging
-                              ? "border-violet-500 bg-violet-50/50"
-                              : "border-gray-200 hover:border-violet-500/50 hover:bg-violet-50/10"
+                              ? "border-foreground bg-muted/50"
+                              : "border-dia-divider hover:border-border hover:bg-muted/10"
                           )}
                         >
                           <input
@@ -608,9 +598,9 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                             accept="application/pdf"
                             onChange={(e) => handleFileInput(e, setTextImportContent)}
                           />
-                          <Upload className="w-10 h-10 text-violet-500 group-hover:scale-110 transition-transform duration-200" />
+                          <Upload className="w-10 h-10 text-muted-foreground group-hover:scale-110 transition-transform duration-200" />
                           <div className="text-center">
-                            <p className="text-sm font-medium text-foreground">
+                            <p className="text-sm font-normal text-foreground">
                               Drop your PDF file here
                             </p>
                             <p className="text-sm text-muted-foreground">
@@ -626,18 +616,18 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                             value={textImportContent}
                             onChange={(e) => setTextImportContent(e.target.value)}
                             placeholder="Paste your text content here..."
-                            className="min-h-[100px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300 pt-4"
+                            className="min-h-[100px] bg-white border-dia-divider focus:border-foreground/40 focus:ring-foreground/10 transition-all duration-300 pt-4"
                           />
                         </div>
                       </div>
                     </div>
                     {apiKeyError && (
-                      <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-lg flex items-start gap-3 text-red-600 text-sm">
+                      <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-dia-btn flex items-start gap-3 text-red-600 text-sm">
                         <div className="p-1.5 rounded-full bg-red-100">
                           <AlertTriangle className="w-4 h-4 text-red-500" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium">API Key Required</p>
+                          <p className="font-normal">API Key Required</p>
                           <p className="text-red-500/90">{apiKeyError}</p>
                           <div className="mt-2 flex flex-col gap-2 justify-start">
                             <Button
@@ -656,14 +646,14 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                       <Button
                         variant="outline"
                         onClick={() => setIsTextImportDialogOpen(false)}
-                        className="bg-white/50 hover:bg-white/60 transition-all duration-300"
+                        className="bg-white hover:bg-muted transition-all duration-300"
                       >
                         Cancel
                       </Button>
                       <Button
                         onClick={() => handleResumeUpload(textImportContent)}
                         disabled={isProcessingResume || !textImportContent.trim()}
-                        className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-90 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100"
+                        className="bg-foreground text-white hover:bg-foreground/90 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100"
                       >
                         {isProcessingResume ? (
                           <div className="flex items-center gap-2">
@@ -690,93 +680,92 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           {/* <div className="absolute inset-x-0 -top-3 h-8 bg-gradient-to-b from-white/60 to-transparent pointer-events-none"></div> */}
           <div className="relative ">
             <Tabs defaultValue="basic" className="w-full ">
-              <TabsList className=" h-full relative bg-white/80  backdrop-blur-xl border border-white/40 rounded-xl overflow-x-auto flex whitespace-nowrap gap-2 shadow-lg">
-                <TabsTrigger 
-                  value="basic" 
-                  className=" group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
-                    data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500/10 data-[state=active]:to-cyan-500/10
-                    data-[state=active]:border-teal-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                    data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
+              <TabsList className=" h-full relative bg-white/80 backdrop-blur-xl border border-dia-divider rounded-dia-sm overflow-x-auto flex whitespace-nowrap gap-2 shadow-dia">
+                <TabsTrigger
+                  value="basic"
+                  className=" group flex items-center gap-2.5 px-5 py-3 rounded-dia-btn font-normal relative transition-all duration-300
+                    data-[state=active]:bg-muted
+                    data-[state=active]:border-border data-[state=active]:shadow-dia hover:bg-muted/60
+                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
                 >
-                  <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-teal-100">
-                    <User className="h-4 w-4 text-teal-600 transition-colors group-data-[state=inactive]:text-teal-500/70" />
+                  <div className="p-1.5 rounded-full bg-muted transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-dia-divider">
+                    <User className="h-4 w-4 text-muted-foreground transition-colors group-data-[state=active]:text-foreground" />
                   </div>
                   <span className="relative">
                     Basic Info
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-teal-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
+                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-foreground scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
                   </span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="experience" 
-                  className="group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
-                    data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/10 data-[state=active]:to-blue-500/10
-                    data-[state=active]:border-cyan-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                    data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
+                <TabsTrigger
+                  value="experience"
+                  className="group flex items-center gap-2.5 px-5 py-3 rounded-dia-btn font-normal relative transition-all duration-300
+                    data-[state=active]:bg-muted
+                    data-[state=active]:border-border data-[state=active]:shadow-dia hover:bg-muted/60
+                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
                 >
-                  <div className="p-1.5 rounded-full bg-cyan-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-cyan-100">
-                    <Briefcase className="h-4 w-4 text-cyan-600 transition-colors group-data-[state=inactive]:text-cyan-500/70" />
+                  <div className="p-1.5 rounded-full bg-muted transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-dia-divider">
+                    <Briefcase className="h-4 w-4 text-muted-foreground transition-colors group-data-[state=active]:text-foreground" />
                   </div>
                   <span className="relative">
                     Work Experience
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-cyan-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
+                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-foreground scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
                   </span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="projects" 
-                  className="group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
-                    data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/10 data-[state=active]:to-purple-500/10
-                    data-[state=active]:border-violet-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                    data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
+                <TabsTrigger
+                  value="projects"
+                  className="group flex items-center gap-2.5 px-5 py-3 rounded-dia-btn font-normal relative transition-all duration-300
+                    data-[state=active]:bg-muted
+                    data-[state=active]:border-border data-[state=active]:shadow-dia hover:bg-muted/60
+                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
                 >
-                  <div className="p-1.5 rounded-full bg-violet-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-violet-100">
-                    <FolderGit2 className="h-4 w-4 text-violet-600 transition-colors group-data-[state=inactive]:text-violet-500/70" />
+                  <div className="p-1.5 rounded-full bg-muted transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-dia-divider">
+                    <FolderGit2 className="h-4 w-4 text-muted-foreground transition-colors group-data-[state=active]:text-foreground" />
                   </div>
                   <span className="relative">
                     Projects
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-violet-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
+                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-foreground scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
                   </span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="education" 
-                  className="group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
-                    data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/10 data-[state=active]:to-blue-500/10
-                    data-[state=active]:border-indigo-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                    data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
+                <TabsTrigger
+                  value="education"
+                  className="group flex items-center gap-2.5 px-5 py-3 rounded-dia-btn font-normal relative transition-all duration-300
+                    data-[state=active]:bg-muted
+                    data-[state=active]:border-border data-[state=active]:shadow-dia hover:bg-muted/60
+                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
                 >
-                  <div className="p-1.5 rounded-full bg-indigo-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-indigo-100">
-                    <GraduationCap className="h-4 w-4 text-indigo-600 transition-colors group-data-[state=inactive]:text-indigo-500/70" />
+                  <div className="p-1.5 rounded-full bg-muted transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-dia-divider">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground transition-colors group-data-[state=active]:text-foreground" />
                   </div>
                   <span className="relative">
                     Education
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-indigo-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
+                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-foreground scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
                   </span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="skills" 
-                  className="group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
-                    data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500/10 data-[state=active]:to-pink-500/10
-                    data-[state=active]:border-rose-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                    data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
+                <TabsTrigger
+                  value="skills"
+                  className="group flex items-center gap-2.5 px-5 py-3 rounded-dia-btn font-normal relative transition-all duration-300
+                    data-[state=active]:bg-muted
+                    data-[state=active]:border-border data-[state=active]:shadow-dia hover:bg-muted/60
+                    data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
                 >
-                  <div className="p-1.5 rounded-full bg-rose-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-rose-100">
-                    <Wrench className="h-4 w-4 text-rose-600 transition-colors group-data-[state=inactive]:text-rose-500/70" />
+                  <div className="p-1.5 rounded-full bg-muted transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-dia-divider">
+                    <Wrench className="h-4 w-4 text-muted-foreground transition-colors group-data-[state=active]:text-foreground" />
                   </div>
                   <span className="relative">
                     Skills
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-rose-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
+                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-foreground scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
                   </span>
                 </TabsTrigger>
-               
+
               </TabsList>
               <div className="relative">
                 {/* Content gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-white/10 to-white/20 pointer-events-none rounded-2xl"></div>
-                
+                <div className="absolute inset-0 pointer-events-none rounded-dia-sm"></div>
+
                 {/* Tab content with consistent card styling */}
                 <div className="relative space-y-6">
                   <TabsContent value="basic" className="mt-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-                    <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-xl transition-all duration-500 hover:shadow-2xl rounded-xl overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                    <Card className="bg-white/50 backdrop-blur-xl border-dia-divider shadow-dia transition-all duration-500 hover:shadow-dia rounded-dia-sm overflow-hidden group">
                       <div className="relative p-6">
                         <ProfileBasicInfoForm
                           profile={profile}
@@ -791,8 +780,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   </TabsContent>
 
                   <TabsContent value="experience" className="mt-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-                    <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-2xl transition-all duration-500 hover:shadow-3xl rounded-2xl overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/5 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                    <Card className="bg-white/50 backdrop-blur-xl border-dia-divider shadow-dia transition-all duration-500 hover:shadow-dia rounded-dia-sm overflow-hidden group">
                       <div className="relative p-8">
                         <ProfileWorkExperienceForm
                           experiences={profile.work_experience}
@@ -803,8 +791,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   </TabsContent>
 
                   <TabsContent value="projects" className="mt-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-                    <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-2xl transition-all duration-500 hover:shadow-3xl rounded-2xl overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                    <Card className="bg-white/50 backdrop-blur-xl border-dia-divider shadow-dia transition-all duration-500 hover:shadow-dia rounded-dia-sm overflow-hidden group">
                       <div className="relative p-8">
                         <ProfileProjectsForm
                           projects={profile.projects}
@@ -815,8 +802,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   </TabsContent>
 
                   <TabsContent value="education" className="mt-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-                    <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-2xl transition-all duration-500 hover:shadow-3xl rounded-2xl overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                    <Card className="bg-white/50 backdrop-blur-xl border-dia-divider shadow-dia transition-all duration-500 hover:shadow-dia rounded-dia-sm overflow-hidden group">
                       <div className="relative p-8">
                         <ProfileEducationForm
                           education={profile.education}
@@ -827,8 +813,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   </TabsContent>
 
                   <TabsContent value="skills" className="mt-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-                    <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-2xl transition-all duration-500 hover:shadow-3xl rounded-2xl overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/5 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                    <Card className="bg-white/50 backdrop-blur-xl border-dia-divider shadow-dia transition-all duration-500 hover:shadow-dia rounded-dia-sm overflow-hidden group">
                       <div className="relative p-8">
                         <ProfileSkillsForm
                           skills={profile.skills}
@@ -838,12 +823,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     </Card>
                   </TabsContent>
 
-                 
+
                 </div>
               </div>
             </Tabs>
           </div>
-          <div className="absolute inset-x-0 -bottom-3 h-8 bg-gradient-to-t from-white/60 to-transparent pointer-events-none"></div>
         </div>
       </div>
     </div>

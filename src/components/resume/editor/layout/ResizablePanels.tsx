@@ -9,7 +9,6 @@ interface ResizablePanelsProps {
 }
 
 export function ResizablePanels({
-  isBaseResume,
   editorPanel,
   previewPanel
 }: ResizablePanelsProps) {
@@ -41,10 +40,8 @@ export function ResizablePanels({
       <ResizablePanelGroup
         direction="horizontal"
         className={cn(
-          "relative h-full rounded-lg  ",
-          isBaseResume
-            ? "border-purple-200/40"
-            : "border-pink-300/50"
+          "relative h-full rounded-dia-sm",
+          "border-border"
         )}
       >
         {/* Editor Panel */}
@@ -53,29 +50,22 @@ export function ResizablePanels({
         </ResizablePanel>
 
         {/* Resize Handle */}
-        <ResizableHandle 
-          withHandle 
-          className={cn(
-            isBaseResume
-              ? "bg-purple-100/50 hover:bg-purple-200/50"
-              : "bg-pink-200/50 hover:bg-pink-300/50 shadow-sm shadow-pink-200/20"
-          )}
+        <ResizableHandle
+          withHandle
+          className="bg-dia-divider hover:bg-dia-button"
         />
 
         {/* Preview Panel */}
-        <ResizablePanel 
-          defaultSize={60} 
-          minSize={30} 
+        <ResizablePanel
+          defaultSize={60}
+          minSize={30}
           maxSize={70}
           onResize={(size) => {
             lastPercentageRef.current = size; // Store current percentage
             updatePixelWidth();
           }}
           className={cn(
-            "shadow-[0_0_30px_-5px_rgba(0,0,0,0.3)] overflow-y-scroll",
-            isBaseResume
-              ? "shadow-purple-200/50"
-              : "shadow-pink-200/50"
+            "shadow-dia overflow-y-scroll"
           )}
         >
           {previewPanel(previewSize)}

@@ -6,24 +6,24 @@ import { useEffect, useState } from "react";
 function getPageTitle(pathname: string): string {
   // Remove leading and trailing slashes and split into segments
   const segments = pathname.split("/").filter(Boolean);
-  
+
   // Handle root path
   if (segments.length === 0) return "Dashboard";
-  
+
   // Remove route groups (segments in parentheses)
   const cleanSegments = segments.filter(segment => !segment.startsWith("(") && !segment.endsWith(")"));
-  
+
   if (cleanSegments.length === 0) return "Dashboard";
-  
+
   // Get the last meaningful segment
   const lastSegment = cleanSegments[cleanSegments.length - 1];
   const parentSegment = cleanSegments[cleanSegments.length - 2];
-  
+
   // Special cases first
   if (parentSegment === "resumes" && lastSegment !== "resumes") {
     return "custom"; // Return special value to indicate we should look for custom title
   }
-  
+
   switch (lastSegment) {
     case "profile": return "My Profile";
     case "resumes": return "My Resumes";
@@ -57,7 +57,7 @@ export function PageTitle() {
       const element = document.querySelector("[data-page-title]");
       const pageTitle = element?.getAttribute("data-page-title");
       const type = element?.getAttribute("data-resume-type") || null;
-      
+
       setTitle(truncateText(pageTitle || "Resume Editor"));
       setResumeType(type);
     } else {
@@ -69,8 +69,8 @@ export function PageTitle() {
 
   return (
     <div className="flex flex-col">
-      <h1 className="text-base font-medium">
-        <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
+      <h1 className="text-base font-normal">
+        <span className="text-foreground">
           {title}
         </span>
       </h1>
@@ -81,4 +81,4 @@ export function PageTitle() {
       )}
     </div>
   );
-} 
+}

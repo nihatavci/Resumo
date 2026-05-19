@@ -22,7 +22,7 @@ export function EditorLayout({
     )}>
       {/* <BackgroundEffects isBaseResume={isBaseResume} /> */}
       
-      <div className="relative py-4 px-6 md:px-8 lg:px-12 mx-auto  w-full h-full  shadow-xl ">
+      <div className="relative py-4 px-6 md:px-8 lg:px-12 mx-auto  w-full h-full  shadow-dia ">
           <ResizablePanels
             isBaseResume={isBaseResume}
             editorPanel={editorPanel}

@@ -29,23 +29,23 @@ function ImportMethodRadioItem({
       <div
         tabIndex={0}
         className={cn(
-          "flex flex-col items-center justify-center rounded-lg p-3",
-          "bg-white/80 border-2 shadow-sm h-full",
-          "hover:border-pink-200 hover:bg-pink-50/50",
+          "flex flex-col items-center justify-center rounded-dia-sm p-3",
+          "bg-white border-2 shadow-dia h-full",
+          "hover:border-foreground/30 hover:bg-dia-canvas",
           "transition-all duration-300",
-          "peer-checked:border-pink-500 peer-checked:bg-pink-50",
-          "peer-checked:shadow-md peer-checked:shadow-pink-100",
-          "focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+          "peer-checked:border-foreground peer-checked:bg-dia-canvas",
+          "peer-checked:shadow-md",
+          "focus:outline-none focus:ring-2 focus:ring-foreground/20"
         )}
       >
         <div className="flex flex-col items-center text-center">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 flex items-center justify-center mb-2">
+          <div className="h-8 w-8 rounded-dia-btn bg-muted border border-border flex items-center justify-center mb-2">
             <div className="scale-75">
               {icon}
             </div>
           </div>
-          <div className="font-semibold text-xs text-pink-950 mb-1">{title}</div>
-          <span className="text-xs leading-tight text-gray-600">{description}</span>
+          <div className="font-medium text-xs text-foreground mb-1">{title}</div>
+          <span className="text-xs leading-tight text-muted-foreground">{description}</span>
         </div>
       </div>
     </label>
@@ -68,9 +68,9 @@ export function ImportMethodRadioGroup({ value, onChange }: ImportMethodRadioGro
         onChange={() => onChange('ai')}
         title="Tailor with AI"
         description="Let AI analyze the job description and optimize your resume for the best match"
-        icon={<Brain className="h-6 w-6 text-pink-600" />}
+        icon={<Brain className="h-6 w-6 text-muted-foreground" />}
       />
-      
+
       <ImportMethodRadioItem
         name="tailorOption"
         value="import-profile"
@@ -79,8 +79,8 @@ export function ImportMethodRadioGroup({ value, onChange }: ImportMethodRadioGro
         onChange={() => onChange('import-profile')}
         title="Copy Base Resume"
         description="Create a copy of your base resume. Add a job description to link it to a specific position."
-        icon={<Copy className="h-6 w-6 text-pink-600" />}
+        icon={<Copy className="h-6 w-6 text-muted-foreground" />}
       />
     </div>
   );
-} 
+}

@@ -28,8 +28,8 @@ export function ApiKeysForm() {
   return (
     <div className="space-y-6">
       {/* Model Selection Card */}
-      <div className="p-5 rounded-xl bg-gradient-to-br from-white/50 to-white/30 border border-white/40 shadow-xl backdrop-blur-sm">
-        <Label className="text-base font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+      <div className="p-5 rounded-dia-sm bg-white/90 backdrop-blur-[24px] border border-dia-divider shadow-dia">
+        <Label className="text-base font-normal text-foreground">
           Default AI Model
         </Label>
         <p className="text-sm text-muted-foreground mt-2 mb-3">
@@ -45,16 +45,16 @@ export function ApiKeysForm() {
       </div>
 
       {/* Workers AI Info Card */}
-      <div className="p-5 rounded-xl bg-gradient-to-br from-white/50 to-white/30 border border-white/40 shadow-xl backdrop-blur-sm">
-        <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+      <div className="p-5 rounded-dia-sm bg-white/90 backdrop-blur-[24px] border border-dia-divider shadow-dia">
+        <Label className="text-base font-normal text-foreground">
           Powered by Cloudflare Workers AI
         </Label>
         <div className="mt-2 space-y-2">
           <p className="text-sm text-muted-foreground">
             All AI models run directly on Cloudflare Workers AI through a secure binding. No API keys are needed.
           </p>
-          <div className="p-3 rounded-lg bg-emerald-50/50 border border-emerald-200/50 text-emerald-900 text-sm">
-            <p><strong>Free for all users:</strong> Every model is available at no cost. Simply select your preferred model above and start using AI features.</p>
+          <div className="p-3 rounded-dia-sm bg-muted/50 border border-dia-divider text-foreground text-sm">
+            <p><span className="font-medium">Free for all users:</span> Every model is available at no cost. Simply select your preferred model above and start using AI features.</p>
           </div>
         </div>
       </div>

@@ -22,7 +22,7 @@ function SubmitButton() {
     <Button
       type="submit"
       disabled={pending}
-      className="w-full bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 hover:from-violet-500 hover:via-blue-500 hover:to-violet-500 shadow-lg shadow-violet-500/25 transition-all duration-500 animate-gradient-x"
+      className="w-full bg-foreground text-white hover:bg-foreground/90 shadow-dia transition-all duration-300 rounded-dia-btn"
     >
       {pending ? (
         <>
@@ -60,8 +60,8 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
 
   if (state.status === "success" && !onSuccess) {
     return (
-      <Alert className="bg-emerald-50/50 text-emerald-900 border-emerald-200/50">
-        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+      <Alert className="bg-muted/50 text-foreground border-dia-divider">
+        <CheckCircle2 className="h-4 w-4 text-dia-body" />
         <AlertDescription>
           {state.message ?? "Account created successfully. Please check your email to confirm your account."}
         </AlertDescription>

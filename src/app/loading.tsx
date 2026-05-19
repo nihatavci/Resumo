@@ -7,16 +7,13 @@ export default function Loading() {
     <main className="min-h-screen relative">
       {/* Background Layer */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50" />
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-pink-200/20 to-violet-200/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-gradient-to-r from-blue-200/20 to-teal-200/20 rounded-full blur-3xl animate-float-delayed" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_24px]" />
+        <div className="absolute inset-0 bg-dia-canvas" />
       </div>
 
       {/* Main Content Layer */}
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Dashboard Header */}
-        <header className="sticky top-0 z-20 py-6 px-4 md:px-6 lg:px-8 border-b bg-white/50 backdrop-blur-lg">
+        <header className="sticky top-0 z-20 py-6 px-4 md:px-6 lg:px-8 border-b border-dia-divider bg-white/90 backdrop-blur-[24px]">
           <div className="max-w-[1800px] mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1.5">
@@ -38,7 +35,7 @@ export default function Loading() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
               {/* Profile Card */}
               <div className="lg:col-span-3 ">
-                <Card className="p-6 bg-white/40 backdrop-blur-md border-white/40 shadow-xl shadow-purple-500/5 h-full">
+                <Card className="p-6 bg-white/90 backdrop-blur-[24px] border-dia-divider shadow-dia rounded-dia-sm h-full">
                   {/* Profile Header */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -78,13 +75,13 @@ export default function Loading() {
 
               {/* Base Resumes */}
               <div className="lg:col-span-9">
-                <Card className="p-6 bg-white/40 backdrop-blur-md border-white/40 shadow-xl shadow-purple-500/5">
+                <Card className="p-6 bg-white/90 backdrop-blur-[24px] border-dia-divider shadow-dia rounded-dia-sm">
                   <div className="space-y-6">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-gradient-to-r from-purple-600/10 to-indigo-600/10">
-                          <FileText className="h-5 w-5 text-purple-600" />
+                        <div className="p-2 rounded-dia-sm bg-muted">
+                          <FileText className="h-5 w-5 text-dia-body" />
                         </div>
                         <div className="space-y-1">
                           <Skeleton className="h-6 w-32" />
@@ -97,7 +94,7 @@ export default function Loading() {
                     {/* Resume Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {[...Array(3)].map((_, i) => (
-                        <Card key={i} className="p-4 space-y-4 bg-white/60 border-purple-200/30">
+                        <Card key={i} className="p-4 space-y-4 bg-white/90 border-dia-divider rounded-dia-sm">
                           <div className="space-y-2">
                             <Skeleton className="h-6 w-3/4" />
                             <Skeleton className="h-4 w-1/2" />
@@ -125,13 +122,13 @@ export default function Loading() {
             </div>
 
             {/* Tailored Resumes */}
-            <Card className="p-6 bg-white/40 backdrop-blur-md border-white/40 shadow-xl shadow-pink-500/5">
+            <Card className="p-6 bg-white/90 backdrop-blur-[24px] border-dia-divider shadow-dia rounded-dia-sm">
               <div className="space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-r from-pink-600/10 to-rose-600/10">
-                      <Sparkles className="h-5 w-5 text-pink-600" />
+                    <div className="p-2 rounded-dia-sm bg-muted">
+                      <Sparkles className="h-5 w-5 text-dia-body" />
                     </div>
                     <div className="space-y-1">
                       <Skeleton className="h-6 w-36" />
@@ -144,7 +141,7 @@ export default function Loading() {
                 {/* Resume Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="p-4 space-y-4 bg-white/60 border-pink-200/30">
+                    <Card key={i} className="p-4 space-y-4 bg-white/90 border-dia-divider rounded-dia-sm">
                       <div className="space-y-2">
                         <Skeleton className="h-6 w-3/4" />
                         <Skeleton className="h-4 w-1/2" />

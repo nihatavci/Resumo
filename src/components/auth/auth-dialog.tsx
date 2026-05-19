@@ -6,10 +6,10 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthTab, useAuthDialog } from "@/components/auth/auth-dialog-provider";
 
-const gradientClasses = {
-  base: "bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600",
-  hover: "hover:from-violet-500 hover:via-blue-500 hover:to-violet-500",
-  animation: "transition-all duration-500 animate-gradient-x",
+const buttonClasses = {
+  base: "bg-foreground",
+  hover: "hover:bg-foreground/90",
+  animation: "transition-all duration-300",
 };
 
 interface AuthDialogProps {
@@ -29,12 +29,11 @@ export function AuthDialog({ children, defaultTab = "signup" }: AuthDialogProps)
       <Button
         size="lg"
         onClick={handleOpen}
-        className={`${gradientClasses.base} ${gradientClasses.hover} text-white font-semibold
-          text-lg py-6 px-10 ${gradientClasses.animation} group
-          shadow-xl shadow-violet-500/30 hover:shadow-violet-500/40
-          ring-2 ring-white/20 hover:ring-white/30
+        className={`${buttonClasses.base} ${buttonClasses.hover} text-white font-medium
+          text-lg py-6 px-10 ${buttonClasses.animation} group
+          shadow-dia
           scale-105 hover:scale-110 transition-all duration-300
-          rounded-xl relative overflow-hidden`}
+          rounded-dia-btn relative overflow-hidden`}
         aria-label="Open authentication dialog"
       >
         <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

@@ -50,34 +50,23 @@ export function ResumeEditorActions({
   };
 
 
-  // Dynamic color classes based on resume type
-  const colors = resume.is_base_resume ? {
-    // Import button colors
-    importBg: "bg-indigo-600",
-    importHover: "hover:bg-indigo-700",
-    importShadow: "shadow-indigo-400/20",
-    // Action buttons colors (download & save)
-    actionBg: "bg-purple-600",
-    actionHover: "hover:bg-purple-700",
-    actionShadow: "shadow-purple-400/20"
-  } : {
-    // Import button colors
-    importBg: "bg-rose-600",
-    importHover: "hover:bg-rose-700",
-    importShadow: "shadow-rose-400/20",
-    // Action buttons colors (download & save)
-    actionBg: "bg-pink-600",
-    actionHover: "hover:bg-pink-700",
-    actionShadow: "shadow-pink-400/20"
+  // Monochrome color scheme for all resume types
+  const colors = {
+    importBg: "bg-foreground",
+    importHover: "hover:bg-foreground/90",
+    importShadow: "shadow-dia",
+    actionBg: "bg-foreground",
+    actionHover: "hover:bg-foreground/90",
+    actionShadow: "shadow-dia"
   };
 
-  
+
   const buttonBaseStyle = cn(
     "transition-all duration-300",
     "relative overflow-hidden",
     "h-8 px-3 text-[11px] font-medium",
-    "rounded-md border-none",
-    "text-white shadow-sm",
+    "rounded-dia-btn border-none",
+    "text-white shadow-dia",
     "hover:shadow-md hover:-translate-y-[1px]",
     "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
   );
@@ -110,7 +99,7 @@ export function ResumeEditorActions({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
+              <Button
                 onClick={async () => {
                   try {
                     // Download Resume if selected
@@ -130,7 +119,7 @@ export function ResumeEditorActions({
                     if (downloadOptions.coverLetter && resume.has_cover_letter) {
                       // Dynamically import html2pdf only when needed
                       const html2pdf = (await import('html2pdf.js')).default;
-                      
+
                       const coverLetterElement = document.getElementById('cover-letter-content');
                       if (!coverLetterElement) {
                         throw new Error('Cover letter content not found');
@@ -150,10 +139,10 @@ export function ResumeEditorActions({
                           logging: true,
                           // windowHeight: 2000
                         },
-                        jsPDF: { 
-                          unit: 'in', 
-                          format: 'letter', 
-                          orientation: 'portrait' 
+                        jsPDF: {
+                          unit: 'in',
+                          format: 'letter',
+                          orientation: 'portrait'
                         }
                       };
 
@@ -179,44 +168,34 @@ export function ResumeEditorActions({
                 Download
               </Button>
             </TooltipTrigger>
-            <TooltipContent 
-              side="bottom" 
+            <TooltipContent
+              side="bottom"
               align="start"
               sideOffset={5}
               className={cn(
                 "w-48 p-3",
-                resume.is_base_resume 
-                  ? "bg-indigo-50 border-2 border-indigo-200"
-                  : "bg-rose-50 border-2 border-rose-200",
-                "rounded-lg shadow-lg"
+                "bg-dia-canvas border-2 border-border",
+                "rounded-dia-btn shadow-dia"
               )}
             >
               <div className="space-y-3">
                 <label className="flex items-center space-x-2">
-                  <Checkbox 
+                  <Checkbox
                     checked={downloadOptions.resume}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setDownloadOptions(prev => ({ ...prev, resume: checked as boolean }))
                     }
-                    className={cn(
-                      resume.is_base_resume 
-                        ? "border-indigo-400 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                        : "border-rose-400 data-[state=checked]:bg-rose-600 data-[state=checked]:border-rose-600"
-                    )}
+                    className="border-border data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
                   />
                   <span className="text-sm font-medium text-foreground">Resume</span>
                 </label>
                 <label className="flex items-center space-x-2">
-                  <Checkbox 
+                  <Checkbox
                     checked={downloadOptions.coverLetter}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setDownloadOptions(prev => ({ ...prev, coverLetter: checked as boolean }))
                     }
-                    className={cn(
-                      resume.is_base_resume 
-                        ? "border-indigo-400 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                        : "border-rose-400 data-[state=checked]:bg-rose-600 data-[state=checked]:border-rose-600"
-                    )}
+                    className="border-border data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
                   />
                   <span className="text-sm font-medium text-foreground">Cover Letter</span>
                 </label>
@@ -226,8 +205,8 @@ export function ResumeEditorActions({
         </TooltipProvider>
 
         {/* Save Button */}
-        <Button 
-          onClick={handleSave} 
+        <Button
+          onClick={handleSave}
           disabled={isSaving}
           className={actionButtonClasses}
         >
@@ -246,4 +225,4 @@ export function ResumeEditorActions({
       </div>
     </div>
   );
-} 
+}

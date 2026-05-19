@@ -5,12 +5,12 @@ export default function ResumeEditorLoading() {
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden relative">
       <div className="max-w-[2000px] mx-auto h-[calc(100vh-120px)] pt-4 px-6 md:px-8 lg:px-12">
-        <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border-purple-200/40">
+        <ResizablePanelGroup direction="horizontal" className="h-full rounded-dia-sm border-dia-divider">
           {/* Editor Panel */}
           <ResizablePanel defaultSize={40}>
             <div className="flex flex-col h-full mr-4">
               {/* Editor Header Skeleton */}
-              <div className="sticky top-0 z-20 space-y-4 backdrop-blur-sm bg-purple-50/80 p-4 rounded-t-lg">
+              <div className="sticky top-0 z-20 space-y-4 backdrop-blur-sm bg-dia-canvas p-4 rounded-t-dia-sm">
                 <div className="flex items-center justify-between">
                   <Skeleton className="h-8 w-48" />
                   <div className="flex gap-2">
@@ -28,7 +28,7 @@ export default function ResumeEditorLoading() {
               {/* Form Fields Skeleton */}
               <div className="flex-1 overflow-hidden mt-4 space-y-8">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="space-y-4 bg-purple-50/30 p-4 rounded-lg">
+                  <div key={i} className="space-y-4 bg-muted/30 p-4 rounded-dia-sm">
                     <Skeleton className="h-6 w-32" />
                     <div className="space-y-2">
                       <Skeleton className="h-10 w-full" />
@@ -39,7 +39,7 @@ export default function ResumeEditorLoading() {
               </div>
 
               {/* Chatbot Skeleton */}
-              <div className="mt-auto mb-4 bg-purple-50/50 border border-purple-200/40 rounded-lg p-4">
+              <div className="mt-auto mb-4 bg-muted/50 border border-dia-divider rounded-dia-sm p-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-8 w-8 rounded-full" />
@@ -52,13 +52,13 @@ export default function ResumeEditorLoading() {
           </ResizablePanel>
 
           {/* Resize Handle */}
-          <ResizableHandle withHandle className="bg-purple-100/50 hover:bg-purple-200/50" />
+          <ResizableHandle withHandle className="bg-dia-divider hover:bg-border" />
 
           {/* Preview Panel */}
           <ResizablePanel defaultSize={60}>
             <div className="h-full pr-4">
               <div className="relative pb-[129.4%] w-full">
-                <div className="absolute inset-0 bg-purple-50/30 rounded-lg">
+                <div className="absolute inset-0 bg-muted/30 rounded-dia-sm">
                   {/* Resume Preview Skeleton */}
                   <div className="h-full p-8 space-y-6">
                     {/* Header */}
@@ -110,4 +110,4 @@ export default function ResumeEditorLoading() {
       </div>
     </div>
   );
-} 
+}

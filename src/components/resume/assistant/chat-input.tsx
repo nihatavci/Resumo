@@ -10,8 +10,8 @@ interface ChatInputProps {
   onStop: () => void;
 }
 
-export default function ChatInput({ 
-    isLoading, 
+export default function ChatInput({
+    isLoading,
     onSubmit,
     onStop,
   }: ChatInputProps) {
@@ -24,7 +24,7 @@ export default function ChatInput({
 
       // Reset height to auto to get the correct scrollHeight
       textarea.style.height = 'auto';
-      
+
       // Calculate new height (capped at 6 lines ~ 144px)
       const newHeight = Math.min(textarea.scrollHeight, 144);
       textarea.style.height = `${newHeight}px`;
@@ -47,9 +47,8 @@ export default function ChatInput({
     return (
       <form onSubmit={handleSubmit} className={cn(
         "relative z-10",
-        "p-1 border-t border-purple-200/60",
-        "bg-white/40",
-        "backdrop-blur-sm",
+        "p-1 border-t border-border",
+        "bg-white",
         "flex gap-1.5"
       )}>
         <Textarea
@@ -71,11 +70,11 @@ export default function ChatInput({
           rows={1}
           className={cn(
             "flex-1",
-            "bg-white/60",
-            "border-purple-200/60",
-            "focus:border-purple-300",
-            "focus:ring-2 focus:ring-purple-500/10",
-            "placeholder:text-purple-400",
+            "bg-dia-canvas",
+            "border-border",
+            "focus:border-foreground/30",
+            "focus:ring-2 focus:ring-foreground/10",
+            "placeholder:text-dia-tertiary",
             "text-sm",
             "min-h-[32px]",
             "max-h-[144px]", // Approximately 6 lines
@@ -83,28 +82,29 @@ export default function ChatInput({
             "overflow-y-auto",
             "px-2 py-1.5",
             "transition-height duration-200",
-            "scrollbar-thin scrollbar-thumb-purple-200 scrollbar-track-transparent"
+            "rounded-dia-btn"
           )}
         />
-        <Button 
+        <Button
           type={isLoading ? "button" : "submit"}
           onClick={isLoading ? onStop : undefined}
           size="sm"
           className={cn(
             isLoading ? [
-              "bg-gradient-to-br from-rose-500 to-pink-500",
-              "hover:from-rose-600 hover:to-pink-600",
+              "bg-red-600",
+              "hover:bg-red-700",
             ] : [
-              "bg-gradient-to-br from-purple-500 to-indigo-500",
-              "hover:from-purple-600 hover:to-indigo-600",
+              "bg-foreground",
+              "hover:bg-foreground/90",
             ],
             "text-white",
             "border-none",
-            "shadow-md shadow-purple-500/10",
+            "shadow-dia",
             "transition-all duration-300",
-            "hover:scale-105 hover:shadow-lg",
+            "hover:scale-105 hover:shadow-md",
             "hover:-translate-y-0.5",
-            "px-2 h-8"
+            "px-2 h-8",
+            "rounded-dia-btn"
           )}
         >
           {isLoading ? (

@@ -78,9 +78,9 @@ export function SecurityForm({ user }: SecurityFormProps) {
     {/* <Button onClick={handleTestApiKey}>Test API Key</Button> */}
 
       {isGoogleOnlyUser && (
-        <div className="rounded-lg border border-teal-200 bg-teal-50/70 p-4 text-sm text-teal-900">
-          <p className="font-medium">Your account uses Google sign-in.</p>
-          <p className="mt-1 text-teal-800">
+        <div className="rounded-dia-sm border border-dia-divider bg-muted/50 p-4 text-sm text-foreground">
+          <p className="font-normal">Your account uses Google sign-in.</p>
+          <p className="mt-1 text-dia-body">
             Email and password changes are managed by your Google account, so ResumeLM does not require a separate password here.
           </p>
         </div>
@@ -111,7 +111,7 @@ export function SecurityForm({ user }: SecurityFormProps) {
                   />
                   <Button 
                     variant="outline"
-                    className="bg-white/50 border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-teal-800"
+                    className="bg-white/50 border-dia-divider text-foreground hover:bg-muted"
                     onClick={handleEmailUpdate}
                     disabled={isUpdatingEmail || !newEmail || !emailCurrentPassword}
                   >
@@ -144,7 +144,7 @@ export function SecurityForm({ user }: SecurityFormProps) {
                 />
                 <Button 
                   variant="outline"
-                  className="bg-white/50 border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-teal-800 whitespace-nowrap"
+                  className="bg-white/50 border-dia-divider text-foreground hover:bg-muted whitespace-nowrap"
                   onClick={handlePasswordUpdate}
                   disabled={isUpdatingPassword || !currentPassword || !newPassword}
                 >

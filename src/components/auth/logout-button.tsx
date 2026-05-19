@@ -35,7 +35,7 @@ export function LogoutButton({ className }: LogoutButtonProps) {
       variant="ghost"
       className={cn(
         "flex items-center gap-1.5 px-3 py-1",
-        "text-sm font-medium text-purple-600/80 hover:text-purple-800",
+        "text-sm font-normal text-dia-body hover:text-foreground",
         "transition-colors duration-200",
         className
       )}

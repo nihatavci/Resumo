@@ -30,7 +30,7 @@ export function CoverLetterPanel({
   const [errorMessage, setErrorMessage] = useState({ title: '', description: '' });
 
   const updateField = (field: keyof Resume, value: Resume[keyof Resume]) => {
-    dispatch({ 
+    dispatch({
       type: 'UPDATE_FIELD',
       field,
       value
@@ -39,9 +39,9 @@ export function CoverLetterPanel({
 
   const generateCoverLetter = async () => {
     if (!job) return;
-    
+
     setIsGenerating(true);
-    
+
     try {
       // Get model and API key from local storage
       const MODEL_STORAGE_KEY = 'resumelm-default-model';
@@ -60,9 +60,9 @@ export function CoverLetterPanel({
       // Prompt
       const prompt = `Write a professional cover letter for the following job using my resume information:
       ${JSON.stringify(job)}
-      
+
       ${JSON.stringify(resume)}
-      
+
       Today's date is ${new Date().toLocaleDateString()}.
 
       Please use my contact information in the letter:
@@ -73,7 +73,7 @@ export function CoverLetterPanel({
       ${resume.github_url ? `GitHub: ${resume.github_url}` : ''}
 
       ${customPrompt ? `\nAdditional requirements: ${customPrompt}` : ''}`;
-      
+
 
       // Call The Model
       const { output } = await generate(prompt, {
@@ -95,12 +95,12 @@ export function CoverLetterPanel({
           content: generatedContent,
         });
       }
-      
-      
+
+
     } catch (error: Error | unknown) {
       console.error('Generation error:', error);
       if (error instanceof Error && (
-          error.message.toLowerCase().includes('api key') || 
+          error.message.toLowerCase().includes('api key') ||
           error.message.toLowerCase().includes('unauthorized') ||
           error.message.toLowerCase().includes('invalid key') ||
           error.message.toLowerCase().includes('invalid x-api-key'))
@@ -124,27 +124,27 @@ export function CoverLetterPanel({
   if (resume.is_base_resume) {
     return (
       <div className={cn(
-        "p-4 backdrop-blur-xl rounded-lg shadow-lg bg-purple-50/80 border border-purple-200",
+        "p-4 rounded-dia-sm shadow-dia bg-dia-canvas border border-border",
         "space-y-4 text-center"
       )}>
         <div className="flex items-center gap-2 justify-center">
-          <div className="p-1.5 rounded-md bg-purple-100/80">
-            <FileText className="h-4 w-4 text-purple-600" />
+          <div className="p-1.5 rounded-dia-btn bg-muted">
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold text-purple-900">Cover Letter</h3>
+          <h3 className="text-lg font-light text-foreground">Cover Letter</h3>
         </div>
-        
-        <p className="text-sm text-purple-700">
+
+        <p className="text-sm text-muted-foreground">
           To generate a cover letter, please first tailor this base resume to a specific job.
         </p>
-        
-        <CreateTailoredResumeDialog 
+
+        <CreateTailoredResumeDialog
           baseResumes={[resume]}
         >
           <Button
             variant="outline"
             size="sm"
-            className="mt-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+            className="mt-2 border-border text-muted-foreground hover:bg-muted rounded-dia-btn"
           >
             <Plus className="h-4 w-4 mr-2" />
             Tailor This Resume
@@ -156,24 +156,24 @@ export function CoverLetterPanel({
 
   return (
     <div className={cn(
-      "p-4 backdrop-blur-xl rounded-lg shadow-lg bg-white/80 border border-emerald-600/50",
+      "p-4 rounded-dia-sm shadow-dia bg-white border border-border",
       "space-y-6"
     )}>
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 rounded-md bg-emerald-100/80">
-          <FileText className="h-4 w-4 text-emerald-600" />
+        <div className="p-1.5 rounded-dia-btn bg-muted">
+          <FileText className="h-4 w-4 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold text-emerald-900">Cover Letter</h3>
+        <h3 className="text-lg font-light text-foreground">Cover Letter</h3>
       </div>
 
       {resume.has_cover_letter ? (
         <div className="space-y-6">
           <div className={cn(
             "w-full p-4",
-            "bg-emerald-50",
-            "border-2 border-emerald-300",
-            "shadow-sm",
-            "rounded-lg"
+            "bg-dia-canvas",
+            "border-2 border-border",
+            "shadow-dia",
+            "rounded-dia-btn"
           )}>
             <AIImprovementPrompt
               value={customPrompt}
@@ -190,13 +190,14 @@ export function CoverLetterPanel({
               size="sm"
               className={cn(
                 "w-full",
-                "bg-emerald-600 hover:bg-emerald-700",
+                "bg-foreground hover:bg-foreground/90",
                 "text-white",
-                "border border-emerald-200/60",
-                "shadow-sm",
+                "border-none",
+                "shadow-dia",
                 "transition-all duration-300",
                 "hover:scale-[1.02] hover:shadow-md",
-                "hover:-translate-y-0.5"
+                "hover:-translate-y-0.5",
+                "rounded-dia-btn"
               )}
               onClick={generateCoverLetter}
               disabled={isGenerating || !job}
@@ -217,7 +218,7 @@ export function CoverLetterPanel({
             <Button
               variant="destructive"
               size="sm"
-              className="w-full"
+              className="w-full rounded-dia-btn"
               onClick={() => updateField('has_cover_letter', false)}
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -227,13 +228,13 @@ export function CoverLetterPanel({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="p-4 rounded-lg bg-muted/50 border border-muted">
+          <div className="p-4 rounded-dia-btn bg-muted border border-border">
             <p className="text-sm text-muted-foreground">No cover letter has been created for this resume yet.</p>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="w-full border-emerald-600/50 text-emerald-700 hover:bg-emerald-50"
+            className="w-full border-border text-muted-foreground hover:bg-muted rounded-dia-btn"
             onClick={() => updateField('has_cover_letter', true)}
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -257,4 +258,4 @@ export function CoverLetterPanel({
       />
     </div>
   );
-} 
+}

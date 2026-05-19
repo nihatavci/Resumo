@@ -69,25 +69,25 @@ export function ResumesSection({
 
   const config = {
     base: {
-      gradient: 'from-purple-600 to-indigo-600',
-      border: 'border-purple-300',
-      bg: 'bg-purple-50',
-      text: 'text-purple-600',
+      gradient: '',
+      border: 'border-dia-divider',
+      bg: 'bg-muted',
+      text: 'text-foreground',
       icon: FileText,
       accent: {
-        bg: 'purple-100',
-        hover: 'purple-100/50'
+        bg: 'muted',
+        hover: 'muted/50'
       }
     },
     tailored: {
-      gradient: 'from-pink-600 to-rose-600',
-      border: 'border-pink-300',
-      bg: 'bg-pink-50',
-      text: 'text-pink-600',
+      gradient: '',
+      border: 'border-dia-divider',
+      bg: 'bg-muted',
+      text: 'text-foreground',
       icon: Sparkles,
       accent: {
-        bg: 'pink-100',
-        hover: 'pink-100/50'
+        bg: 'muted',
+        hover: 'muted/50'
       }
     }
   }[type];
@@ -189,59 +189,36 @@ export function ResumesSection({
       {...(type === 'tailored' && { baseResumes })}
     >
       <button className={cn(
-        "aspect-[8.5/11] rounded-lg",
+        "aspect-[8.5/11] rounded-dia-sm",
         "relative overflow-hidden",
-        "border-2 border-dashed transition-all duration-500",
+        "border-2 border-dashed border-dia-divider transition-all duration-300",
         "group/new-resume flex flex-col items-center justify-center gap-4",
-        type === 'base'
-          ? "border-purple-300/70 hover:border-purple-400"
-          : "border-pink-300/70 hover:border-pink-400",
-        type === 'base'
-          ? "bg-gradient-to-br from-purple-50/80 via-purple-50/40 to-purple-100/60"
-          : "bg-gradient-to-br from-pink-50/80 via-pink-50/40 to-pink-100/60",
-        "hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-1",
-        "after:absolute after:inset-0 after:bg-gradient-to-br",
-        type === 'base'
-          ? "after:from-purple-600/[0.03] after:to-indigo-600/[0.03]"
-          : "after:from-pink-600/[0.03] after:to-rose-600/[0.03]",
-        "after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-500 w-full sm:w-auto mr-8 sm:mr-0"
+        "bg-white/60 hover:bg-white/90",
+        "hover:shadow-dia hover:-translate-y-1",
+        "w-full sm:w-auto mr-8 sm:mr-0"
       )}>
         <div className={cn(
           "relative z-10 flex flex-col items-center",
-          "transform transition-all duration-500",
+          "transform transition-all duration-300",
           "group-hover/new-resume:scale-105"
         )}>
           <div className={cn(
-            "h-12 w-12 rounded-xl",
+            "h-12 w-12 rounded-dia-btn",
             "flex items-center justify-center",
-            "transform transition-all duration-500",
-            "shadow-sm group-hover/new-resume:shadow-md",
-            type === 'base'
-              ? "bg-gradient-to-br from-purple-100 to-purple-50"
-              : "bg-gradient-to-br from-pink-100 to-pink-50",
-            "group-hover/new-resume:scale-110"
+            "bg-muted shadow-dia",
+            "transition-all duration-300"
           )}>
-            <config.icon className={cn(
-              "h-5 w-5 transition-all duration-500",
-              type === 'base' ? "text-purple-600" : "text-pink-600",
-              "group-hover/new-resume:scale-110"
-            )} />
+            <config.icon className="h-5 w-5 text-dia-body" />
           </div>
 
-          <span className={cn(
-            "mt-4 text-sm font-medium",
-            "transition-all duration-500",
-            type === 'base' ? "text-purple-600" : "text-pink-600",
-            "group-hover/new-resume:font-semibold"
-          )}>
+          <span className="mt-4 text-sm font-medium text-foreground">
             Create {type === 'base' ? 'Base' : 'Tailored'} Resume
           </span>
 
           <span className={cn(
-            "mt-2 text-xs",
-            "transition-all duration-500 opacity-0",
-            type === 'base' ? "text-purple-500" : "text-pink-500",
-            "group-hover/new-resume:opacity-70"
+            "mt-2 text-xs text-dia-tertiary",
+            "transition-opacity duration-300 opacity-0",
+            "group-hover/new-resume:opacity-100"
           )}>
             Click to start
           </span>
@@ -281,10 +258,10 @@ export function ResumesSection({
                   )}
                 />
                 {/* Loading Overlay */}
-                <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                <div className="absolute inset-0 bg-white/90 backdrop-blur-[24px] rounded-dia-sm flex items-center justify-center z-10">
                   <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                    <span className="text-xs font-medium text-blue-600">Copying...</span>
+                    <Loader2 className="h-5 w-5 animate-spin text-dia-body" />
+                    <span className="text-xs font-medium text-dia-body">Copying...</span>
                   </div>
                 </div>
               </div>
@@ -310,14 +287,12 @@ export function ResumesSection({
                     variant="ghost"
                     disabled={isDeleting}
                     className={cn(
-                      "h-8 w-8 rounded-lg",
-                      "bg-rose-50/80 hover:bg-rose-100/80",
-                      "text-rose-600 hover:text-rose-700",
-                      "border border-rose-200/60",
-                      "shadow-sm",
-                      "transition-all duration-300",
-                      "hover:scale-105 hover:shadow-md",
-                      "hover:-translate-y-0.5",
+                      "h-8 w-8 rounded-dia-btn",
+                      "bg-white/80 hover:bg-white",
+                      "text-dia-tertiary hover:text-destructive",
+                      "border border-dia-divider",
+                      "shadow-dia",
+                      "transition-all duration-200",
                       isDeleting && "opacity-50 cursor-not-allowed"
                     )}
                   >
@@ -336,14 +311,12 @@ export function ResumesSection({
                   }}
                   disabled={isDeleting || isCopying}
                   className={cn(
-                    "h-8 w-8 rounded-lg",
-                    "bg-teal-50/80 hover:bg-teal-100/80",
-                    "text-teal-600 hover:text-teal-700",
-                    "border border-teal-200/60",
-                    "shadow-sm",
-                    "transition-all duration-300",
-                    "hover:scale-105 hover:shadow-md",
-                    "hover:-translate-y-0.5",
+                    "h-8 w-8 rounded-dia-btn",
+                    "bg-white/80 hover:bg-white",
+                    "text-dia-tertiary hover:text-foreground",
+                    "border border-dia-divider",
+                    "shadow-dia",
+                    "transition-all duration-200",
                     (isDeleting || isCopying) && "opacity-50 cursor-not-allowed"
                   )}
                 >
@@ -386,7 +359,7 @@ export function ResumesSection({
     <div className="relative ">
       <div className="flex flex-col gap-4 w-full">
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <h2 className={`text-2xl sm:text-3xl font-semibold tracking-tight bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
+          <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-foreground">
             {type === 'base' ? 'Base' : 'Tailored'} Resumes
           </h2>
           <div className="flex items-center gap-2 mb-4">

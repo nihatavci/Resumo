@@ -47,9 +47,7 @@ export function EditorPanel({
           <div className="relative pb-12">
             <div className={cn(
               "sticky top-0 z-20 backdrop-blur-sm",
-              resume.is_base_resume
-                ? "bg-purple-50/80"
-                : "bg-pink-100/90 shadow-sm shadow-pink-200/50"
+              "bg-dia-canvas/80"
             )}>
               <div className="flex flex-col gap-4">
                 <ResumeEditorActions
@@ -185,9 +183,7 @@ export function EditorPanel({
 
       <div className={cn(
         "absolute w-full bottom-0 rounded-lg border", 
-        resume.is_base_resume
-          ? "bg-purple-50/50 border-purple-200/40"
-          : "bg-pink-50/80 border-pink-300/50 shadow-sm shadow-pink-200/20"
+        "bg-dia-canvas border-border"
       )}>
         <ChatBot 
           resume={resume} 

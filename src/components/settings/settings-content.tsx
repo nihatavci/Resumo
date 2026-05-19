@@ -61,8 +61,8 @@ export function SettingsContent({ user }: SettingsContentProps) {
     <div className="flex gap-8 relative">
       {/* Table of Contents */}
       <div className="w-64 hidden lg:block">
-        <div className="sticky top-20 rounded-lg border border-white/40 bg-white/80 backdrop-blur-xl p-4">
-          <h3 className="font-semibold mb-4 text-muted-foreground">On this page</h3>
+        <div className="sticky top-20 rounded-dia-sm border border-dia-divider bg-white/90 backdrop-blur-[24px] shadow-dia p-4">
+          <h3 className="font-light mb-4 text-muted-foreground">On this page</h3>
           <div className="space-y-1">
             {sections.map((section) => (
               <Button
@@ -71,7 +71,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                 className={cn(
                   "w-full justify-start text-left font-normal transition-all duration-200 relative pl-8",
                   activeSection === section.id && 
-                  "bg-gradient-to-r from-purple-600/10 to-indigo-600/10 text-purple-600 font-medium",
+                  "bg-muted text-foreground font-medium",
                   activeSection !== section.id && "text-muted-foreground hover:text-foreground"
                 )}
                 onClick={() => scrollToSection(section.id)}
@@ -79,7 +79,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                 <span className="absolute left-2">{section.icon}</span>
                 <span className="truncate">{section.title}</span>
                 {activeSection === section.id && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-foreground rounded-full" />
                 )}
               </Button>
             ))}
@@ -90,9 +90,9 @@ export function SettingsContent({ user }: SettingsContentProps) {
       {/* Content */}
       <div className="flex-1 space-y-8">
         {/* Security Settings */}
-        <Card id="security" className="border-white/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-xl">
+        <Card id="security" className="border-dia-divider shadow-dia bg-white/90 backdrop-blur-[24px] rounded-dia-sm">
           <CardHeader>
-            <CardTitle className="text-xl">Security</CardTitle>
+            <CardTitle className="text-xl font-light">Security</CardTitle>
             <CardDescription>Manage your email and password settings</CardDescription>
           </CardHeader>
           <CardContent>
@@ -101,9 +101,9 @@ export function SettingsContent({ user }: SettingsContentProps) {
         </Card>
 
         {/* API Keys */}
-        <Card id="api-keys" className="border-white/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-xl">
+        <Card id="api-keys" className="border-dia-divider shadow-dia bg-white/90 backdrop-blur-[24px] rounded-dia-sm">
           <CardHeader>
-            <CardTitle className="text-xl">API Keys</CardTitle>
+            <CardTitle className="text-xl font-light">API Keys</CardTitle>
             <CardDescription>Manage your API keys for different AI providers</CardDescription>
           </CardHeader>
           <CardContent>
@@ -112,9 +112,9 @@ export function SettingsContent({ user }: SettingsContentProps) {
         </Card>
 
         {/* AI Prompts */}
-        <Card id="ai-prompts" className="border-white/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-xl">
+        <Card id="ai-prompts" className="border-dia-divider shadow-dia bg-white/90 backdrop-blur-[24px] rounded-dia-sm">
           <CardHeader>
-            <CardTitle className="text-xl">AI Prompts</CardTitle>
+            <CardTitle className="text-xl font-light">AI Prompts</CardTitle>
             <CardDescription>Customize AI system prompts for different actions</CardDescription>
           </CardHeader>
           <CardContent>
@@ -123,9 +123,9 @@ export function SettingsContent({ user }: SettingsContentProps) {
         </Card>
 
         {/* Danger Zone */}
-        <Card id="danger-zone" className="border-destructive/50 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-xl">
+        <Card id="danger-zone" className="border-destructive/50 shadow-dia bg-white/90 backdrop-blur-[24px] rounded-dia-sm">
           <CardHeader>
-            <CardTitle className="text-xl text-destructive">Danger Zone</CardTitle>
+            <CardTitle className="text-xl font-light text-destructive">Danger Zone</CardTitle>
             <CardDescription>Irreversible and destructive actions</CardDescription>
           </CardHeader>
           <CardContent>

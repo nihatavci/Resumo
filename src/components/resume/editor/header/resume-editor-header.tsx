@@ -26,51 +26,12 @@ export function ResumeEditorHeader({
     }
   };
 
-  // Dynamic color classes based on resume type
-  const colors = resume.is_base_resume ? {
-    gradient: "from-purple-600 via-purple-500 to-indigo-600",
-    border: "border-purple-200/50",
-    background: "from-purple-50/95 via-white/95 to-purple-50/95",
-    shadow: "shadow-purple-500/10",
-    text: "text-purple-600",
-    hover: "hover:text-purple-600",
-    textOpacity: "text-purple-600/60",
-    gradientOverlay: "#f3e8ff30",
-  } : {
-    gradient: "from-pink-600 via-pink-500 to-rose-600",
-    border: "border-pink-200/50",
-    background: "from-pink-50/95 via-white/95 to-pink-50/95",
-    shadow: "shadow-pink-500/10",
-    text: "text-pink-600",
-    hover: "hover:text-pink-600",
-    textOpacity: "text-pink-600/60",
-    gradientOverlay: "#fce7f330",
-  };
-
   return (
     <div className={cn(
-      "h-20 border-b backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg",
-      colors.border,
-      `bg-gradient-to-r ${colors.background}`,
-      colors.shadow
+      "h-20 border-b backdrop-blur-xl fixed left-0 right-0 z-40 shadow-dia",
+      "border-border",
+      "bg-white/95",
     )}>
-      {/* Gradient Overlays */}
-      <div className={cn(
-        "absolute inset-0",
-        `bg-[linear-gradient(to_right,${colors.gradientOverlay}_0%,#ffffff40_50%,${colors.gradientOverlay}_100%)]`,
-        "pointer-events-none"
-      )} />
-      <div className={cn(
-        "absolute inset-0",
-        `bg-[radial-gradient(circle_800px_at_50%_-40%,${colors.gradientOverlay}_0%,transparent_100%)]`,
-        "pointer-events-none"
-      )} />
-      <div className={cn(
-        "absolute inset-0",
-        `bg-[radial-gradient(circle_600px_at_100%_100%,${colors.gradientOverlay}_0%,transparent_100%)]`,
-        "pointer-events-none"
-      )} />
-      
       {/* Content Container */}
       <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
         {/* Left Section - Logo, Title  */}
@@ -105,19 +66,16 @@ export function ResumeEditorHeader({
               <Logo className="text-xl cursor-pointer" asLink={false} />
             </div>
           )}
-          <div className="h-8 w-px bg-purple-200/50 hidden sm:block" />
+          <div className="h-8 w-px bg-border hidden sm:block" />
           <div className="flex flex-col justify-center gap-1">
             {/* Resume Title Section */}
             <div className="flex flex-col ">
-              <h1 className="text-xl font-semibold">
-                <span className={cn(
-                  "bg-gradient-to-r bg-clip-text text-transparent",
-                  colors.gradient
-                )}>
+              <h1 className="text-xl font-light">
+                <span className="text-foreground">
                   {resume.is_base_resume ? capitalizeWords(resume.target_role) : resume.name}
                 </span>
               </h1>
-              <div className={cn("flex text-sm", colors.textOpacity)}>
+              <div className="flex text-sm text-dia-tertiary">
                 {resume.is_base_resume ? (
                   <div className="flex items-center">
                     <span className="text-xs font-medium">Base Resume</span>
@@ -134,4 +92,4 @@ export function ResumeEditorHeader({
       </div>
     </div>
   );
-} 
+}

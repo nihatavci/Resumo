@@ -28,10 +28,10 @@ interface TailoredJobCardProps {
   isLoading?: boolean;
 }
 
-export function TailoredJobCard({ 
-  jobId, 
+export function TailoredJobCard({
+  jobId,
   job: externalJob,
-  isLoading: externalIsLoading 
+  isLoading: externalIsLoading
 }: TailoredJobCardProps) {
   const router = useRouter();
   const { state, dispatch } = useResumeContext();
@@ -39,7 +39,7 @@ export function TailoredJobCard({
   // Only use internal state if external job is not provided
   const [internalJob, setInternalJob] = useState<Job | null>(null);
   const [internalIsLoading, setInternalIsLoading] = useState(true);
-  
+
   const effectiveJob = externalJob ?? internalJob;
   const effectiveIsLoading = externalIsLoading ?? internalIsLoading;
 
@@ -146,16 +146,16 @@ export function TailoredJobCard({
 
       // Create job in database
       const newJob = await createJob(formattedJob);
-      
+
       // Update resume with new job ID using context
       dispatch({ type: 'UPDATE_FIELD', field: 'job_id', value: newJob.id });
-      
+
       // Save the changes to the database
       await updateResume(state.resume.id, {
         ...state.resume,
         job_id: newJob.id
       });
-      
+
       // Close dialog and refresh
       setCreateDialogOpen(false);
       router.refresh();
@@ -185,22 +185,22 @@ export function TailoredJobCard({
     >
       <div className="flex items-start justify-between mb-3">
         <div className="space-y-3 w-3/4">
-          <div className="h-6 bg-gradient-to-r from-pink-200/50 via-rose-200/50 to-pink-200/50 rounded-xl animate-pulse" />
-          <div className="h-4 bg-gradient-to-r from-pink-100/50 via-rose-100/50 to-pink-100/50 rounded-lg w-2/3 animate-pulse" />
+          <div className="h-6 bg-muted rounded-dia-btn animate-pulse" />
+          <div className="h-4 bg-muted rounded-dia-btn w-2/3 animate-pulse" />
         </div>
-        <div className="h-8 w-8 bg-gradient-to-r from-pink-200/50 via-rose-200/50 to-pink-200/50 rounded-xl animate-pulse" />
+        <div className="h-8 w-8 bg-muted rounded-dia-btn animate-pulse" />
       </div>
       <div className="grid grid-cols-2 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="flex items-center gap-2">
-            <div className="h-4 w-4 rounded-full bg-gradient-to-r from-pink-200/50 via-rose-200/50 to-pink-200/50 animate-pulse" />
-            <div className="h-4 flex-1 bg-gradient-to-r from-pink-100/50 via-rose-100/50 to-pink-100/50 rounded-lg animate-pulse" />
+            <div className="h-4 w-4 rounded-full bg-muted animate-pulse" />
+            <div className="h-4 flex-1 bg-muted rounded-dia-btn animate-pulse" />
           </div>
         ))}
       </div>
       <div className="flex gap-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-6 w-20 bg-gradient-to-r from-pink-100/50 via-rose-100/50 to-pink-100/50 rounded-full animate-pulse" />
+          <div key={i} className="h-6 w-20 bg-muted rounded-full animate-pulse" />
         ))}
       </div>
     </motion.div>
@@ -208,25 +208,25 @@ export function TailoredJobCard({
 
   // Enhanced error state with proper ARIA and animations
   const ErrorState = () => (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center justify-center p-8 space-y-4"
       role="alert"
       aria-live="polite"
     >
-      <div className="p-3 rounded-xl bg-red-50/80 backdrop-blur-sm border border-red-100">
+      <div className="p-3 rounded-dia-btn bg-red-50 border border-red-200">
         <AlertCircle className="w-6 h-6 text-red-500" />
       </div>
       <div className="text-center space-y-2">
-        <h3 className="font-semibold text-red-900">Unable to Load Job</h3>
+        <h3 className="font-medium text-red-900">Unable to Load Job</h3>
         <p className="text-sm text-red-600/90">
           This job listing is no longer available or there was an error loading it.
         </p>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => router.refresh()}
-          className="mt-4 bg-white/80 border-red-200 hover:bg-red-50/80 hover:border-red-300 text-red-700"
+          className="mt-4 bg-white border-red-200 hover:bg-red-50 hover:border-red-300 text-red-700"
         >
           <motion.div
             animate={{ rotate: [0, 360] }}
@@ -241,17 +241,17 @@ export function TailoredJobCard({
 
   if (!jobId) {
     return (
-      <Card className="relative group">
+      <Card className="relative group rounded-dia-sm">
         <div className="relative p-8 flex flex-col items-center justify-center space-y-6 text-center">
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-500/5 to-rose-500/5 border border-pink-200/20 group-hover:scale-110 transition-transform duration-500">
-            <Plus className="w-8 h-8 text-pink-500" />
+          <div className="p-4 rounded-dia-sm bg-muted border border-border group-hover:scale-110 transition-transform duration-300">
+            <Plus className="w-8 h-8 text-muted-foreground" />
           </div>
-          
+
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+            <h3 className="text-xl font-light text-foreground">
               No Job Currently Linked
             </h3>
-            <p className="text-sm text-gray-500/90 max-w-sm">
+            <p className="text-sm text-muted-foreground max-w-sm">
               Create a new job listing to track the position you&apos;re applying for and tailor your resume accordingly.
             </p>
           </div>
@@ -261,13 +261,14 @@ export function TailoredJobCard({
               <Button
                 className={cn(
                   "relative overflow-hidden",
-                  "bg-gradient-to-r from-pink-500 to-rose-500",
+                  "bg-foreground",
                   "text-white font-medium",
-                  "border border-pink-400/20",
-                  "shadow-lg shadow-pink-500/10",
-                  "hover:shadow-xl hover:shadow-pink-500/20",
+                  "border-none",
+                  "shadow-dia",
+                  "hover:bg-foreground/90",
                   "hover:scale-105",
-                  "transition-all duration-500"
+                  "transition-all duration-300",
+                  "rounded-dia-btn"
                 )}
                 aria-label="Create new job listing"
               >
@@ -276,16 +277,16 @@ export function TailoredJobCard({
               </Button>
             </DialogTrigger>
 
-            <DialogContent 
+            <DialogContent
               className={cn(
                 "sm:max-w-[600px]",
-                "bg-gradient-to-b from-white/95 to-white/90",
-                "backdrop-blur-xl",
-                "border-pink-200/40",
-                "shadow-xl shadow-pink-500/10"
+                "bg-white",
+                "border-border",
+                "shadow-dia",
+                "rounded-dia-sm"
               )}
             >
-              <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+              <DialogTitle className="text-xl font-light text-foreground">
                 Create New Job Listing
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
@@ -300,12 +301,13 @@ export function TailoredJobCard({
                     onChange={handleJobDescriptionChange}
                     className={cn(
                       "min-h-[200px]",
-                      "bg-white/80 backdrop-blur-sm",
+                      "bg-dia-canvas",
                       "border transition-all duration-300",
-                      "placeholder:text-gray-400",
-                      validationErrors.jobDescription 
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/20" 
-                        : "border-gray-200 focus:border-pink-500 focus:ring-pink-500/20"
+                      "placeholder:text-dia-tertiary",
+                      "rounded-dia-btn",
+                      validationErrors.jobDescription
+                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                        : "border-border focus:border-foreground/40 focus:ring-foreground/10"
                     )}
                     aria-invalid={!!validationErrors.jobDescription}
                     aria-describedby="job-description-error"
@@ -325,9 +327,10 @@ export function TailoredJobCard({
                     variant="outline"
                     onClick={() => setCreateDialogOpen(false)}
                     className={cn(
-                      "border-gray-200",
-                      "hover:bg-gray-50",
-                      "transition-colors duration-300"
+                      "border-border",
+                      "hover:bg-muted",
+                      "transition-colors duration-300",
+                      "rounded-dia-btn"
                     )}
                   >
                     Cancel
@@ -337,13 +340,13 @@ export function TailoredJobCard({
                     disabled={isFormatting || isCreating || !!validationErrors.jobDescription}
                     className={cn(
                       "relative overflow-hidden",
-                      "bg-gradient-to-r from-pink-500 to-rose-500",
-                      "hover:from-pink-600 hover:to-rose-600",
+                      "bg-foreground",
+                      "hover:bg-foreground/90",
                       "text-white font-medium",
-                      "shadow-lg hover:shadow-xl",
+                      "shadow-dia hover:shadow-md",
                       "disabled:opacity-50 disabled:cursor-not-allowed",
-                      "disabled:hover:from-pink-500 disabled:hover:to-rose-500",
-                      "transition-all duration-300"
+                      "transition-all duration-300",
+                      "rounded-dia-btn"
                     )}
                     aria-busy={isFormatting || isCreating}
                   >
@@ -375,7 +378,7 @@ export function TailoredJobCard({
 
   return (
     <Card className={cn(
-      "relative group border-none px-8",
+      "relative group border-none px-8 rounded-dia-sm",
     )}>
 
       <div className="relative">
@@ -394,10 +397,10 @@ export function TailoredJobCard({
               {/* Job Details Grid */}
               <div className="grid grid-cols-2 gap-x-2 gap-y-3">
                 {[
-                  { icon: MapPin, text: effectiveJob.location || 'Location not specified', color: 'pink' },
-                  { icon: Briefcase, text: formatWorkLocation(effectiveJob.work_location), color: 'rose' },
-                  { icon: DollarSign, text: effectiveJob.salary_range || 'Salary not specified', color: 'pink' },
-                  { icon: Clock, text: effectiveJob.employment_type?.replace('_', ' ') || 'Employment type not specified', color: 'rose' }
+                  { icon: MapPin, text: effectiveJob.location || 'Location not specified' },
+                  { icon: Briefcase, text: formatWorkLocation(effectiveJob.work_location) },
+                  { icon: DollarSign, text: effectiveJob.salary_range || 'Salary not specified' },
+                  { icon: Clock, text: effectiveJob.employment_type?.replace('_', ' ') || 'Employment type not specified' }
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -406,8 +409,8 @@ export function TailoredJobCard({
                     transition={{ delay: 0.1 + index * 0.1 }}
                     className={cn(
                       "flex items-center gap-2",
-                      "text-sm text-gray-600",
-                      `group-hover:text-${item.color}-600`,
+                      "text-sm text-muted-foreground",
+                      "group-hover:text-foreground",
                       "transition-colors duration-300"
                     )}
                   >
@@ -420,13 +423,13 @@ export function TailoredJobCard({
               {/* Description */}
               {effectiveJob.description && (
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700">Description</h4>
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                  <h4 className="text-sm font-medium text-foreground">Description</h4>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {effectiveJob.description}
                   </p>
                 </div>
               )}
-              
+
               {/* Keywords */}
               <div className="flex flex-wrap gap-2 ">
                 {effectiveJob.keywords?.map((keyword, index) => (
@@ -436,16 +439,17 @@ export function TailoredJobCard({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className={cn(
                         "text-xs py-0.5",
-                        "bg-gradient-to-r from-pink-50/50 to-rose-50/50",
-                        "hover:from-pink-100/50 hover:to-rose-100/50",
-                        "text-pink-700",
-                        "border border-pink-100/20",
+                        "bg-muted",
+                        "hover:bg-dia-button",
+                        "text-muted-foreground",
+                        "border border-border",
                         "transition-all duration-300",
-                        "cursor-default"
+                        "cursor-default",
+                        "rounded-full"
                       )}
                     >
                       {keyword}
@@ -484,7 +488,7 @@ export function TailoredJobAccordion({
 
   const handleDelete = async () => {
     if (!resume.job_id) return;
-    
+
     try {
       setIsDeleting(true);
       await deleteJob(resume.job_id);
@@ -502,17 +506,17 @@ export function TailoredJobAccordion({
   };
 
   return (
-    <AccordionItem value="job" className="mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border-pink-600/50 border-2">
+    <AccordionItem value="job" className="mb-4 rounded-dia-sm shadow-dia bg-white border-border border-2">
       <div className="px-4">
         <AccordionTrigger className="hover:no-underline group">
           <div className="flex items-center gap-2">
-            <div className={cn("p-1 rounded-md transition-transform duration-300 group-data-[state=open]:scale-105", "bg-pink-100/80")}>
-              <BriefcaseIcon className={cn("h-3.5 w-3.5", "text-pink-600")} />
+            <div className={cn("p-1 rounded-dia-btn transition-transform duration-300 group-data-[state=open]:scale-105", "bg-muted")}>
+              <BriefcaseIcon className={cn("h-3.5 w-3.5", "text-muted-foreground")} />
             </div>
             <div className="flex flex-col items-start">
-              <span className={cn("text-sm font-medium", "text-pink-900")}>{title}</span>
+              <span className={cn("text-sm font-medium", "text-foreground")}>{title}</span>
               {company && (
-                <span className="text-xs text-pink-600/80">{company}</span>
+                <span className="text-xs text-muted-foreground">{company}</span>
               )}
             </div>
           </div>
@@ -520,7 +524,7 @@ export function TailoredJobAccordion({
       </div>
       <AccordionContent className=" ">
         <div className="">
-          <TailoredJobCard 
+          <TailoredJobCard
             jobId={resume.job_id || null}
             job={job}
             isLoading={isLoading}
@@ -533,11 +537,11 @@ export function TailoredJobAccordion({
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className={cn(
-                  "text-gray-400",
+                  "text-dia-tertiary",
                   "hover:text-red-500",
-                  "hover:bg-red-50/50",
+                  "hover:bg-red-50",
                   "transition-all duration-300",
-                  "rounded-lg",
+                  "rounded-dia-btn",
                   "gap-2"
                 )}
               >
@@ -554,4 +558,4 @@ export function TailoredJobAccordion({
       </AccordionContent>
     </AccordionItem>
   );
-} 
+}

@@ -275,11 +275,11 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
               variant="outline"
               size="sm"
               onClick={() => handleSettingsChange({...defaultSettings})}
-              className="relative h-60 group p-0 overflow-hidden border-slate-200 hover:border-teal-600/40 transition-colors"
+              className="relative h-60 group p-0 overflow-hidden border-border hover:border-foreground/30 transition-colors rounded-dia-sm"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-muted opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative h-full w-full flex flex-col items-center">
-                <div className="w-full p-2 text-xs font-medium text-teal-600 border-b border-slate-200 bg-slate-50/80">
+                <div className="w-full p-2 text-xs font-medium text-muted-foreground border-b border-border bg-dia-canvas">
                   <LayoutTemplate className="w-3 h-3 inline-block mr-1" />
                   Default Layout
                 </div>
@@ -355,11 +355,11 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
                 education_margin_horizontal: 0,
                 experience_margin_horizontal: 0
               })}
-              className="relative h-60 group p-0 overflow-hidden border-slate-200 hover:border-pink-600/40 transition-colors"
+              className="relative h-60 group p-0 overflow-hidden border-border hover:border-foreground/30 transition-colors rounded-dia-sm"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-rose-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-muted opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative h-full w-full flex flex-col items-center">
-                <div className="w-full p-2 text-xs font-medium text-pink-600 border-b border-slate-200 bg-slate-50/80">
+                <div className="w-full p-2 text-xs font-medium text-muted-foreground border-b border-border bg-dia-canvas">
                   <LayoutTemplate className="w-3 h-3 inline-block mr-1" />
                   Compact Layout
                 </div>
@@ -420,10 +420,10 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
         <CardContent className="space-y-8">
           <div className="space-y-6 ">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              <Label className="text-base font-normal text-foreground">
                 Footer Options
               </Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+              <div className="h-[1px] flex-1 mx-4 bg-border" />
             </div>
 
             <div className="space-y-2 bg-slate-50/50 rounded-lg  border border-slate-200/50">
@@ -490,8 +490,8 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
           {/* Global Document Settings */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Document</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+              <Label className="text-base font-normal text-foreground">Document</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-border" />
             </div>
 
             <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
@@ -627,8 +627,8 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
           {/* Header Settings */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Header</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+              <Label className="text-base font-normal text-foreground">Header</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-border" />
             </div>
 
             <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
@@ -707,8 +707,8 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
           {/* Skills Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Skills</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+              <Label className="text-base font-normal text-foreground">Skills</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-border" />
             </div>
             <SectionSettings title="Skills" section="skills" />
           </div>
@@ -716,8 +716,8 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
           {/* Experience Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Experience</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+              <Label className="text-base font-normal text-foreground">Experience</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-border" />
             </div>
             <SectionSettings title="Experience" section="experience" />
           </div>
@@ -725,8 +725,8 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
           {/* Projects Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Projects</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+              <Label className="text-base font-normal text-foreground">Projects</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-border" />
             </div>
             <SectionSettings title="Projects" section="projects" />
           </div>
@@ -734,8 +734,8 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
           {/* Education Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Education</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+              <Label className="text-base font-normal text-foreground">Education</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-border" />
             </div>
             <SectionSettings title="Education" section="education" />
           </div>

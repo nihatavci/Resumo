@@ -35,20 +35,20 @@ function WorkExperienceSuggestion({ content: work, currentContent: currentWork }
       <div className="flex justify-between items-start">
         <div>
           <h3 className={cn(
-            "text-base font-bold text-gray-900",
+            "text-base font-normal text-foreground",
             !currentWork || currentWork.position !== work.position && DIFF_HIGHLIGHT_CLASSES
           )}>
             {work.position.replace(/\*\*/g, '')}
           </h3>
           <p className={cn(
-            "text-xs text-gray-700",
+            "text-xs text-muted-foreground",
             !currentWork || currentWork.company !== work.company && DIFF_HIGHLIGHT_CLASSES
           )}>
             {work.company}
           </p>
         </div>
         <span className={cn(
-          "text-[10px] text-gray-600",
+          "text-[10px] text-dia-tertiary",
           !currentWork || currentWork.date !== work.date && DIFF_HIGHLIGHT_CLASSES
         )}>
           {work.date}
@@ -57,14 +57,14 @@ function WorkExperienceSuggestion({ content: work, currentContent: currentWork }
       <div className="space-y-1.5">
         {work.description.map((point, index) => {
           const currentPoint = currentWork?.description?.[index];
-          const comparedWords = currentPoint 
+          const comparedWords = currentPoint
             ? compareDescriptions(currentPoint, point)
             : [{ text: point.replace(/\*\*/g, ''), isNew: true, isBold: false, isStart: true, isEnd: true }];
 
           return (
             <div key={index} className="flex items-start gap-1.5">
-              <span className="text-gray-800 mt-0.5 text-xs">•</span>
-              <p className="text-sm text-gray-800 flex-1 flex flex-wrap">
+              <span className="text-foreground mt-0.5 text-xs">•</span>
+              <p className="text-sm text-foreground flex-1 flex flex-wrap">
                 {comparedWords.map((word, wordIndex) => (
                   <span
                     key={wordIndex}
@@ -102,14 +102,14 @@ function ProjectSuggestion({ content: project, currentContent: currentProject }:
     <div className="space-y-3">
       <div className="flex justify-between items-start">
         <h3 className={cn(
-          "text-lg font-bold text-gray-900",
+          "text-lg font-normal text-foreground",
           !currentProject || currentProject.name !== project.name && DIFF_HIGHLIGHT_CLASSES
         )}>
           {project.name}
         </h3>
         {project.date && (
           <span className={cn(
-            "text-xs text-gray-600",
+            "text-xs text-dia-tertiary",
             !currentProject || currentProject.date !== project.date && DIFF_HIGHLIGHT_CLASSES
           )}>
             {project.date}
@@ -119,14 +119,14 @@ function ProjectSuggestion({ content: project, currentContent: currentProject }:
       <div className="space-y-2">
         {project.description.map((point, index) => {
           const currentPoint = currentProject?.description?.[index];
-          const comparedWords = currentPoint 
+          const comparedWords = currentPoint
             ? compareDescriptions(currentPoint, point)
             : [{ text: point.replace(/\*\*/g, ''), isNew: true, isBold: false, isStart: true, isEnd: true }];
 
           return (
             <div key={index} className="flex items-start gap-1.5">
-              <span className="text-gray-800 mt-0.5 text-xs">•</span>
-              <p className="text-xs text-gray-800 flex-1 flex flex-wrap">
+              <span className="text-foreground mt-0.5 text-xs">•</span>
+              <p className="text-xs text-foreground flex-1 flex flex-wrap">
                 {comparedWords.map((word, wordIndex) => (
                   <span
                     key={wordIndex}
@@ -157,10 +157,10 @@ function ProjectSuggestion({ content: project, currentContent: currentProject }:
             <span
               key={index}
               className={cn(
-                "px-2 py-0.5 text-xs rounded-full border text-gray-700",
+                "px-2 py-0.5 text-xs rounded-full border text-muted-foreground",
                 !currentProject || isNewItem(currentProject.technologies, project.technologies, tech)
                   ? DIFF_HIGHLIGHT_CLASSES
-                  : "bg-gray-100/80 border-gray-200/60"
+                  : "bg-muted border-border"
               )}
             >
               {tech.replace(/\*\*/g, '')}
@@ -188,10 +188,10 @@ function SkillSuggestion({ content: skill, currentContent: currentSkill }: Skill
           readOnly={true}
           variant="skill"
           className={cn(
-            "text-sm font-semibold tracking-wide",
+            "text-sm font-medium tracking-wide",
             "bg-transparent",
             "border-none shadow-none",
-            !currentSkill || currentSkill.category !== skill.category && "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 px-2 py-1 rounded-md"
+            !currentSkill || currentSkill.category !== skill.category && "bg-green-50 text-green-700 px-2 py-1 rounded-dia-btn"
           )}
         />
       </div>
@@ -200,35 +200,26 @@ function SkillSuggestion({ content: skill, currentContent: currentSkill }: Skill
       <div className="flex flex-wrap gap-2">
         {skill.items.map((item, index) => {
           const isNew = !currentSkill || isNewItem(currentSkill.items, skill.items, item);
-          
+
           return (
             <div
               key={index}
               className={cn(
-                "relative group transition-all duration-500",
-                "rounded-lg overflow-hidden",
+                "relative group transition-all duration-300",
+                "rounded-dia-btn overflow-hidden",
                 isNew ? [
-                  "bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-50",
-                  "border border-emerald-200",
-                  "shadow-sm shadow-emerald-100",
+                  "bg-green-50",
+                  "border border-green-200",
+                  "shadow-dia",
                 ] : [
-                  "bg-gradient-to-br from-gray-50 via-white to-gray-50",
-                  "border border-gray-200/60",
-                  "shadow-sm",
+                  "bg-dia-canvas",
+                  "border border-border",
+                  "shadow-dia",
                 ],
                 "hover:-translate-y-0.5 hover:shadow-md",
-                "transition-all duration-500 ease-in-out"
+                "transition-all duration-300 ease-in-out"
               )}
             >
-              {/* Animated Background Gradient */}
-              <div className={cn(
-                "absolute inset-0 opacity-0 transition-opacity duration-500",
-                "group-hover:opacity-100",
-                isNew 
-                  ? "bg-gradient-to-br from-emerald-100/50 via-teal-100/50 to-emerald-100/50"
-                  : "bg-gradient-to-br from-gray-100/50 via-white to-gray-100/50"
-              )} />
-
               {/* Skill Content */}
               <div className="relative px-3 py-1.5">
                 <Tiptap
@@ -240,7 +231,7 @@ function SkillSuggestion({ content: skill, currentContent: currentSkill }: Skill
                     "border-none shadow-none p-0",
                     "text-sm",
                     "bg-transparent",
-                    isNew ? "text-emerald-700" : "text-gray-700"
+                    isNew ? "text-green-700" : "text-muted-foreground"
                   )}
                 />
               </div>
@@ -249,8 +240,8 @@ function SkillSuggestion({ content: skill, currentContent: currentSkill }: Skill
               {isNew && (
                 <div className="absolute -top-1 -right-1">
                   <div className="relative flex h-4 w-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20"></span>
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500/10"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-20"></span>
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500/10"></span>
                   </div>
                 </div>
               )}
@@ -273,34 +264,34 @@ function EducationSuggestion({ content: education, currentContent: currentEducat
       <div className="flex justify-between items-start">
         <div>
           <h3 className={cn(
-            "font-medium text-gray-900",
+            "font-medium text-foreground",
             !currentEducation || (currentEducation.degree !== education.degree || currentEducation.field !== education.field) && DIFF_HIGHLIGHT_CLASSES
           )}>
             <span>
-              {education.degree.split(/(\*\*.*?\*\*)/).map((part, i) => 
-                part.startsWith('**') && part.endsWith('**') ? 
-                  <strong key={i}>{part.slice(2, -2)}</strong> : 
+              {education.degree.split(/(\*\*.*?\*\*)/).map((part, i) =>
+                part.startsWith('**') && part.endsWith('**') ?
+                  <strong key={i}>{part.slice(2, -2)}</strong> :
                   part
               )}
             </span>
             {' in '}
             <span>
-              {education.field.split(/(\*\*.*?\*\*)/).map((part, i) => 
-                part.startsWith('**') && part.endsWith('**') ? 
-                  <strong key={i}>{part.slice(2, -2)}</strong> : 
+              {education.field.split(/(\*\*.*?\*\*)/).map((part, i) =>
+                part.startsWith('**') && part.endsWith('**') ?
+                  <strong key={i}>{part.slice(2, -2)}</strong> :
                   part
               )}
             </span>
           </h3>
           <p className={cn(
-            "text-sm text-gray-700",
+            "text-sm text-muted-foreground",
             !currentEducation || currentEducation.school !== education.school && DIFF_HIGHLIGHT_CLASSES
           )}>
             {education.school.replace(/\*\*/g, '')}
           </p>
         </div>
         <span className={cn(
-          "text-xs text-gray-600",
+          "text-xs text-dia-tertiary",
           !currentEducation || currentEducation.date !== education.date && DIFF_HIGHLIGHT_CLASSES
         )}>
           {education.date.replace(/\*\*/g, '')}
@@ -310,14 +301,14 @@ function EducationSuggestion({ content: education, currentContent: currentEducat
         <div className="space-y-1.5">
           {education.achievements.map((achievement, index) => {
             const currentAchievement = currentEducation?.achievements?.[index];
-            const comparedWords = currentAchievement 
+            const comparedWords = currentAchievement
               ? compareDescriptions(currentAchievement, achievement)
               : [{ text: achievement.replace(/\*\*/g, ''), isNew: true, isBold: false, isStart: true, isEnd: true }];
 
             return (
               <div key={index} className="flex items-start gap-1.5">
-                <span className="text-gray-800 mt-0.5 text-xs">•</span>
-                <p className="text-xs text-gray-800 flex-1 flex flex-wrap">
+                <span className="text-foreground mt-0.5 text-xs">•</span>
+                <p className="text-xs text-foreground flex-1 flex flex-wrap">
                   {comparedWords.map((word, wordIndex) => (
                     <span
                       key={wordIndex}
@@ -363,7 +354,7 @@ function compareDescriptions(current: string, suggested: string): {
   const splitText = (text: string): string[] => {
     // First, split by bold markdown
     const parts = text.split(/(\*\*[^*]+\*\*)/).filter(Boolean);
-    
+
     // Then split non-bold parts by spaces while preserving bold parts
     return parts.flatMap(part => {
       if (part.startsWith('**') && part.endsWith('**')) {
@@ -375,28 +366,28 @@ function compareDescriptions(current: string, suggested: string): {
 
   const currentText = cleanText(current);
   const suggestedText = cleanText(suggested);
-  
+
   const currentWords = splitText(currentText);
   const suggestedWords = splitText(suggestedText);
-  
+
   return suggestedWords.map((word, index) => {
     const isBold = word.startsWith('**') && word.endsWith('**');
     const cleanedWord = isBold ? word.slice(2, -2) : word;
-    
+
     // Check if the word exists in current text (considering bold status)
     const isNew = !currentWords.some(currentWord => {
       const currentIsBold = currentWord.startsWith('**') && currentWord.endsWith('**');
       const currentCleaned = currentIsBold ? currentWord.slice(2, -2) : currentWord;
       return currentCleaned === cleanedWord;
     });
-    
+
     // Check if adjacent words are new
     const prevWord = index > 0 ? suggestedWords[index - 1] : null;
     const nextWord = index < suggestedWords.length - 1 ? suggestedWords[index + 1] : null;
-    
+
     const prevIsNew = prevWord ? !currentWords.includes(prevWord) : false;
     const nextIsNew = nextWord ? !currentWords.includes(nextWord) : false;
-    
+
     return {
       text: cleanedWord,
       isNew,
@@ -406,7 +397,7 @@ function compareDescriptions(current: string, suggested: string): {
     };
   });
 }
-  
+
 
 function isNewItem<T>(current: T[] | undefined, suggested: T[] | undefined, item: T): boolean {
   if (!current) return true;
@@ -440,26 +431,26 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
     switch (status) {
       case 'accepted':
         return {
-          card: "bg-gradient-to-br from-emerald-200/95 via-emerald-200/90 to-green-200/95 border-emerald-200/60",
-          icon: "from-emerald-100/90 to-green-100/90",
-          iconColor: "text-emerald-600",
-          label: "text-emerald-600",
+          card: "bg-green-50 border-green-200",
+          icon: "bg-green-100",
+          iconColor: "text-green-600",
+          label: "text-green-600",
           text: "Accepted"
         };
       case 'rejected':
         return {
-          card: "bg-gradient-to-br from-rose-200/95 via-rose-200/90 to-red-200/95 border-rose-200/60",
-          icon: "from-rose-100/90 to-red-100/90",
-          iconColor: "text-rose-600",
-          label: "text-rose-600",
+          card: "bg-red-50 border-red-200",
+          icon: "bg-red-100",
+          iconColor: "text-red-600",
+          label: "text-red-600",
           text: "Rejected"
         };
       default:
         return {
-          card: "bg-gradient-to-br from-white/95 via-purple-50/30 to-indigo-50/40 border-white/60",
-          icon: "from-purple-100/90 to-indigo-100/90",
-          iconColor: "text-purple-600",
-          label: "text-gray-900",
+          card: "bg-white border-border",
+          icon: "bg-muted",
+          iconColor: "text-muted-foreground",
+          label: "text-foreground",
           text: "AI Suggestion"
         };
     }
@@ -484,32 +475,27 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
   return (
     <Card className={cn(
       "group relative overflow-hidden",
-      "border ",
+      "border",
+      "rounded-dia-sm",
       statusStyles.card,
-      "shadow-xl shadow-purple-500/10",
-      "transition-all duration-500 ease-in-out",
-      "hover:shadow-2xl hover:shadow-purple-500/20",
-      "backdrop-blur-xl"
+      "shadow-dia",
+      "transition-all duration-300 ease-in-out",
+      "hover:shadow-md"
     )}>
-      {/* Enhanced Background Pattern */}
-      <div className="absolute inset-0  opacity-[0.15]" />
-      
-      {/* Improved Floating Gradient Orbs */}
-
       {/* Content */}
       <div className="relative ">
         {/* Header */}
         <div className="flex items-center">
           <div className="flex items-center gap-2">
-            <div className={cn("p-1.5 rounded-lg  shadow-sm", statusStyles.icon)}>
+            <div className={cn("p-1.5 rounded-dia-btn shadow-dia", statusStyles.icon)}>
               <Sparkles className={cn("h-3.5 w-3.5", statusStyles.iconColor)} />
             </div>
-            <span className={cn("font-semibold text-sm", statusStyles.label)}>{statusStyles.text}</span>
+            <span className={cn("font-medium text-sm", statusStyles.label)}>{statusStyles.text}</span>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="bg-white from-white/80 to-white/60 rounded-lg p-3 backdrop-blur-md border border-white/60 shadow-sm">
+        <div className="bg-white rounded-dia-btn p-3 border border-border shadow-dia">
           {renderContent()}
         </div>
 
@@ -523,23 +509,20 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
               className={cn(
                 "relative group/button overflow-hidden",
                 "h-8 px-4 text-xs",
-                "bg-gradient-to-br from-rose-50 to-rose-100/90",
-                "text-rose-700",
-                "border border-rose-200/60",
-                "shadow-sm",
-                "transition-all duration-500",
-                "hover:shadow-md hover:shadow-rose-500/10",
-                "hover:border-rose-300/80",
+                "bg-red-50",
+                "text-red-700",
+                "border border-red-200",
+                "shadow-dia",
+                "transition-all duration-300",
+                "hover:bg-red-100",
+                "hover:border-red-300",
                 "hover:-translate-y-0.5",
-                "active:translate-y-0"
+                "active:translate-y-0",
+                "rounded-dia-btn"
               )}
             >
-              {/* Animated background on hover */}
-              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-rose-100 to-rose-200/90 
-                opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
-              
               <div className="relative flex items-center justify-center gap-1.5">
-                <X className="h-3.5 w-3.5 transition-transform duration-500 group-hover/button:rotate-90" />
+                <X className="h-3.5 w-3.5 transition-transform duration-300 group-hover/button:rotate-90" />
                 <span className="font-medium">Reject</span>
               </div>
             </Button>
@@ -551,23 +534,20 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
               className={cn(
                 "relative group/button overflow-hidden",
                 "h-8 px-4 text-xs",
-                "bg-gradient-to-br from-emerald-50 to-emerald-100/90",
-                "text-emerald-700",
-                "border border-emerald-200/60",
-                "shadow-sm",
-                "transition-all duration-500",
-                "hover:shadow-md hover:shadow-emerald-500/10",
-                "hover:border-emerald-300/80",
+                "bg-green-50",
+                "text-green-700",
+                "border border-green-200",
+                "shadow-dia",
+                "transition-all duration-300",
+                "hover:bg-green-100",
+                "hover:border-green-300",
                 "hover:-translate-y-0.5",
-                "active:translate-y-0"
+                "active:translate-y-0",
+                "rounded-dia-btn"
               )}
             >
-              {/* Animated background on hover */}
-              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-100 to-emerald-200/90 
-                opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
-              
               <div className="relative flex items-center justify-center gap-1.5">
-                <Check className="h-3.5 w-3.5 transition-transform duration-500 group-hover/button:scale-110" />
+                <Check className="h-3.5 w-3.5 transition-transform duration-300 group-hover/button:scale-110" />
                 <span className="font-medium">Accept</span>
               </div>
             </Button>
@@ -593,24 +573,24 @@ export function WholeResumeSuggestion({ onReject }: WholeResumeSuggestionProps) 
 
   const statusStyles = {
     pending: {
-      card: "bg-gradient-to-br from-white/95 via-purple-50/30 to-indigo-50/40 border-white/60",
-      icon: "from-purple-100/90 to-indigo-100/90",
-      iconColor: "text-purple-600",
-      label: "text-gray-900",
+      card: "bg-white border-border",
+      icon: "bg-muted",
+      iconColor: "text-muted-foreground",
+      label: "text-foreground",
       text: "Modified Resume"
     },
     accepted: {
-      card: "bg-gradient-to-br from-emerald-200/95 via-emerald-200/90 to-green-200/95 border-emerald-200/60",
-      icon: "from-emerald-100/90 to-green-100/90",
-      iconColor: "text-emerald-600",
-      label: "text-emerald-600",
+      card: "bg-green-50 border-green-200",
+      icon: "bg-green-100",
+      iconColor: "text-green-600",
+      label: "text-green-600",
       text: "Changes Accepted"
     },
     rejected: {
-      card: "bg-gradient-to-br from-rose-200/95 via-rose-200/90 to-red-200/95 border-rose-200/60",
-      icon: "from-rose-100/90 to-red-100/90",
-      iconColor: "text-rose-600",
-      label: "text-rose-600",
+      card: "bg-red-50 border-red-200",
+      icon: "bg-red-100",
+      iconColor: "text-red-600",
+      label: "text-red-600",
       text: "Changes Rejected"
     }
   }[status];
@@ -618,18 +598,17 @@ export function WholeResumeSuggestion({ onReject }: WholeResumeSuggestionProps) 
   return (
     <Card className={cn(
       "group relative overflow-hidden p-4",
-      "border",
+      "border rounded-dia-sm",
       statusStyles.card,
-      "shadow-xl shadow-purple-500/10",
-      "transition-all duration-500 ease-in-out",
-      "hover:shadow-2xl hover:shadow-purple-500/20",
-      "backdrop-blur-xl"
+      "shadow-dia",
+      "transition-all duration-300 ease-in-out",
+      "hover:shadow-md"
     )}>
       <div className="flex items-center gap-2 mb-2">
-        <div className={cn("p-1.5 rounded-lg shadow-sm", statusStyles.icon)}>
+        <div className={cn("p-1.5 rounded-dia-btn shadow-dia", statusStyles.icon)}>
           <Sparkles className={cn("h-3.5 w-3.5", statusStyles.iconColor)} />
         </div>
-        <span className={cn("font-semibold text-sm", statusStyles.label)}>
+        <span className={cn("font-medium text-sm", statusStyles.label)}>
           {statusStyles.text}
         </span>
       </div>
@@ -643,22 +622,20 @@ export function WholeResumeSuggestion({ onReject }: WholeResumeSuggestionProps) 
             className={cn(
               "relative group/button overflow-hidden",
               "h-8 px-4 text-xs",
-              "bg-gradient-to-br from-rose-50 to-rose-100/90",
-              "text-rose-700",
-              "border border-rose-200/60",
-              "shadow-sm",
-              "transition-all duration-500",
-              "hover:shadow-md hover:shadow-rose-500/10",
-              "hover:border-rose-300/80",
+              "bg-red-50",
+              "text-red-700",
+              "border border-red-200",
+              "shadow-dia",
+              "transition-all duration-300",
+              "hover:bg-red-100",
+              "hover:border-red-300",
               "hover:-translate-y-0.5",
-              "active:translate-y-0"
+              "active:translate-y-0",
+              "rounded-dia-btn"
             )}
           >
-            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-rose-100 to-rose-200/90 
-              opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
-            
             <div className="relative flex items-center justify-center gap-1.5">
-              <X className="h-3.5 w-3.5 transition-transform duration-500 group-hover/button:rotate-90" />
+              <X className="h-3.5 w-3.5 transition-transform duration-300 group-hover/button:rotate-90" />
               <span className="font-medium">Undo Changes</span>
             </div>
           </Button>
@@ -670,22 +647,20 @@ export function WholeResumeSuggestion({ onReject }: WholeResumeSuggestionProps) 
             className={cn(
               "relative group/button overflow-hidden",
               "h-8 px-4 text-xs",
-              "bg-gradient-to-br from-emerald-50 to-emerald-100/90",
-              "text-emerald-700",
-              "border border-emerald-200/60",
-              "shadow-sm",
-              "transition-all duration-500",
-              "hover:shadow-md hover:shadow-emerald-500/10",
-              "hover:border-emerald-300/80",
+              "bg-green-50",
+              "text-green-700",
+              "border border-green-200",
+              "shadow-dia",
+              "transition-all duration-300",
+              "hover:bg-green-100",
+              "hover:border-green-300",
               "hover:-translate-y-0.5",
-              "active:translate-y-0"
+              "active:translate-y-0",
+              "rounded-dia-btn"
             )}
           >
-            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-100 to-emerald-200/90 
-              opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
-            
             <div className="relative flex items-center justify-center gap-1.5">
-              <Check className="h-3.5 w-3.5 transition-transform duration-500 group-hover/button:scale-110" />
+              <Check className="h-3.5 w-3.5 transition-transform duration-300 group-hover/button:scale-110" />
               <span className="font-medium">Keep Changes</span>
             </div>
           </Button>

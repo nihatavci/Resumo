@@ -342,8 +342,8 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         </DialogTrigger>
         <DialogContent className="sm:max-w-[500px] bg-white border border-gray-200 shadow-lg rounded-lg">
           <div className="flex flex-col items-center justify-center p-8 space-y-4">
-            <div className="p-3 rounded-lg bg-pink-50 border border-pink-100">
-              <Sparkles className="w-6 h-6 text-pink-600" />
+            <div className="p-3 rounded-dia-sm bg-muted border border-dia-divider">
+              <Sparkles className="w-6 h-6 text-foreground" />
             </div>
             <div className="text-center space-y-2 max-w-sm">
               <h3 className="font-semibold text-lg text-gray-900">No Base Resumes Found</h3>
@@ -353,7 +353,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
             </div>
             {profile ? (
               <CreateBaseResumeDialog profile={profile}>
-                <Button className="mt-2 bg-purple-600 hover:bg-purple-700 text-white">
+                <Button className="mt-2 bg-foreground hover:bg-foreground/90 text-white rounded-dia-btn">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Base Resume
                 </Button>
@@ -390,8 +390,8 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-pink-50 border border-pink-100">
-                <Sparkles className="w-5 h-5 text-pink-600" />
+              <div className="p-2 rounded-dia-sm bg-muted border border-dia-divider">
+                <Sparkles className="w-5 h-5 text-foreground" />
               </div>
               <div className="flex-1">
                 <DialogTitle className="text-lg font-semibold text-gray-900">
@@ -408,17 +408,17 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
               <div className="flex items-center gap-2">
                 <div className={cn(
                   "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
-                  dialogStep >= 1 ? "bg-pink-600 text-white" : "bg-gray-200 text-gray-600"
+                  dialogStep >= 1 ? "bg-foreground text-white" : "bg-dia-divider text-muted-foreground"
                 )}>
                   1
                 </div>
                 <div className={cn(
                   "w-4 h-0.5",
-                  dialogStep >= 2 ? "bg-pink-600" : "bg-gray-200"
+                  dialogStep >= 2 ? "bg-foreground" : "bg-dia-divider"
                 )} />
                 <div className={cn(
                   "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
-                  dialogStep >= 2 ? "bg-pink-600 text-white" : "bg-gray-200 text-gray-600"
+                  dialogStep >= 2 ? "bg-foreground text-white" : "bg-dia-divider text-muted-foreground"
                 )}>
                   2
                 </div>
@@ -434,7 +434,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
               <div className="space-y-6">
                 {/* Header Section */}
                 <div className="text-center space-y-2">
-                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 mb-1">
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-foreground mb-1">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">Choose Your Foundation</h3>
@@ -460,7 +460,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
               <div className="space-y-6">
 
                 {/* Selected Resume Summary */}
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-3">
+                <div className="bg-muted border border-dia-divider rounded-dia-sm p-3">
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0">
                       <MiniResumePreview
@@ -471,8 +471,8 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-purple-900">Foundation:</span>
-                        <span className="text-sm text-purple-700 font-semibold truncate">
+                        <span className="text-sm font-medium text-foreground">Foundation:</span>
+                        <span className="text-sm text-muted-foreground font-medium truncate">
                           {baseResumes.find(r => r.id === selectedBaseResume)?.name}
                         </span>
                       </div>
@@ -483,8 +483,8 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 {/* Job Description Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center">
-                      <span className="text-pink-600 font-bold text-sm">1</span>
+                    <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center">
+                      <span className="text-foreground font-medium text-sm">1</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Job Information <span className="text-red-500">*</span></h4>
@@ -504,8 +504,8 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 {/* Tailoring Method Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center">
-                      <span className="text-pink-600 font-bold text-sm">2</span>
+                    <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center">
+                      <span className="text-foreground font-medium text-sm">2</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Tailoring Method</h4>
@@ -523,24 +523,24 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
 
                 {/* Method Description */}
                 {importOption === 'ai' && (
-                  <div className="ml-10 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
+                  <div className="ml-10 bg-muted border border-dia-divider rounded-dia-sm p-3">
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Brain className="w-3 h-3 text-blue-600" />
+                      <div className="w-5 h-5 rounded-full bg-dia-divider flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Brain className="w-3 h-3 text-foreground" />
                       </div>
                       <div className="space-y-1">
-                        <h5 className="font-medium text-blue-900 text-sm">AI Tailoring Process</h5>
-                        <ul className="text-xs text-blue-800 space-y-0.5">
+                        <h5 className="font-medium text-foreground text-sm">AI Tailoring Process</h5>
+                        <ul className="text-xs text-muted-foreground space-y-0.5">
                           <li className="flex items-center gap-2">
-                            <div className="w-1 h-1 rounded-full bg-blue-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-dia-tertiary"></div>
                             Analyzes job requirements and keywords
                           </li>
                           <li className="flex items-center gap-2">
-                            <div className="w-1 h-1 rounded-full bg-blue-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-dia-tertiary"></div>
                             Optimizes your experience descriptions
                           </li>
                           <li className="flex items-center gap-2">
-                            <div className="w-1 h-1 rounded-full bg-blue-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-dia-tertiary"></div>
                             Highlights relevant skills and achievements
                           </li>
                         </ul>
@@ -550,24 +550,24 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 )}
 
                 {importOption === 'import-profile' && (
-                  <div className="ml-10 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3">
+                  <div className="ml-10 bg-muted border border-dia-divider rounded-dia-sm p-3">
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Copy className="w-3 h-3 text-amber-600" />
+                      <div className="w-5 h-5 rounded-full bg-dia-divider flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Copy className="w-3 h-3 text-foreground" />
                       </div>
                       <div className="space-y-1">
-                        <h5 className="font-medium text-amber-900 text-sm">Direct Copy Process</h5>
-                        <ul className="text-xs text-amber-800 space-y-0.5">
+                        <h5 className="font-medium text-foreground text-sm">Direct Copy Process</h5>
+                        <ul className="text-xs text-muted-foreground space-y-0.5">
                           <li className="flex items-center gap-2">
-                            <div className="w-1 h-1 rounded-full bg-amber-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-dia-tertiary"></div>
                             Creates an exact copy of your base resume
                           </li>
                           <li className="flex items-center gap-2">
-                            <div className="w-1 h-1 rounded-full bg-amber-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-dia-tertiary"></div>
                             Links it to the job posting for organization
                           </li>
                           <li className="flex items-center gap-2">
-                            <div className="w-1 h-1 rounded-full bg-amber-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-dia-tertiary"></div>
                             You can manually edit it afterwards
                           </li>
                         </ul>
@@ -594,7 +594,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                   Cancel
                 </Button>
                 {dialogStep === 1 && (
-                  <Button onClick={handleNext} size="sm" className="bg-pink-600 hover:bg-pink-700">
+                  <Button onClick={handleNext} size="sm" className="bg-foreground text-white hover:bg-foreground/90 rounded-dia-btn">
                     Next
                   </Button>
                 )}
@@ -603,7 +603,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                     onClick={handleCreate} 
                     disabled={isCreating}
                     size="sm"
-                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                    className="bg-foreground hover:bg-foreground/90 text-white rounded-dia-btn"
                   >
                     {isCreating ? (
                       <>

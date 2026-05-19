@@ -381,8 +381,8 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-purple-50 border border-purple-100">
-              <FileText className="w-5 h-5 text-purple-600" />
+            <div className="p-2 rounded-dia-sm bg-muted border border-dia-divider">
+              <FileText className="w-5 h-5 text-foreground" />
             </div>
             <div className="flex-1">
               <DialogTitle className="text-lg font-semibold text-gray-900">
@@ -399,17 +399,17 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
             <div className="flex items-center gap-2">
               <div className={cn(
                 "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
-                currentStep >= 1 ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-600"
+                currentStep >= 1 ? "bg-foreground text-white" : "bg-dia-divider text-muted-foreground"
               )}>
                 1
               </div>
               <div className={cn(
                 "w-4 h-0.5",
-                currentStep >= 2 ? "bg-purple-600" : "bg-gray-200"
+                currentStep >= 2 ? "bg-foreground" : "bg-dia-divider"
               )} />
               <div className={cn(
                 "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
-                currentStep >= 2 ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-600"
+                currentStep >= 2 ? "bg-foreground text-white" : "bg-dia-divider text-muted-foreground"
               )}>
                 2
               </div>
@@ -443,7 +443,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                       }
                     }}
                     className={cn(
-                      "h-12 text-base focus:border-purple-500 focus:ring-purple-500/20",
+                      "h-12 text-base focus:border-foreground focus:ring-foreground/10 rounded-dia-btn",
                       isTargetRoleInvalid && "border-red-500 shake"
                     )}
                     required
@@ -466,8 +466,8 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           {currentStep === 2 && (
             <div className="space-y-5">
               {/* Show selected target role */}
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                <div className="text-sm text-purple-800">
+              <div className="bg-muted border border-dia-divider rounded-dia-sm p-3">
+                <div className="text-sm text-foreground">
                   <span className="font-medium">Target Role:</span> {targetRole}
                 </div>
               </div>
@@ -495,11 +495,11 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                         htmlFor={option.id}
                         className={cn(
                           "flex flex-col items-center p-3 rounded-lg border cursor-pointer transition-all",
-                          "hover:border-purple-200 hover:bg-purple-50/50",
-                          "peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:shadow-sm"
+                          "hover:border-dia-tertiary hover:bg-muted/50",
+                          "peer-checked:border-foreground peer-checked:bg-muted peer-checked:shadow-dia"
                         )}
                       >
-                        <option.icon className="w-5 h-5 text-purple-600 mb-2" />
+                        <option.icon className="w-5 h-5 text-foreground mb-2" />
                         <div className="text-xs font-medium text-center">
                           <div className="text-gray-900">{option.label}</div>
                           <div className="text-gray-500 mt-0.5">{option.desc}</div>
@@ -527,7 +527,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                                 checked={isSectionSelected(section.key as keyof typeof selectedItems)}
                                 onCheckedChange={(checked) => handleSectionSelection(section.key as keyof typeof selectedItems, checked as boolean)}
                                 className={cn(
-                                  isSectionPartiallySelected(section.key as keyof typeof selectedItems) && "data-[state=checked]:bg-purple-600/50"
+                                  isSectionPartiallySelected(section.key as keyof typeof selectedItems) && "data-[state=checked]:bg-foreground/50"
                                 )}
                               />
                               <AccordionTrigger className="flex-1 py-0 hover:no-underline">
@@ -606,11 +606,11 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                       onDrop={handleDrop}
                       className={cn(
                         "border-2 border-dashed rounded-lg p-6 flex flex-col items-center gap-2 transition-colors cursor-pointer",
-                        isDragging ? "border-purple-500 bg-purple-50" : "border-gray-300 hover:border-purple-400"
+                        isDragging ? "border-foreground bg-muted/50" : "border-dia-tertiary hover:border-foreground"
                       )}
                     >
                       <input type="file" className="hidden" accept="application/pdf" onChange={handleFileInput} />
-                      <Upload className="w-8 h-8 text-purple-500" />
+                      <Upload className="w-8 h-8 text-dia-tertiary" />
                       <div className="text-center">
                         <p className="text-sm font-medium">Drop PDF here or click to browse</p>
                         <p className="text-xs text-gray-500">Supports PDF files only</p>
@@ -659,12 +659,12 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                 Cancel
               </Button>
               {currentStep === 1 && (
-                <Button onClick={handleNext} size="sm" className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={handleNext} size="sm" className="bg-foreground text-white hover:bg-foreground/90 rounded-dia-btn">
                   Next
                 </Button>
               )}
               {currentStep === 2 && (
-                <Button onClick={handleCreate} disabled={isCreating} size="sm" className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={handleCreate} disabled={isCreating} size="sm" className="bg-foreground text-white hover:bg-foreground/90 rounded-dia-btn">
                   {isCreating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

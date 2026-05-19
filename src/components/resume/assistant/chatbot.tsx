@@ -51,15 +51,15 @@ function ScrollToBottom() {
       <button
         className={cn(
           "absolute z-50 rounded-full p-2",
-          "bg-white/80 hover:bg-white",
-          "border border-purple-200/60 hover:border-purple-300/60",
-          "shadow-lg shadow-purple-500/5 hover:shadow-purple-500/10",
+          "bg-white hover:bg-dia-canvas",
+          "border border-border hover:border-foreground/20",
+          "shadow-dia hover:shadow-md",
           "transition-all duration-300",
           "left-[50%] translate-x-[-50%] bottom-4"
         )}
         onClick={() => scrollToBottom()}
       >
-        <ChevronDown className="h-4 w-4 text-purple-600" />
+        <ChevronDown className="h-4 w-4 text-foreground" />
       </button>
     )
   );
@@ -68,12 +68,12 @@ function ScrollToBottom() {
 export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const router = useRouter();
   const [accordionValue, setAccordionValue] = React.useState<string>("");
-  
+
   // Use synchronized hooks for instant updates when settings change
   const { apiKeys } = useApiKeys();
   const { defaultModel } = useDefaultModel();
   const { customPrompts } = useCustomPrompts();
-  
+
   const [originalResume, setOriginalResume] = React.useState<Resume | null>(null);
   const [isInitialLoading, setIsInitialLoading] = React.useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -85,7 +85,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
     apiKeys,
     customPrompts: Object.keys(customPrompts).length > 0 ? customPrompts : undefined,
   };
-  
+
   const { messages, error, append, isLoading, addToolResult, stop, setMessages } = useChat({
     api: withBasePath('/api/chat'),
     body: {
@@ -96,7 +96,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
     },
     maxSteps: 5,
     onResponse() {
- 
+
       setIsInitialLoading(false);
     },
     onError() {
@@ -104,10 +104,10 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
     },
     async onToolCall({ toolCall }) {
       // setIsStreaming(false);
-      
+
       if (toolCall.toolName === 'getResume') {
         const params = toolCall.args as { sections: string[] };
-        
+
         const personalInfo = {
           first_name: resume.first_name,
           last_name: resume.last_name,
@@ -133,7 +133,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
               ...acc,
               [section]: sectionMap[section as keyof typeof sectionMap]
             }), {});
-        
+
         addToolResult({ toolCallId: toolCall.toolCallId, result });
         console.log('Tool call READ RESUME result:', result);
         return result;
@@ -172,10 +172,10 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
           skills?: Skill[];
           projects?: Project[];
         };
-        
+
         // Store the current resume state before applying updates
         setOriginalResume({ ...resume });
-        
+
         // Apply updates as before
         if (updates.basic_info) {
           Object.entries(updates.basic_info).forEach(([key, value]) => {
@@ -214,15 +214,15 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
   // Memoize the submit handler
   const handleSubmit = useCallback((message: string) => {
-  
-    
+
+
     setIsInitialLoading(true);
-    append({ 
+    append({
       content: message.replace(/\s+$/, ''), // Extra safety: trim trailing whitespace
-      role: 'user' 
+      role: 'user'
     });
-    
-    
+
+
     setAccordionValue("chat");
   }, [append]);
 
@@ -239,8 +239,8 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
   // Add save handler
   const handleSaveEdit = (id: string) => {
-    setMessages(messages.map(message => 
-      message.id === id 
+    setMessages(messages.map(message =>
+      message.id === id
         ? { ...message, content: editContent }
         : message
     ));
@@ -258,16 +258,17 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   return (
     <Card className={cn(
       "flex flex-col w-full l mx-auto",
-      "bg-gradient-to-br from-purple-400/20 via-purple-400/50 to-indigo-400/50",
-      "border-2 border-purple-200/60",
-      "shadow-lg shadow-purple-500/5",
-      "transition-all duration-500",
-      "hover:shadow-xl hover:shadow-purple-500/10",
+      "bg-dia-canvas",
+      "border border-border",
+      "shadow-dia",
+      "transition-all duration-300",
+      "hover:shadow-md",
       "overflow-hidden",
       "relative",
-      "data-[state=closed]:shadow-md data-[state=closed]:border data-[state=closed]:border-purple-200/40 "
+      "rounded-dia-sm",
+      "data-[state=closed]:shadow-dia data-[state=closed]:border data-[state=closed]:border-border"
     )}>
-      
+
 
       <Accordion
         type="single"
@@ -285,7 +286,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
               "hover:no-underline",
               "group",
               "transition-all duration-300",
-              "data-[state=open]:border-b border-purple-200/60",
+              "data-[state=open]:border-b border-border",
               "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100",
               "data-[state=closed]:py-1"
             )}>
@@ -297,11 +298,11 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
               )}>
                 <div className="flex items-center gap-1.5">
                   <div className={cn(
-                    "p-1 rounded-lg",
-                    "bg-purple-100/80 text-purple-600",
-                    "group-hover:bg-purple-200/80",
+                    "p-1 rounded-dia-btn",
+                    "bg-muted text-muted-foreground",
+                    "group-hover:bg-dia-button",
                     "transition-colors duration-300",
-                    "group-data-[state=closed]:bg-white/60",
+                    "group-data-[state=closed]:bg-dia-canvas",
                     "group-data-[state=closed]:p-0.5"
                   )}>
                     <Bot className="h-3 w-3" />
@@ -316,16 +317,16 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                 <Button
                   className={cn(
                     "absolute right-8 top-1/2 -translate-y-1/2",
-                    "px-3 py-1 rounded-lg",
-                    "bg-purple-100/40 text-purple-500/80 border border-purple-500",
-                    "hover:bg-purple-200/60 hover:text-purple-600",
+                    "px-3 py-1 rounded-dia-btn",
+                    "bg-muted text-muted-foreground border border-border",
+                    "hover:bg-dia-button hover:text-foreground",
                     "transition-all duration-300",
-                    "focus:outline-none focus:ring-2 focus:ring-purple-400/40",
+                    "focus:outline-none focus:ring-2 focus:ring-foreground/20",
                     "disabled:opacity-50",
                     "flex items-center gap-2",
                     (accordionValue !== "chat" || isAlertOpen) && "hidden",
-                    
-                
+
+
                   )}
                   disabled={messages.length === 0}
                   aria-label="Clear chat history"
@@ -337,9 +338,9 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className={cn(
-                "bg-white/95 backdrop-blur-xl",
-                "border-purple-200/60",
-                "shadow-lg shadow-purple-500/5"
+                "bg-white",
+                "border-border",
+                "shadow-dia"
               )}>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Clear Chat History</AlertDialogTitle>
@@ -349,18 +350,18 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel className={cn(
-                    "border-purple-200/60",
-                    "hover:bg-purple-50/50",
-                    "hover:text-purple-700"
+                    "border-border",
+                    "hover:bg-muted",
+                    "hover:text-foreground"
                   )}>
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleClearChat}
                     className={cn(
-                      "bg-purple-500 text-white",
-                      "hover:bg-purple-600",
-                      "focus:ring-purple-400"
+                      "bg-foreground text-white",
+                      "hover:bg-foreground/90",
+                      "focus:ring-foreground/20"
                     )}
                   >
                     Clear Chat
@@ -387,17 +388,17 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                           <div className="my-2">
                             <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                               <div className={cn(
-                                "rounded-2xl px-4 py-2 max-w-[90%] text-sm relative group items-center",
+                                "rounded-dia-sm px-4 py-2 max-w-[90%] text-sm relative group items-center",
                                 m.role === 'user' ? [
-                                  "bg-gradient-to-br from-purple-500 to-indigo-500",
+                                  "bg-foreground",
                                   "text-white",
-                                  "shadow-md shadow-purple-500/10",
+                                  "shadow-dia",
                                   "ml-auto pb-0 text-white"
                                 ] : [
-                                  "bg-white/60",
-                                  "border border-purple-200/60",
-                                  "shadow-sm",
-                                  "backdrop-blur-sm pb-0"
+                                  "bg-white",
+                                  "border border-border",
+                                  "shadow-dia",
+                                  "pb-0"
                                 ]
                               )}>
 
@@ -408,21 +409,21 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                       value={editContent}
                                       onChange={(e) => setEditContent(e.target.value)}
                                       className={cn(
-                                        "w-full min-h-[100px] p-2 rounded-lg",
-                                        "bg-white/80 backdrop-blur-sm",
-                                        m.role === 'user' 
-                                          ? "text-purple-900 placeholder-purple-400"
-                                          : "text-gray-900 placeholder-gray-400",
-                                        "border border-purple-200/60 focus:border-purple-400/60",
-                                        "focus:outline-none focus:ring-1 focus:ring-purple-400/60"
+                                        "w-full min-h-[100px] p-2 rounded-dia-btn",
+                                        "bg-white",
+                                        m.role === 'user'
+                                          ? "text-foreground placeholder-muted-foreground"
+                                          : "text-foreground placeholder-muted-foreground",
+                                        "border border-border focus:border-foreground/40",
+                                        "focus:outline-none focus:ring-1 focus:ring-foreground/20"
                                       )}
                                     />
                                     <button
                                       onClick={() => handleSaveEdit(m.id)}
                                       className={cn(
-                                        "self-end px-3 py-1 rounded-lg text-xs",
-                                        "bg-purple-500 text-white",
-                                        "hover:bg-purple-600",
+                                        "self-end px-3 py-1 rounded-dia-btn text-xs",
+                                        "bg-foreground text-white",
+                                        "hover:bg-foreground/90",
                                         "transition-colors duration-200"
                                       )}
                                     >
@@ -439,9 +440,9 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                     onClick={() => handleDelete(m.id)}
                                     className={cn(
                                       "transition-colors duration-200",
-                                      m.role === 'user' 
-                                        ? "text-purple-500/60 hover:text-purple-600"
-                                        : "text-purple-400/60 hover:text-purple-500",
+                                      m.role === 'user'
+                                        ? "text-dia-tertiary hover:text-foreground"
+                                        : "text-dia-tertiary hover:text-foreground",
                                     )}
                                     aria-label="Delete message"
                                   >
@@ -451,9 +452,9 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                     onClick={() => handleEdit(m.id, m.content)}
                                     className={cn(
                                       "transition-colors duration-200",
-                                      m.role === 'user' 
-                                        ? "text-purple-500/60 hover:text-purple-600"
-                                        : "text-purple-400/60 hover:text-purple-500",
+                                      m.role === 'user'
+                                        ? "text-dia-tertiary hover:text-foreground"
+                                        : "text-dia-tertiary hover:text-foreground",
                                     )}
                                     aria-label="Edit message"
                                   >
@@ -464,7 +465,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                             </div>
                           </div>
                         )}
-                        
+
                         {/* Tool Invocations as Separate Bubbles */}
                         {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
                           const { toolName, toolCallId, state, args } = toolInvocation;
@@ -476,17 +477,17 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                   <div className="flex justify-start max-w-[90%]">
                                     {toolName === 'getResume' ? (
                                       <div className={cn(
-                                        "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
-                                        "bg-white/60 border border-purple-200/60",
-                                        "shadow-sm backdrop-blur-sm"
+                                        "rounded-dia-sm px-4 py-2 max-w-[90%] text-sm",
+                                        "bg-white border border-border",
+                                        "shadow-dia"
                                       )}>
                                         Reading Resume...
                                       </div>
                                     ) : toolName === 'modifyWholeResume' ? (
                                       <div className={cn(
-                                        "w-full rounded-2xl px-4 py-2",
-                                        "bg-white/60 border border-purple-200/60",
-                                        "shadow-sm backdrop-blur-sm"
+                                        "w-full rounded-dia-sm px-4 py-2",
+                                        "bg-white border border-border",
+                                        "shadow-dia"
                                       )}>
                                         Preparing resume modifications...
                                       </div>
@@ -539,9 +540,9 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                   <div key={toolCallId} className="mt-2 w-[90%]">
                                     <div className="flex justify-start">
                                       <div className={cn(
-                                        "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
-                                        "bg-white/60 border border-purple-200/60",
-                                        "shadow-sm backdrop-blur-sm"
+                                        "rounded-dia-sm px-4 py-2 max-w-[90%] text-sm",
+                                        "bg-white border border-border",
+                                        "shadow-dia"
                                       )}>
                                         <p>Read Resume ({args.sections?.join(', ') || 'all'}) ✅</p>
                                       </div>
@@ -576,8 +577,8 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                       type={config.type}
                                       content={args[config.content]}
                                       currentContent={resume[config.field][args.index]}
-                                      onAccept={() => onResumeChange(config.field, 
-                                        resume[config.field].map((item: WorkExperience | Education | Project | Skill, i: number) => 
+                                      onAccept={() => onResumeChange(config.field,
+                                        resume[config.field].map((item: WorkExperience | Education | Project | Skill, i: number) =>
                                           i === args.index ? args[config.content] : item
                                         )
                                       )}
@@ -599,13 +600,12 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                           <div className="mt-2">
                             <div className="flex justify-start">
                               <div className={cn(
-                                "rounded-2xl px-4 py-2.5 min-w-[60px]",
-                                "bg-white/60",
-                                "border border-purple-200/60",
-                                "shadow-sm",
-                                "backdrop-blur-sm"
+                                "rounded-dia-sm px-4 py-2.5 min-w-[60px]",
+                                "bg-white",
+                                "border border-border",
+                                "shadow-dia"
                               )}>
-                                <LoadingDots className="text-purple-600" />
+                                <LoadingDots className="text-muted-foreground" />
                               </div>
                             </div>
                           </div>
@@ -614,13 +614,13 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                     ))}
                   </>
                 )}
-              
+
                 {error && (
                   error.message === "Rate limit exceeded. Try again later." ? (
                     <div className={cn(
-                      "rounded-lg p-4 text-sm",
-                      "bg-pink-50 border border-pink-200",
-                      "text-pink-700"
+                      "rounded-dia-btn p-4 text-sm",
+                      "bg-red-50 border border-red-200",
+                      "text-red-700"
                     )}>
                       <p>You&apos;ve used all your available messages. Please try again after:</p>
                       <p className="font-medium mt-2">
@@ -628,9 +628,9 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                       </p>
                     </div>
                   ) : (
-                    <ApiKeyErrorAlert 
-                      error={error} 
-                      router={router} 
+                    <ApiKeyErrorAlert
+                      error={error}
+                      router={router}
                     />
                   )
                 )}
@@ -638,7 +638,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
               <ScrollToBottom />
             </StickToBottom>
-            
+
           </AccordionContent>
         </AccordionItem>
       </Accordion>

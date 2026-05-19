@@ -115,12 +115,12 @@ export function ImportFromProfileDialog<T extends ImportItem>({
           variant="outline" 
           className={cn(
             "mb-6 w-full h-16",
-            "bg-gradient-to-r from-teal-500/5 via-teal-500/10 to-cyan-500/5",
-            "hover:from-teal-500/10 hover:via-teal-500/15 hover:to-cyan-500/10",
-            "border-2 border-dashed border-teal-500/30 hover:border-teal-500/40",
-            "text-teal-700 hover:text-teal-800",
+            "bg-muted/30",
+            "hover:bg-muted/60",
+            "border-2 border-dashed border-dia-tertiary hover:border-foreground",
+            "text-muted-foreground hover:text-foreground",
             "transition-all duration-300",
-            "rounded-xl",
+            "rounded-dia-sm",
             buttonClassName
           )}
         >
@@ -176,7 +176,7 @@ export function ImportFromProfileDialog<T extends ImportItem>({
                             <Badge
                               key={index}
                               variant="secondary"
-                              className="bg-white/60 text-rose-700 border border-rose-200"
+                              className="bg-muted text-muted-foreground border border-dia-divider"
                             >
                               {skill}
                             </Badge>
@@ -201,7 +201,7 @@ export function ImportFromProfileDialog<T extends ImportItem>({
           <Button
             onClick={handleImport}
             disabled={selectedItems.length === 0}
-            className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700"
+            className="bg-foreground text-white hover:bg-foreground/90 rounded-dia-btn"
           >
             Import Selected
           </Button>

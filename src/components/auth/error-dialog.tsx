@@ -43,7 +43,7 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
           <div className="mx-auto rounded-full w-12 h-12 bg-red-100 flex items-center justify-center mb-4">
             <AlertCircle className="w-6 h-6 text-red-600" />
           </div>
-          <DialogTitle className="text-center text-2xl font-semibold text-red-600">
+          <DialogTitle className="text-center text-2xl font-light text-red-600">
             Authentication Error
           </DialogTitle>
           <DialogDescription>{errorMessage}</DialogDescription>
@@ -72,7 +72,7 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
           </ul>
           <div className="pt-4 space-y-2">
             <Link href="/">
-              <Button className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white">
+              <Button className="w-full bg-foreground text-white hover:bg-foreground/90 rounded-dia-btn">
                 Try Logging In Again
               </Button>
             </Link>
