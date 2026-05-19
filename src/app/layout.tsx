@@ -9,6 +9,8 @@ import { Analytics } from "@vercel/analytics/react";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { PostHogPageView } from "@/components/analytics/posthog-pageview";
 import { Suspense } from "react";
+import { MotionProvider } from "@/components/motion/motion-config";
+import { PageTransition } from "@/components/motion/page-transition";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -98,10 +100,14 @@ export default async function RootLayout({
           </Suspense>
           <div className="relative min-h-screen h-screen flex flex-col">
             {user && <AppHeader />}
-            <main className="py-14 h-full">
-              {children}
-              {isVercel && <Analytics />}
-            </main>
+            <MotionProvider>
+              <main className="py-14 h-full">
+                <PageTransition>
+                  {children}
+                </PageTransition>
+                {isVercel && <Analytics />}
+              </main>
+            </MotionProvider>
             {user && <Footer />}
           </div>
           <Toaster
