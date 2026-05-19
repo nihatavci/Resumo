@@ -1,8 +1,6 @@
 import "./globals.css";
 import { DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
-import { Footer } from "@/components/layout/footer";
-import { AppHeader } from "@/components/layout/app-header";
 import { getAuthenticatedUser } from "@/utils/auth";
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
@@ -99,16 +97,14 @@ export default async function RootLayout({
             <PostHogPageView />
           </Suspense>
           <div className="relative min-h-screen h-screen flex flex-col">
-            {user && <AppHeader />}
             <MotionProvider>
-              <main className="py-14 h-full">
+              <main className="h-full">
                 <PageTransition>
                   {children}
                 </PageTransition>
                 {isVercel && <Analytics />}
               </main>
             </MotionProvider>
-            {user && <Footer />}
           </div>
           <Toaster
             position="top-right"
