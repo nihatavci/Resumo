@@ -49,10 +49,12 @@ export function OnboardingFlow() {
       console.error('Onboarding completion error:', error);
       toast({
         title: 'Something went wrong',
-        description: 'Failed to create your profile. Please try again.',
+        description: 'Failed to save your profile. Tap retry below.',
         variant: 'destructive',
       });
-      setStep('questionnaire');
+      // Stay on generating screen — don't send back to question 1
+      // The user will see an error toast and can refresh to retry
+      setStep('generating');
     }
   }, [cvData, router]);
 
