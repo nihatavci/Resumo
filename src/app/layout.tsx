@@ -1,14 +1,14 @@
 import "./globals.css";
 import { DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
-import { Footer } from "@/components/layout/footer";
-import { AppHeader } from "@/components/layout/app-header";
 import { getAuthenticatedUser } from "@/utils/auth";
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { PostHogPageView } from "@/components/analytics/posthog-pageview";
 import { Suspense } from "react";
+import { MotionProvider } from "@/components/motion/motion-config";
+import { PageTransition } from "@/components/motion/page-transition";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -97,12 +97,14 @@ export default async function RootLayout({
             <PostHogPageView />
           </Suspense>
           <div className="relative min-h-screen h-screen flex flex-col">
-            {user && <AppHeader />}
-            <main className="py-14 h-full">
-              {children}
-              {isVercel && <Analytics />}
-            </main>
-            {user && <Footer />}
+            <MotionProvider>
+              <main className="h-full">
+                <PageTransition>
+                  {children}
+                </PageTransition>
+                {isVercel && <Analytics />}
+              </main>
+            </MotionProvider>
           </div>
           <Toaster
             position="top-right"

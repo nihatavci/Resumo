@@ -21,7 +21,7 @@ export function Logo({ className, asLink = true }: LogoProps) {
   );
 
   if (asLink) {
-    return <Link href="/home">{logoContent}</Link>;
+    return <Link href="/">{logoContent}</Link>;
   }
 
   return logoContent;

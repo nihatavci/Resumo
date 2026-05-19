@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { ProfileRow } from "@/components/dashboard/profile-row";
 import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 import { getGreeting } from "@/lib/utils";
-import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
 import type { ResumeSummary } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
@@ -81,8 +80,6 @@ export default async function Home({
 
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <div className="mb-6 space-y-6">
-            <ApiKeyAlert />
-
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-light text-foreground">
