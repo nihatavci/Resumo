@@ -1,14 +1,22 @@
-export default function WorkspacePage() {
-  return (
-    <main className="h-[calc(100vh-3.5rem)] flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <h1 className="text-dia-heading-sm font-light text-foreground">
-          Workspace
-        </h1>
-        <p className="text-dia-body text-dia-body">
-          Split-view resume tailoring — coming in Phase 3.
-        </p>
-      </div>
-    </main>
-  );
+import { redirect } from 'next/navigation';
+import { getAuthenticatedUser } from '@/utils/auth';
+import { getProfileByUserId, getResumesByUserId } from '@/lib/db';
+import { WorkspaceClient } from '@/components/workspace/workspace-client';
+
+export default async function WorkspacePage() {
+  let masterResume;
+  try {
+    const user = await getAuthenticatedUser();
+    const profile = await getProfileByUserId(user.id);
+    if (!profile) redirect('/onboarding');
+
+    const baseResumes = await getResumesByUserId(user.id, true);
+    if (baseResumes.length === 0) redirect('/onboarding');
+
+    masterResume = baseResumes[0];
+  } catch {
+    redirect('/onboarding');
+  }
+
+  return <WorkspaceClient masterResume={masterResume} />;
 }
