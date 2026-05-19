@@ -97,7 +97,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "tiptap-markdown": "^0.8.10",
-    "use-stick-to-bottom": "1.0.30",
+    "use-stick-to-bottom": "^1.1.4",
     "workers-ai-provider": "0.7.5",
     "zod": "^3.24.1"
   },
