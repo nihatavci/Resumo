@@ -120,9 +120,32 @@ export async function completeOnboarding(
     projects: projects,
   };
 
-  const profile = await db.createProfile(user.id, profileData);
+  // Upsert profile — update if exists, create if not
+  const existingProfile = await db.getProfileByUserId(user.id);
+  const profile = existingProfile
+    ? await db.updateProfile(user.id, profileData).then(p => p!)
+    : await db.createProfile(user.id, profileData);
 
-  const resume = await db.insertResume({
+  // Also upsert the Master CV — update the existing base resume if any
+  const existingBaseResumes = await db.getResumesByUserId(user.id, true);
+
+  const resume = existingBaseResumes.length > 0
+    ? await db.updateResume(existingBaseResumes[0].id, user.id, {
+        target_role: targetRole || 'General',
+        first_name: profileData.first_name ?? '',
+        last_name: profileData.last_name ?? '',
+        email: profileData.email ?? '',
+        phone_number: profileData.phone_number ?? '',
+        location: profileData.location ?? '',
+        website: profileData.website ?? '',
+        linkedin_url: profileData.linkedin_url ?? '',
+        github_url: profileData.github_url ?? '',
+        work_experience: workExperience,
+        education: education,
+        skills: skills,
+        projects: projects,
+      }).then(r => r!)
+    : await db.insertResume({
     user_id: user.id,
     name: 'Master CV',
     target_role: targetRole || 'General',
