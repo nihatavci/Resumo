@@ -5,7 +5,7 @@ import { SettingsButton } from "@/components/settings/settings-button";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Menu, User } from "lucide-react";
+import { Menu, User, LayoutDashboard } from "lucide-react";
 import { PageTitle } from "./page-title";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -47,6 +47,17 @@ export function AppHeader({
               <nav className="hidden md:flex items-center gap-2">
                 <div className="flex items-center px-2 py-1">
                   <Link
+                    href="/workspace"
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1",
+                      "text-sm font-normal text-dia-body hover:text-foreground",
+                      "transition-colors duration-200"
+                    )}
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span className="hidden lg:inline">Workspace</span>
+                  </Link>
+                  <Link
                     href="/memory"
                     onClick={handleProfileClick}
                     className={cn(
@@ -56,7 +67,7 @@ export function AppHeader({
                     )}
                   >
                     <User className="h-4 w-4" />
-                    <span className="hidden lg:inline">Profile</span>
+                    <span className="hidden lg:inline">Memory</span>
                   </Link>
                   <div className="mx-2 h-4 w-px bg-dia-divider" />
                   <SettingsButton />
@@ -78,6 +89,18 @@ export function AppHeader({
                   </SheetHeader>
                   <div className="flex flex-col gap-4 pt-6">
                     <Link
+                      href="/workspace"
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-dia-btn",
+                        "text-sm font-normal text-dia-body hover:text-foreground",
+                        "hover:bg-muted transition-colors duration-200"
+                      )}
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Workspace
+                    </Link>
+                    <Link
                       href="/memory"
                       onClick={handleProfileClick}
                       className={cn(
@@ -87,7 +110,7 @@ export function AppHeader({
                       )}
                     >
                       <User className="h-4 w-4" />
-                      Profile
+                      Memory
                     </Link>
                     <div className="px-4">
                       <SettingsButton
