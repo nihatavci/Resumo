@@ -9,10 +9,7 @@ import { Menu, User } from "lucide-react";
 import { PageTitle } from "./page-title";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useState, useEffect, useRef } from "react";
-import { ModelSelector } from "@/components/shared/model-selector";
-import { getDefaultModel } from "@/lib/ai-models";
-import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys";
+import { useState } from "react";
 interface AppHeaderProps {
   children?: React.ReactNode;
 }
@@ -21,25 +18,6 @@ export function AppHeader({
   children,
 }: AppHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
-
-  const { apiKeys } = useApiKeys();
-  const { defaultModel, setDefaultModel } = useDefaultModel();
-
-  const hasInitialized = useRef(false);
-
-  useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-
-    if (!defaultModel) {
-      const defaultModelId = getDefaultModel(true);
-      setDefaultModel(defaultModelId);
-    }
-  }, [defaultModel, setDefaultModel]);
-
-  const handleModelChange = (modelId: string) => {
-    setDefaultModel(modelId);
-  };
 
   const handleProfileClick = () => {
     setIsOpen(false);
@@ -67,21 +45,9 @@ export function AppHeader({
             <>
               {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center gap-2">
-                <div className="mr-3">
-                  <ModelSelector
-                    value={defaultModel}
-                    onValueChange={handleModelChange}
-                    apiKeys={apiKeys}
-                    className="w-[220px] lg:w-[260px] h-8 text-xs"
-                    placeholder="Select AI model"
-                    showToast={false}
-                  />
-                </div>
-                <div className="h-4 w-px bg-dia-divider" />
-
                 <div className="flex items-center px-2 py-1">
                   <Link
-                    href="/profile"
+                    href="/memory"
                     onClick={handleProfileClick}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1",
@@ -111,19 +77,8 @@ export function AppHeader({
                     <SheetTitle className="font-normal text-foreground">Menu</SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col gap-4 pt-6">
-                    <div className="px-1">
-                      <ModelSelector
-                        value={defaultModel}
-                        onValueChange={handleModelChange}
-                        apiKeys={apiKeys}
-                        className="w-full h-10 text-sm"
-                        placeholder="Select AI model"
-                        showToast={false}
-                      />
-                    </div>
-
                     <Link
-                      href="/profile"
+                      href="/memory"
                       onClick={handleProfileClick}
                       className={cn(
                         "flex items-center gap-2 px-4 py-2 rounded-dia-btn",
