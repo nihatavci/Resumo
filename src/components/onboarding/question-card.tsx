@@ -91,6 +91,16 @@ export function QuestionCard({
     [value, onChange]
   );
 
+  const handleTextareaKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        onNext();
+      }
+    },
+    [onNext]
+  );
+
   const renderInput = () => {
     switch (question.type) {
       case 'text':
@@ -108,14 +118,20 @@ export function QuestionCard({
 
       case 'textarea':
         return (
-          <textarea
-            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-            value={(value as string) || ''}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={question.placeholder}
-            rows={4}
-            className="w-full bg-transparent border-2 border-dia-divider focus:border-foreground rounded-dia-sm outline-none p-4 text-dia-body text-foreground placeholder:text-dia-steel transition-colors resize-none"
-          />
+          <div className="space-y-2">
+            <textarea
+              ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+              value={(value as string) || ''}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleTextareaKeyDown}
+              placeholder={question.placeholder}
+              rows={4}
+              className="w-full bg-transparent border-2 border-dia-divider focus:border-foreground rounded-dia-sm outline-none p-4 text-dia-body text-foreground placeholder:text-dia-steel transition-colors resize-none"
+            />
+            <p className="text-dia-caption text-dia-steel text-right">
+              Press Cmd+Enter to continue
+            </p>
+          </div>
         );
 
       case 'select':
