@@ -17,6 +17,7 @@ export interface CVExtraction {
   website?: string;
   linkedin_url?: string;
   github_url?: string;
+  professional_summary?: string;
   work_experience?: {
     company: string;
     position: string;

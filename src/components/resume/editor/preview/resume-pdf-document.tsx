@@ -122,7 +122,23 @@ const HeaderSection = memo(function HeaderSection({
   );
 });
 
-const SkillsSection = memo(function SkillsSection({ 
+const SummarySection = memo(function SummarySection({
+  summary,
+  styles,
+}: {
+  summary: string | null | undefined;
+  styles: ReturnType<typeof createResumeStyles>;
+}) {
+  if (!summary || !summary.trim()) return null;
+  return (
+    <View style={styles.summarySection}>
+      <Text style={styles.sectionTitle}>Summary</Text>
+      <Text style={styles.summaryText}>{summary.trim()}</Text>
+    </View>
+  );
+});
+
+const SkillsSection = memo(function SkillsSection({
   skills, 
   styles 
 }: { 
@@ -382,6 +398,17 @@ function createResumeStyles(settings: Resume['document_settings'] = {
       borderBottom: '0.5pt solid #e5e7eb',
       paddingBottom: 0,
     },
+    // Summary section
+    summarySection: {
+      marginTop: 8,
+      marginBottom: 4,
+    },
+    summaryText: {
+      fontSize: document_font_size,
+      color: '#1f2937',
+      lineHeight: document_line_height,
+      marginTop: 4,
+    },
     // Skills section
     skillsSection: {
       marginTop: skills_margin_top,
@@ -568,10 +595,11 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume }: Res
     <PDFDocument>
       <PDFPage size="LETTER" style={styles.page}>
         <HeaderSection resume={resume} styles={styles} />
-        <SkillsSection skills={resume.skills} styles={styles} />
+        <SummarySection summary={resume.professional_summary} styles={styles} />
         <ExperienceSection experiences={resume.work_experience} styles={styles} />
-        <ProjectsSection projects={resume.projects} styles={styles} />
         <EducationSection education={resume.education} styles={styles} />
+        <SkillsSection skills={resume.skills} styles={styles} />
+        <ProjectsSection projects={resume.projects} styles={styles} />
         
         {resume.document_settings?.show_ubc_footer && (
           <View style={styles.footer}>

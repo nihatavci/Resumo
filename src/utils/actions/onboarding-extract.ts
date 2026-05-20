@@ -20,6 +20,7 @@ const contactSchema = z.object({
   website: z.string().optional(),
   linkedin_url: z.string().optional(),
   github_url: z.string().optional(),
+  professional_summary: z.string().optional(),
 });
 
 const workExperienceSchema = z.object({
@@ -114,7 +115,9 @@ async function runExtraction<S extends z.ZodTypeAny>(
 // Section prompts
 // ============================================================================
 
-const CONTACT_PROMPT = `Extract ONLY contact information from the CV.
+const CONTACT_PROMPT = `Extract contact information AND the professional summary from the CV.
+
+CONTACT FIELDS:
 - first_name and last_name: split the candidate's full name (almost always the largest text at the top)
 - email: matches user@domain.tld
 - phone_number: digits with separators (+, ., -, parentheses, spaces)
@@ -122,6 +125,13 @@ const CONTACT_PROMPT = `Extract ONLY contact information from the CV.
 - linkedin_url: any linkedin.com URL
 - github_url: any github.com URL
 - website: any other personal URL
+
+PROFESSIONAL SUMMARY:
+- professional_summary: the introductory paragraph at the top of the CV (right after contact info, before WORK EXPERIENCE).
+- Typically starts with phrases like "Accomplished X with Y years of experience…", "Senior X specializing in…", "Experienced X passionate about…"
+- Preserve it VERBATIM — do not paraphrase or shorten.
+- Usually 2-4 sentences, 30-80 words.
+- If the CV has no such paragraph, omit this field.
 
 Omit fields not present. Do NOT invent any data.`;
 
@@ -216,6 +226,7 @@ export async function extractCVSectioned(cvText: string): Promise<CVExtraction> 
   console.log('[extractCVSectioned] result summary:', {
     has_name: !!(result.first_name || result.last_name),
     has_email: !!result.email,
+    has_summary: !!result.professional_summary,
     work_count: result.work_experience?.length ?? 0,
     edu_count: result.education?.length ?? 0,
     skill_categories: result.skills?.length ?? 0,

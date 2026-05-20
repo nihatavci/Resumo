@@ -63,6 +63,7 @@ function rowToProfile(row: D1Row): Profile {
     website: row.website as string | null,
     linkedin_url: row.linkedin_url as string | null,
     github_url: row.github_url as string | null,
+    professional_summary: row.professional_summary as string | null,
     is_admin: Boolean(row.is_admin),
     work_experience: parseJSON<WorkExperience[]>(row.work_experience, []),
     education: parseJSON<Education[]>(row.education, []),
@@ -89,6 +90,7 @@ function rowToResume(row: D1Row): Resume {
     website: row.website as string,
     linkedin_url: row.linkedin_url as string,
     github_url: row.github_url as string,
+    professional_summary: row.professional_summary as string | null,
     work_experience: parseJSON<WorkExperience[]>(row.work_experience, []),
     education: parseJSON<Education[]>(row.education, []),
     skills: parseJSON<Skill[]>(row.skills, []),
@@ -136,7 +138,7 @@ export async function updateProfile(userId: string, data: Partial<Profile>): Pro
   const values: unknown[] = [];
 
   const jsonFields = ['work_experience', 'education', 'skills', 'projects'];
-  const textFields = ['first_name', 'last_name', 'email', 'phone_number', 'location', 'website', 'linkedin_url', 'github_url'];
+  const textFields = ['first_name', 'last_name', 'email', 'phone_number', 'location', 'website', 'linkedin_url', 'github_url', 'professional_summary'];
 
   for (const key of textFields) {
     if (key in data) {
@@ -228,11 +230,12 @@ export async function insertResume(data: Partial<Resume> & { user_id: string; na
     INSERT INTO resumes (
       id, user_id, job_id, name, target_role, is_base_resume,
       first_name, last_name, email, phone_number, location, website, linkedin_url, github_url,
+      professional_summary,
       work_experience, education, skills, projects,
       document_settings, section_order, section_configs,
       has_cover_letter, cover_letter,
       created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     id,
     data.user_id,
@@ -248,6 +251,7 @@ export async function insertResume(data: Partial<Resume> & { user_id: string; na
     data.website ?? '',
     data.linkedin_url ?? '',
     data.github_url ?? '',
+    data.professional_summary ?? null,
     toJSON(data.work_experience ?? []),
     toJSON(data.education ?? []),
     toJSON(data.skills ?? []),
