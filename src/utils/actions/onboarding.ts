@@ -102,6 +102,33 @@ export async function completeOnboarding(
   // Upsert Master CV
   const existingBaseResumes = await db.getResumesByUserId(user.id, true);
 
+  const atsDocumentSettings = {
+    footer_width: 0,
+    show_ubc_footer: false,
+    document_font_size: 10.5,
+    document_line_height: 1.4,
+    header_name_size: 22,
+    header_name_bottom_spacing: 8,
+    document_margin_vertical: 32,
+    document_margin_horizontal: 36,
+    skills_margin_top: 8,
+    skills_margin_bottom: 4,
+    skills_margin_horizontal: 0,
+    skills_item_spacing: 3,
+    experience_margin_top: 8,
+    experience_margin_bottom: 4,
+    experience_margin_horizontal: 0,
+    experience_item_spacing: 6,
+    projects_margin_top: 8,
+    projects_margin_bottom: 4,
+    projects_margin_horizontal: 0,
+    projects_item_spacing: 6,
+    education_margin_top: 8,
+    education_margin_bottom: 4,
+    education_margin_horizontal: 0,
+    education_item_spacing: 4,
+  };
+
   const resume = existingBaseResumes.length > 0
     ? await db.updateResume(existingBaseResumes[0].id, user.id, {
         target_role: targetRole || 'General',
@@ -123,6 +150,7 @@ export async function completeOnboarding(
           skills: { visible: skills.length > 0 },
           projects: { visible: projects.length > 0 },
         },
+        document_settings: atsDocumentSettings,
       }).then((r) => r!)
     : await db.insertResume({
         user_id: user.id,
@@ -148,32 +176,7 @@ export async function completeOnboarding(
           skills: { visible: skills.length > 0 },
           projects: { visible: projects.length > 0 },
         },
-        document_settings: {
-          footer_width: 0,
-          show_ubc_footer: false,
-          header_name_size: 24,
-          skills_margin_top: 0,
-          document_font_size: 10,
-          projects_margin_top: 0,
-          skills_item_spacing: 0,
-          document_line_height: 1.2,
-          education_margin_top: 0,
-          skills_margin_bottom: 2,
-          experience_margin_top: 2,
-          projects_item_spacing: 0,
-          education_item_spacing: 0,
-          projects_margin_bottom: 0,
-          education_margin_bottom: 0,
-          experience_item_spacing: 1,
-          document_margin_vertical: 20,
-          experience_margin_bottom: 0,
-          skills_margin_horizontal: 0,
-          document_margin_horizontal: 28,
-          header_name_bottom_spacing: 16,
-          projects_margin_horizontal: 0,
-          education_margin_horizontal: 0,
-          experience_margin_horizontal: 0,
-        },
+        document_settings: atsDocumentSettings,
       });
 
   console.log('[completeOnboarding] saved profile + resume', { profile_id: profile.id, resume_id: resume.id });
