@@ -6,9 +6,11 @@ import { tailorResume } from '@/utils/actions/workspace';
 import { ResumePreview } from '@/components/resume/editor/preview/resume-preview';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResizablePanels } from '@/components/resume/editor/layout/ResizablePanels';
+import { ResumePDFDocument } from '@/components/resume/editor/preview/resume-pdf-document';
+import { pdf } from '@react-pdf/renderer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Clock, X, ChevronRight } from 'lucide-react';
+import { Clock, X, ChevronRight, Download } from 'lucide-react';
 
 interface HistoryEntry {
   resume: Resume;
@@ -70,6 +72,27 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
     setCompany(entry.company);
     setStep('done');
     setHistoryOpen(false);
+  }
+
+  async function handleDownload() {
+    try {
+      const blob = await pdf(<ResumePDFDocument resume={displayResume} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const fileLabel = tailoredResume
+        ? `${displayResume.first_name}_${displayResume.last_name}_${jobTitle.replace(/\s+/g, '_')}`
+        : `${displayResume.first_name}_${displayResume.last_name}_Master_CV`;
+      link.download = `${fileLabel}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('PDF downloaded');
+    } catch (err) {
+      console.error('Download failed:', err);
+      toast.error('Failed to generate PDF');
+    }
   }
 
   const editorPanel = (
@@ -257,9 +280,20 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
         isBaseResume={!tailoredResume}
         editorPanel={editorPanel}
         previewPanel={(width) => (
-          <ScrollArea className="h-full bg-dia-canvas">
-            <ResumePreview resume={displayResume} containerWidth={width} />
-          </ScrollArea>
+          <div className="relative h-full">
+            <ScrollArea className="h-full bg-dia-canvas">
+              <ResumePreview resume={displayResume} containerWidth={width} />
+            </ScrollArea>
+            {/* Floating download button */}
+            <button
+              onClick={handleDownload}
+              className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full bg-foreground text-background text-sm font-medium px-4 py-2.5 shadow-lg hover:opacity-90 active:scale-[0.98] transition-all"
+              title="Download as PDF"
+            >
+              <Download className="h-4 w-4" />
+              Download PDF
+            </button>
+          </div>
         )}
       />
     </main>
