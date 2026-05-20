@@ -21,5 +21,6 @@ export default async function MemoryPage() {
 
   if (!profile) redirect('/onboarding');
 
-  return <MemoryClient profile={profile} />;
+  // profile is non-null past this guard
+  return <MemoryClient profile={profile!} />;
 }
