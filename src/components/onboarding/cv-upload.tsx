@@ -15,62 +15,92 @@ interface CVUploadProps {
 
 // Lazy-load pdfjs-dist to avoid SSR issues
 /**
- * Extract text from PDF preserving layout using item positioning.
- * PDF text items carry [scaleX, skewY, skewX, scaleY, X, Y] in `transform`.
- * We use the Y coordinate to detect line breaks — without this, multi-column
- * resumes get jumbled and even the candidate's name becomes unparseable.
+ * Robust PDF text extraction.
+ * - disableFontFace + useSystemFonts: avoid embedded-font glyph remapping that
+ *   converts "AVCI" → "Avc1" when a CV uses a font where the capital-I glyph
+ *   is encoded as digit-1.
+ * - Column detection: 2-column resumes (sidebar + main) need to be read column
+ *   by column, not line by line, or text gets jumbled.
+ * - Y-coordinate line grouping preserves visual line breaks.
  */
 async function extractTextFromPDF(file: File): Promise<string> {
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await pdfjsLib.getDocument({
+    data: arrayBuffer,
+    disableFontFace: true,
+    useSystemFonts: true,
+  }).promise;
 
   const pages: string[] = [];
 
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
+    const viewport = page.getViewport({ scale: 1 });
+    const content = await page.getTextContent({ includeMarkedContent: false });
 
-    // Collect items with positioning
-    type PosItem = { str: string; x: number; y: number };
+    type PosItem = { str: string; x: number; y: number; w: number };
     const items: PosItem[] = [];
     for (const item of content.items) {
       if (!('str' in item) || !item.str.trim()) continue;
       const tx = item.transform as number[];
-      items.push({ str: item.str, x: tx[4], y: tx[5] });
+      items.push({
+        str: item.str,
+        x: tx[4],
+        y: tx[5],
+        w: 'width' in item ? (item.width as number) : 0,
+      });
     }
-
     if (items.length === 0) continue;
 
-    // Sort: rows top-to-bottom (Y descending in PDF coords), within row left-to-right
-    items.sort((a, b) => {
-      const dy = Math.abs(a.y - b.y);
-      if (dy > 3) return b.y - a.y;
-      return a.x - b.x;
-    });
+    // Detect 2-column layout: significant clustering both left and right of midpoint
+    const mid = viewport.width * 0.5;
+    const leftItems = items.filter((it) => it.x < mid * 0.9);
+    const rightItems = items.filter((it) => it.x > mid * 1.1);
+    const isTwoColumn =
+      leftItems.length > items.length * 0.2 &&
+      rightItems.length > items.length * 0.2;
 
-    // Group into lines by Y proximity
-    let text = '';
-    let lastY: number | null = null;
-    let lastX = 0;
-    for (const item of items) {
-      if (lastY !== null && Math.abs(item.y - lastY) > 3) {
-        text += '\n';
-        lastX = 0;
-      } else if (text && !text.endsWith(' ') && item.x - lastX > 2) {
-        text += ' ';
+    const renderColumn = (cols: PosItem[]): string => {
+      const sorted = [...cols].sort((a, b) => {
+        const dy = Math.abs(a.y - b.y);
+        if (dy > 3) return b.y - a.y; // PDF Y is bottom-up
+        return a.x - b.x;
+      });
+      let out = '';
+      let lastY: number | null = null;
+      let lastEnd = 0;
+      for (const it of sorted) {
+        if (lastY !== null && Math.abs(it.y - lastY) > 3) {
+          out += '\n';
+          lastEnd = 0;
+        } else if (out && !out.endsWith(' ') && !out.endsWith('\n') && it.x - lastEnd > 2) {
+          out += ' ';
+        }
+        out += it.str;
+        lastY = it.y;
+        lastEnd = it.x + it.w;
       }
-      text += item.str;
-      lastY = item.y;
-      lastX = item.x + item.str.length * 4; // rough char width estimate
-    }
+      return out;
+    };
 
-    pages.push(text);
+    if (isTwoColumn) {
+      // Most CVs put contact/skills in narrow left column, work history in wide right column.
+      // Detect which is wider to decide order.
+      const leftAvgX = leftItems.reduce((s, it) => s + it.x, 0) / leftItems.length;
+      const rightAvgX = rightItems.reduce((s, it) => s + it.x, 0) / rightItems.length;
+      // Process narrower column first if it's the sidebar (left), else main first
+      const leftText = renderColumn(items.filter((it) => it.x < mid));
+      const rightText = renderColumn(items.filter((it) => it.x >= mid));
+      pages.push(leftAvgX < rightAvgX ? `${leftText}\n\n${rightText}` : `${rightText}\n\n${leftText}`);
+    } else {
+      pages.push(renderColumn(items));
+    }
   }
 
-  return pages.join('\n\n').trim();
+  return pages.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
 export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {

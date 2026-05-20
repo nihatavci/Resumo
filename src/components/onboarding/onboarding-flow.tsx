@@ -12,40 +12,30 @@ import type { OnboardingStep, CVExtraction } from '@/lib/onboarding/types';
 
 /**
  * Regex extraction of contact info from raw CV text.
- * Used UNCONDITIONALLY to harden against AI mistakes — the LLM may miss
- * obvious patterns (email, phone, URLs), but regex never does.
- * The AI's output is preferred where both exist; regex fills any gaps.
+ * Runs UNCONDITIONALLY alongside the AI. AI wins where it has data; regex fills any gaps.
  */
 function extractBasicInfoFromText(text: string): Partial<CVExtraction> {
   const result: Partial<CVExtraction> = {};
 
-  // Email
   const email = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/)?.[0];
   if (email) result.email = email;
 
-  // Phone — at least 10 digits with optional + and separators
   const phone = text.match(/(\+?\d[\d\s\-().]{8,}\d)/)?.[0]?.trim();
   if (phone) result.phone_number = phone;
 
-  // LinkedIn — match optional protocol/www, then linkedin.com/in/<slug>
   const linkedin = text.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w\-_%]+/i)?.[0];
   if (linkedin) result.linkedin_url = linkedin.startsWith('http') ? linkedin : `https://${linkedin}`;
 
-  // GitHub — same idea
   const github = text.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/[\w\-_]+/i)?.[0];
   if (github) result.github_url = github.startsWith('http') ? github : `https://${github}`;
 
-  // Website (any http(s) URL that isn't LinkedIn or GitHub)
   const website = text.match(/https?:\/\/(?!.*(?:linkedin|github))[^\s,)>]+/i)?.[0];
   if (website) result.website = website;
 
-  // Name heuristic: first non-empty line near the top usually contains the candidate name.
-  // Pattern: 2+ capitalized words, no digits, no special chars.
+  // Name heuristic — supports Turkish/European chars (Ş Ğ Ü Ç Ö İ etc.)
   const lines = text.split('\n').slice(0, 10).map((l) => l.trim()).filter(Boolean);
   for (const line of lines) {
-    // Skip lines that look like contact info or section headers
     if (line.includes('@') || /\d/.test(line) || line.length > 60) continue;
-    // Match "Firstname Lastname" or "First Middle Last" — 2-4 words, each starting capital
     const nameMatch = line.match(/^([A-ZÀ-ÝŞĞÜÇÖİ][a-zà-ÿşğüçöı]+(?:\s+[A-ZÀ-ÝŞĞÜÇÖİ][a-zà-ÿşğüçöı]+){1,3})$/);
     if (nameMatch) {
       const parts = nameMatch[1].split(/\s+/);
@@ -58,10 +48,6 @@ function extractBasicInfoFromText(text: string): Partial<CVExtraction> {
   return result;
 }
 
-/**
- * Merge AI and regex extractions. AI wins where both have a value;
- * regex fills any field the AI missed.
- */
 function mergeExtractions(ai: CVExtraction | null, regex: Partial<CVExtraction>): CVExtraction {
   const merged: CVExtraction = { ...(ai ?? {}) };
   if (!merged.first_name && regex.first_name) merged.first_name = regex.first_name;
@@ -81,22 +67,33 @@ export function OnboardingFlow() {
   const [isExtracting, setIsExtracting] = useState(false);
 
   const handleCVUploaded = useCallback(async (cvText: string) => {
+    console.log('[onboarding-flow] PDF text length:', cvText.length);
+    console.log('[onboarding-flow] PDF first 800 chars:', cvText.slice(0, 800));
+
     setIsExtracting(true);
     const regexFallback = extractBasicInfoFromText(cvText);
+    console.log('[onboarding-flow] regex extracted:', regexFallback);
 
     try {
       const aiExtracted = await extractCVData(cvText);
-      // Merge — AI wins on structured fields; regex fills gaps in contact fields
+      console.log('[onboarding-flow] AI extracted:', {
+        name: `${aiExtracted.first_name ?? '?'} ${aiExtracted.last_name ?? '?'}`,
+        email: aiExtracted.email,
+        work_count: aiExtracted.work_experience?.length ?? 0,
+        edu_count: aiExtracted.education?.length ?? 0,
+        skill_categories: aiExtracted.skills?.length ?? 0,
+        project_count: aiExtracted.projects?.length ?? 0,
+      });
       const merged = mergeExtractions(aiExtracted, regexFallback);
       setCvData(merged);
     } catch (err) {
-      console.error('AI extraction failed, using regex-only fallback:', err);
+      console.error('[onboarding-flow] AI extraction failed, using regex-only fallback:', err);
       if (Object.keys(regexFallback).length > 0) {
         setCvData(regexFallback as CVExtraction);
       }
       toast({
         title: 'Partial extraction',
-        description: 'AI analysis timed out — contact fields were extracted from your CV. Please review.',
+        description: 'AI analysis failed — contact fields were extracted. Please review and add the rest.',
         variant: 'destructive',
       });
     } finally {
@@ -110,14 +107,24 @@ export function OnboardingFlow() {
   }, []);
 
   const handleReviewComplete = useCallback(
-    async (answers: Record<string, string | string[]>) => {
+    async (
+      answers: Record<string, string | string[]>,
+      editedCV?: Partial<CVExtraction>
+    ) => {
       setStep('generating');
       try {
         const targetRole = (answers.target_role as string) || '';
-        await completeOnboarding(answers, cvData, targetRole);
+        // Merge user's edits over the original AI extraction
+        const finalCV: CVExtraction = { ...(cvData ?? {}), ...(editedCV ?? {}) };
+        console.log('[onboarding-flow] final CV being saved:', {
+          name: `${finalCV.first_name ?? '?'} ${finalCV.last_name ?? '?'}`,
+          work_count: finalCV.work_experience?.length ?? 0,
+          edu_count: finalCV.education?.length ?? 0,
+        });
+        await completeOnboarding(answers, finalCV, targetRole);
         router.push('/workspace');
       } catch (error) {
-        console.error('Onboarding completion error:', error);
+        console.error('[onboarding-flow] completion error:', error);
         toast({
           title: 'Something went wrong',
           description: 'Failed to save your profile. Please try again.',
