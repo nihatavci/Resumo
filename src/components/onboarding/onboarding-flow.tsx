@@ -48,10 +48,10 @@ export function OnboardingFlow() {
         console.error('Onboarding completion error:', error);
         toast({
           title: 'Something went wrong',
-          description: 'Failed to save your profile. Please refresh and try again.',
+          description: 'Failed to save your profile. Please try again.',
           variant: 'destructive',
         });
-        setStep('generating');
+        setStep('review');
       }
     },
     [cvData, router]

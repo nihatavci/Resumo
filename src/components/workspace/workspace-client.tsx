@@ -73,7 +73,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
   }
 
   const editorPanel = (
-    <div className="h-full overflow-y-auto bg-dia-canvas flex flex-col">
+    <div className="relative h-full overflow-y-auto bg-dia-canvas flex flex-col">
       {/* Panel header */}
       <div className="px-6 pt-6 pb-4 flex items-start justify-between flex-shrink-0">
         <div>

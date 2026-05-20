@@ -85,24 +85,35 @@ export async function completeOnboarding(
     field: e.field ?? '',
     date: e.date ?? '',
   })) as Education[];
-  const skills = (cvData?.skills ?? []) as Skill[];
   const projects = (cvData?.projects ?? []) as Project[];
 
-  const certifications = answers.certifications;
-  if (certifications && Array.isArray(certifications) && certifications.length > 0) {
-    skills.push({ category: 'Certifications', items: certifications });
-  }
-  const tools = answers.tools_software;
-  if (tools && Array.isArray(tools) && tools.length > 0) {
-    skills.push({ category: 'Tools & Software', items: tools });
-  }
-  const frameworks = answers.frameworks;
-  if (frameworks && Array.isArray(frameworks) && frameworks.length > 0) {
-    skills.push({ category: 'Frameworks & Methodologies', items: frameworks });
-  }
-  const progLangs = answers.programming_languages;
-  if (progLangs && Array.isArray(progLangs) && progLangs.length > 0) {
-    skills.push({ category: 'Programming Languages', items: progLangs });
+  // Build skills: start with CV-extracted data, then merge form answers.
+  // Form answers WIN for their specific categories (they come from the review screen
+  // where the user explicitly confirmed/edited the values). We replace any CV category
+  // whose name overlaps with the same canonical category name.
+  const cvSkills = (cvData?.skills ?? []) as Skill[];
+
+  const formCategories: { category: string; key: keyof typeof answers; match: string[] }[] = [
+    { category: 'Programming Languages', key: 'programming_languages', match: ['language', 'programming'] },
+    { category: 'Frameworks & Methodologies', key: 'frameworks', match: ['framework', 'methodolog', 'standard', 'agile', 'scrum', 'librar'] },
+    { category: 'Tools & Software', key: 'tools_software', match: ['tool', 'software', 'platform', 'database', 'cloud', 'devops'] },
+    { category: 'Certifications', key: 'certifications', match: ['certif', 'license'] },
+  ];
+
+  // Drop CV skill categories that are superseded by form answers
+  const supersededKeywords = formCategories.flatMap((fc) => fc.match);
+  const baseSkills = cvSkills.filter((s) => {
+    const cat = s.category.toLowerCase();
+    return !supersededKeywords.some((kw) => cat.includes(kw));
+  });
+
+  // Append form answer categories (only if non-empty)
+  const skills: Skill[] = [...baseSkills];
+  for (const { category, key, } of formCategories) {
+    const val = answers[key];
+    if (Array.isArray(val) && val.length > 0) {
+      skills.push({ category, items: val });
+    }
   }
 
   const profileData: Partial<Profile> = {

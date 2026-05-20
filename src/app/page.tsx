@@ -3,8 +3,9 @@ import { getAuthenticatedUser } from '@/utils/auth';
 import { getProfileByUserId } from '@/lib/db';
 
 export default async function RootPage() {
+  // Auth never throws — always returns the single user
+  const user = await getAuthenticatedUser();
   try {
-    const user = await getAuthenticatedUser();
     const profile = await getProfileByUserId(user.id);
     if (profile) {
       redirect('/workspace');
@@ -12,6 +13,8 @@ export default async function RootPage() {
       redirect('/onboarding');
     }
   } catch {
-    redirect('/onboarding');
+    // DB error — don't send to onboarding (would overwrite data).
+    // Send to workspace and let it handle the empty state gracefully.
+    redirect('/workspace');
   }
 }
