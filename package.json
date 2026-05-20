@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.3.7",
     "@opentelemetry/resources": "^2.7.1",
     "@opentelemetry/sdk-node": "^0.217.0",
     "@posthog/ai": "^7.18.3",

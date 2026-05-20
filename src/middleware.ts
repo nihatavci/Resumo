@@ -1,17 +1,24 @@
-import { NextResponse } from 'next/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-export async function middleware() {
-  // In single-user mode with Cloudflare Access, auth is handled at the edge.
-  // This middleware is a pass-through. Cloudflare Access blocks unauthenticated
-  // requests before they reach the application.
-  //
-  // For local development without CF Access, all requests are allowed
-  // (the auth layer treats every request as the single user).
-  return NextResponse.next()
-}
+// Public routes — anything else requires sign-in
+const isPublicRoute = createRouteMatcher([
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/blog(.*)',
+  '/api/webhook(.*)',
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
+});
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Skip Next.js internals and static assets
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
-}
+};

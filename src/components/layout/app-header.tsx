@@ -1,6 +1,6 @@
 'use client';
 
-import { LogoutButton } from "@/components/auth/logout-button";
+import { UserButton } from "@clerk/nextjs";
 import { SettingsButton } from "@/components/settings/settings-button";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
@@ -72,7 +72,7 @@ export function AppHeader({
                   <div className="mx-2 h-4 w-px bg-dia-divider" />
                   <SettingsButton />
                   <div className="mx-2 h-4 w-px bg-dia-divider" />
-                  <LogoutButton />
+                  <UserButton appearance={{ elements: { avatarBox: 'h-8 w-8' } }} />
                 </div>
               </nav>
 
@@ -118,8 +118,9 @@ export function AppHeader({
                         onAllowedNavigation={() => setIsOpen(false)}
                       />
                     </div>
-                    <div className="px-4">
-                      <LogoutButton className="w-full justify-start" />
+                    <div className="px-4 flex items-center gap-3">
+                      <UserButton appearance={{ elements: { avatarBox: 'h-8 w-8' } }} />
+                      <span className="text-sm text-foreground/60">Account</span>
                     </div>
                   </div>
                 </SheetContent>

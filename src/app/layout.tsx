@@ -1,7 +1,7 @@
 import "./globals.css";
 import { DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
-import { getAuthenticatedUser } from "@/utils/auth";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
@@ -80,43 +80,36 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let user: { id: string; email: string | null } | null = null;
-  try {
-    user = await getAuthenticatedUser();
-  } catch {
-    // Not authenticated
-  }
-
   return (
     <html lang="en" className={dmSans.variable}>
       <body className="font-sans bg-dia-canvas">
-        <PostHogProvider
-          user={user ? { id: user.id } : null}
-        >
-          <Suspense fallback={null}>
-            <PostHogPageView />
-          </Suspense>
-          <div className="relative min-h-screen h-screen flex flex-col">
-            <MotionProvider>
-              <main className="h-full">
-                {children}
-                {isVercel && <Analytics />}
-              </main>
-            </MotionProvider>
-          </div>
-          <Toaster
-            position="top-right"
-            closeButton
-            toastOptions={{
-              style: {
-                fontSize: '0.875rem',
-                padding: '16px',
-                borderRadius: '16px',
-                boxShadow: '0px 0px 8px 0px rgba(0,0,0,0.08)',
-              }
-            }}
-          />
-        </PostHogProvider>
+        <ClerkProvider>
+          <PostHogProvider user={null}>
+            <Suspense fallback={null}>
+              <PostHogPageView />
+            </Suspense>
+            <div className="relative min-h-screen h-screen flex flex-col">
+              <MotionProvider>
+                <main className="h-full">
+                  {children}
+                  {isVercel && <Analytics />}
+                </main>
+              </MotionProvider>
+            </div>
+            <Toaster
+              position="top-right"
+              closeButton
+              toastOptions={{
+                style: {
+                  fontSize: '0.875rem',
+                  padding: '16px',
+                  borderRadius: '16px',
+                  boxShadow: '0px 0px 8px 0px rgba(0,0,0,0.08)',
+                }
+              }}
+            />
+          </PostHogProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
