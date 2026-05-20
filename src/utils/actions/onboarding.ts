@@ -9,15 +9,18 @@ import {
   finishAIUsageRequest,
   startAIUsageRequest,
 } from '@/lib/ai/usage-ledger';
+import { MODEL_DESIGNATIONS } from '@/lib/ai-models';
 import * as db from '@/lib/db';
 import type { Profile, Education, WorkExperience, Skill, Project } from '@/lib/types';
 import type { CVExtraction } from '@/lib/onboarding/types';
+import type { AIConfig } from '@/utils/ai-tools';
 
 async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
   input: {
     route: string;
     userId: string;
     isPro: boolean;
+    config?: AIConfig;
   },
   task: (model: LanguageModelV1, telemetry: TelemetrySettings) => Promise<T>
 ) {
@@ -49,6 +52,9 @@ export async function extractCVData(cvText: string): Promise<CVExtraction> {
       route: 'actions.onboarding.extractCVData',
       userId: user.id,
       isPro: true,
+      // Use the fast 8B model — CV extraction is structured parsing, not quality writing.
+      // The 70B model is 3-5× slower for no benefit here.
+      config: { model: MODEL_DESIGNATIONS.STRUCTURED_EXTRACTION, apiKeys: [] },
     },
     (aiClient, telemetry) =>
       generateObject({

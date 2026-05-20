@@ -1,10 +1,9 @@
 // src/components/onboarding/cv-upload.tsx
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, FileText, Loader2 } from 'lucide-react';
-import pdfToText from 'react-pdftotext';
 import { cn } from '@/lib/utils';
 import { fadeIn, slideUp } from '@/components/motion/variants';
 
@@ -14,11 +13,40 @@ interface CVUploadProps {
   isExtracting?: boolean;
 }
 
+// Lazy-load pdfjs-dist to avoid SSR issues
+async function extractTextFromPDF(file: File): Promise<string> {
+  const pdfjsLib = await import('pdfjs-dist');
+  // Use CDN worker to avoid bundling complexity with Next.js
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+  const pages: string[] = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    // Filter to TextItem (has 'str'), join with spaces, preserve line breaks between items
+    const pageText = content.items
+      .map((item) => ('str' in item ? item.str : ''))
+      .join(' ')
+      .replace(/\s{3,}/g, '\n'); // collapse excessive whitespace into newlines
+    pages.push(pageText);
+  }
+
+  return pages.join('\n\n').trim();
+}
+
 export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Preload pdfjs on mount so first upload is faster
+  useEffect(() => {
+    import('pdfjs-dist').catch(() => {});
+  }, []);
 
   const processFile = useCallback(async (file: File) => {
     if (file.type !== 'application/pdf') {
@@ -31,15 +59,18 @@ export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
     setError(null);
 
     try {
-      const text = await pdfToText(file);
+      const text = await extractTextFromPDF(file);
       if (!text.trim()) {
-        setError('Could not extract text from this PDF. It may be image-based. Try a different file or skip this step.');
+        setError(
+          'Could not extract text from this PDF. It may be image-based (scanned). Try a different file or skip.'
+        );
         setIsProcessing(false);
         return;
       }
       onComplete(text);
-    } catch {
-      setError('Failed to read this PDF. Please try a different file or skip this step.');
+    } catch (err) {
+      console.error('PDF extraction error:', err);
+      setError('Failed to read this PDF. Please try a different file or skip.');
       setIsProcessing(false);
     }
   }, [onComplete]);
@@ -47,18 +78,14 @@ export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setIsDragging(true);
-    } else if (e.type === 'dragleave') {
-      setIsDragging(false);
-    }
+    if (e.type === 'dragenter' || e.type === 'dragover') setIsDragging(true);
+    else if (e.type === 'dragleave') setIsDragging(false);
   }, []);
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-
     const file = e.dataTransfer.files[0];
     if (file) await processFile(file);
   }, [processFile]);
@@ -67,6 +94,8 @@ export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
     const file = e.target.files?.[0];
     if (file) await processFile(file);
   }, [processFile]);
+
+  const busy = isProcessing || isExtracting;
 
   return (
     <motion.div
@@ -86,7 +115,7 @@ export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
           Welcome to Resumo
         </h1>
         <p className="text-dia-subheading text-dia-ash">
-          Upload your CV and we&apos;ll build your career profile together.
+          Upload your CV and {"we'll"} pre-fill everything for you.
         </p>
 
         <label
@@ -99,7 +128,7 @@ export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
             isDragging
               ? 'border-foreground bg-dia-fog scale-[1.02]'
               : 'border-dia-steel hover:border-foreground hover:bg-dia-fog/50',
-            (isProcessing || isExtracting) && 'pointer-events-none opacity-60'
+            busy && 'pointer-events-none opacity-60'
           )}
         >
           <input
@@ -107,27 +136,25 @@ export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
             className="hidden"
             accept="application/pdf"
             onChange={handleFileInput}
-            disabled={isProcessing || isExtracting}
+            disabled={busy}
           />
 
-          {isProcessing || isExtracting ? (
+          {busy ? (
             <>
               <Loader2 className="w-12 h-12 text-foreground animate-spin" />
               <p className="text-dia-body text-foreground font-medium">
-                {isExtracting ? 'Analyzing your CV with AI...' : `Reading ${fileName}...`}
+                {isExtracting ? 'Analysing CV with AI…' : `Reading ${fileName}…`}
               </p>
               {isExtracting && (
                 <p className="text-dia-body-sm text-dia-ash">
-                  Extracting your experience, skills, and education
+                  Extracting your experience, skills and education
                 </p>
               )}
             </>
           ) : fileName ? (
             <>
               <FileText className="w-12 h-12 text-foreground" />
-              <p className="text-dia-body text-foreground font-medium">
-                {fileName}
-              </p>
+              <p className="text-dia-body text-foreground font-medium">{fileName}</p>
             </>
           ) : (
             <>
@@ -136,9 +163,7 @@ export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
                 <p className="text-dia-body text-foreground font-medium">
                   Drop your PDF resume here
                 </p>
-                <p className="text-dia-body-sm text-dia-ash">
-                  or click to browse files
-                </p>
+                <p className="text-dia-body-sm text-dia-ash">or click to browse files</p>
               </div>
             </>
           )}
@@ -158,7 +183,7 @@ export function CVUpload({ onComplete, onSkip, isExtracting }: CVUploadProps) {
           onClick={onSkip}
           className="text-dia-body-sm text-dia-ash hover:text-foreground transition-colors underline-offset-4 hover:underline"
         >
-          Skip — I&apos;ll enter everything manually
+          {"Skip — I'll"} enter everything manually
         </button>
       </motion.div>
     </motion.div>

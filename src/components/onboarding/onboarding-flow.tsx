@@ -10,6 +10,37 @@ import { extractCVData, completeOnboarding } from '@/utils/actions/onboarding';
 import { toast } from '@/hooks/use-toast';
 import type { OnboardingStep, CVExtraction } from '@/lib/onboarding/types';
 
+/**
+ * Regex fallback: extract basic contact info from raw CV text.
+ * Used when the AI extraction fails or times out so the review form
+ * is never completely empty.
+ */
+function extractBasicInfoFromText(text: string): Partial<CVExtraction> {
+  const result: Partial<CVExtraction> = {};
+
+  // Email
+  const email = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/)?.[0];
+  if (email) result.email = email;
+
+  // Phone — match common formats
+  const phone = text.match(/(\+?\d[\d\s\-().]{8,}\d)/)?.[0]?.trim();
+  if (phone) result.phone_number = phone;
+
+  // LinkedIn
+  const linkedin = text.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([\w\-]+)/)?.[0];
+  if (linkedin) result.linkedin_url = linkedin.startsWith('http') ? linkedin : `https://${linkedin}`;
+
+  // GitHub
+  const github = text.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([\w\-]+)/)?.[0];
+  if (github) result.github_url = github.startsWith('http') ? github : `https://${github}`;
+
+  // Website (generic URL, not linkedin/github)
+  const website = text.match(/https?:\/\/(?!.*(?:linkedin|github))[^\s,)>]+/)?.[0];
+  if (website) result.website = website;
+
+  return result;
+}
+
 export function OnboardingFlow() {
   const router = useRouter();
   const [step, setStep] = useState<OnboardingStep>('upload');
@@ -21,10 +52,16 @@ export function OnboardingFlow() {
     try {
       const extracted = await extractCVData(cvText);
       setCvData(extracted);
-    } catch {
+    } catch (err) {
+      console.error('AI extraction failed, falling back to regex:', err);
+      // AI failed — use regex to get at least the contact fields
+      const basic = extractBasicInfoFromText(cvText);
+      if (Object.keys(basic).length > 0) {
+        setCvData(basic as CVExtraction);
+      }
       toast({
-        title: 'CV Processing Error',
-        description: 'We had trouble reading your CV. You can still fill in your details manually.',
+        title: 'Partial extraction',
+        description: 'AI analysis timed out — contact fields were extracted. Check and complete the rest.',
         variant: 'destructive',
       });
     } finally {
