@@ -103,7 +103,28 @@ function extractTags(cvData: CVExtraction | null, categoryKeywords: string[]): s
   return [...new Set(tags)];
 }
 
+// Collect all skills not already claimed by a more specific bucket
+function extractRemainingTags(
+  cvData: CVExtraction | null,
+  claimedKeywords: string[][]
+): string[] {
+  if (!cvData?.skills) return [];
+  const allClaimed = claimedKeywords.flat();
+  const tags: string[] = [];
+  cvData.skills.forEach((s) => {
+    const cat = s.category.toLowerCase();
+    const isClaimed = allClaimed.some((kw) => cat.includes(kw));
+    if (!isClaimed) tags.push(...s.items);
+  });
+  return [...new Set(tags)];
+}
+
 export function CVReviewForm({ cvData, onComplete }: CVReviewFormProps) {
+  const langKeywords = ['language', 'programming'];
+  const frameworkKeywords = ['framework', 'methodolog', 'standard', 'agile', 'scrum', 'librar'];
+  const certKeywords = ['certif', 'license', 'accredit'];
+  const toolKeywords = ['tool', 'software', 'platform', 'database', 'cloud', 'devops', 'infrastructure'];
+
   const [fields, setFields] = useState({
     first_name: cvData?.first_name ?? '',
     last_name: cvData?.last_name ?? '',
@@ -113,10 +134,14 @@ export function CVReviewForm({ cvData, onComplete }: CVReviewFormProps) {
     linkedin_url: cvData?.linkedin_url ?? '',
     github_url: cvData?.github_url ?? '',
     target_role: '',
-    tools_software: extractTags(cvData, ['tool', 'software', 'platform']),
-    frameworks: extractTags(cvData, ['framework', 'methodolog', 'standard', 'agile', 'scrum']),
-    programming_languages: extractTags(cvData, ['language', 'programming']),
-    certifications: extractTags(cvData, ['certif', 'license']),
+    programming_languages: extractTags(cvData, langKeywords),
+    frameworks: extractTags(cvData, frameworkKeywords),
+    certifications: extractTags(cvData, certKeywords),
+    // tools gets everything not claimed above
+    tools_software: [
+      ...extractTags(cvData, toolKeywords),
+      ...extractRemainingTags(cvData, [langKeywords, frameworkKeywords, certKeywords, toolKeywords]),
+    ].filter((v, i, a) => a.indexOf(v) === i),
   });
 
   const set = useCallback(<K extends keyof typeof fields>(key: K, value: (typeof fields)[K]) => {

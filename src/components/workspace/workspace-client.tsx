@@ -3,7 +3,8 @@
 import { useState, useRef } from 'react';
 import { Resume } from '@/lib/types';
 import { tailorResume } from '@/utils/actions/workspace';
-import { PreviewPanel } from '@/components/resume/editor/panels/preview-panel';
+import { ResumePreview } from '@/components/resume/editor/preview/resume-preview';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResizablePanels } from '@/components/resume/editor/layout/ResizablePanels';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -256,11 +257,9 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
         isBaseResume={!tailoredResume}
         editorPanel={editorPanel}
         previewPanel={(width) => (
-          <PreviewPanel
-            resume={displayResume}
-            onResumeChange={() => {}}
-            width={width}
-          />
+          <ScrollArea className="h-full bg-dia-canvas">
+            <ResumePreview resume={displayResume} containerWidth={width} />
+          </ScrollArea>
         )}
       />
     </main>
