@@ -9,7 +9,6 @@ import {
   finishAIUsageRequest,
   startAIUsageRequest,
 } from '@/lib/ai/usage-ledger';
-import { MODEL_DESIGNATIONS } from '@/lib/ai-models';
 import * as db from '@/lib/db';
 import type { Profile, Education, WorkExperience, Skill, Project } from '@/lib/types';
 import type { CVExtraction } from '@/lib/onboarding/types';
@@ -52,26 +51,30 @@ export async function extractCVData(cvText: string): Promise<CVExtraction> {
       route: 'actions.onboarding.extractCVData',
       userId: user.id,
       isPro: true,
-      // Use the fast 8B model — CV extraction is structured parsing, not quality writing.
-      // The 70B model is 3-5× slower for no benefit here.
-      config: { model: MODEL_DESIGNATIONS.STRUCTURED_EXTRACTION, apiKeys: [] },
+      // Use the default 70B model — structured extraction from messy CV text
+      // needs reasoning capability the 8B model lacks.
     },
     (aiClient, telemetry) =>
       generateObject({
         model: aiClient,
         experimental_telemetry: telemetry,
         schema: z.object({ content: textImportSchema }),
-        system: `You are an expert CV parser. Extract ALL structured information from the provided CV text into the schema format.
+        system: `You parse resumes. Your output MUST match the schema exactly.
 
-Be thorough:
-- Extract every work experience entry with company, position, dates, and all bullet points
-- Extract every education entry with school, degree, field, dates
-- Extract all skills, grouped by category (e.g. "Programming Languages", "Frameworks", "Tools")
-- Extract all projects with descriptions and technologies
-- Extract all contact information (name, email, phone, location, URLs)
+CRITICAL RULES:
+1. The CANDIDATE'S NAME is almost always the largest text at the very top. Split it into first_name and last_name. NEVER skip the name.
+2. Email is anything matching user@domain.tld pattern.
+3. Phone numbers contain + or parentheses or 10+ digits with separators.
+4. URLs starting with linkedin.com → linkedin_url. github.com → github_url. Others → website.
+5. Location is "City, Region" or "City, Country" — usually near the top under the name.
+6. For work_experience: each role gets ONE entry. "date" is the date range as written ("Jan 2020 - Present", "2018-2021", etc.). "description" is an array — one string per bullet point.
+7. For education: "school" is the institution name. "degree" is the qualification ("BSc", "MA", "PhD", "MBA"). "field" is the subject ("Computer Science").
+8. For skills: group by visible category. If no category given, use "Technical Skills".
+9. PRESERVE original wording. Do not paraphrase, summarize, or invent.
+10. If a section is missing in the CV, omit it (don't fabricate).
 
-Preserve the original wording exactly. Do not rephrase, summarize, or embellish anything.`,
-        prompt: cvText,
+The CV text below may have layout artifacts from PDF parsing. Use context to determine what's a heading vs body text.`,
+        prompt: `Parse this CV:\n\n${cvText}`,
       })
   );
 

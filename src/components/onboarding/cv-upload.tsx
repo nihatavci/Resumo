@@ -14,24 +14,60 @@ interface CVUploadProps {
 }
 
 // Lazy-load pdfjs-dist to avoid SSR issues
+/**
+ * Extract text from PDF preserving layout using item positioning.
+ * PDF text items carry [scaleX, skewY, skewX, scaleY, X, Y] in `transform`.
+ * We use the Y coordinate to detect line breaks — without this, multi-column
+ * resumes get jumbled and even the candidate's name becomes unparseable.
+ */
 async function extractTextFromPDF(file: File): Promise<string> {
   const pdfjsLib = await import('pdfjs-dist');
-  // Use CDN worker to avoid bundling complexity with Next.js
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
   const pages: string[] = [];
+
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    // Filter to TextItem (has 'str'), join with spaces, preserve line breaks between items
-    const pageText = content.items
-      .map((item) => ('str' in item ? item.str : ''))
-      .join(' ')
-      .replace(/\s{3,}/g, '\n'); // collapse excessive whitespace into newlines
-    pages.push(pageText);
+
+    // Collect items with positioning
+    type PosItem = { str: string; x: number; y: number };
+    const items: PosItem[] = [];
+    for (const item of content.items) {
+      if (!('str' in item) || !item.str.trim()) continue;
+      const tx = item.transform as number[];
+      items.push({ str: item.str, x: tx[4], y: tx[5] });
+    }
+
+    if (items.length === 0) continue;
+
+    // Sort: rows top-to-bottom (Y descending in PDF coords), within row left-to-right
+    items.sort((a, b) => {
+      const dy = Math.abs(a.y - b.y);
+      if (dy > 3) return b.y - a.y;
+      return a.x - b.x;
+    });
+
+    // Group into lines by Y proximity
+    let text = '';
+    let lastY: number | null = null;
+    let lastX = 0;
+    for (const item of items) {
+      if (lastY !== null && Math.abs(item.y - lastY) > 3) {
+        text += '\n';
+        lastX = 0;
+      } else if (text && !text.endsWith(' ') && item.x - lastX > 2) {
+        text += ' ';
+      }
+      text += item.str;
+      lastY = item.y;
+      lastX = item.x + item.str.length * 4; // rough char width estimate
+    }
+
+    pages.push(text);
   }
 
   return pages.join('\n\n').trim();
