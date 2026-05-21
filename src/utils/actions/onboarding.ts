@@ -1,75 +1,20 @@
 // src/utils/actions/onboarding.ts
 'use server';
 
-import { z } from 'zod';
-import { generateObject, type LanguageModelUsage, type LanguageModelV1, type TelemetrySettings } from 'ai';
-import { textImportSchema } from '@/lib/zod-schemas';
 import { getAuthenticatedUser } from '@/utils/auth';
-import {
-  finishAIUsageRequest,
-  startAIUsageRequest,
-} from '@/lib/ai/usage-ledger';
 import * as db from '@/lib/db';
 import type { Profile, Education, WorkExperience, Skill, Project } from '@/lib/types';
 import type { CVExtraction } from '@/lib/onboarding/types';
+import { extractCVSectioned } from './onboarding-extract';
+import { optimizeWorkForATS, optimizeSkillsForATS } from './onboarding-ats';
 
-async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
-  input: {
-    route: string;
-    userId: string;
-    isPro: boolean;
-  },
-  task: (model: LanguageModelV1, telemetry: TelemetrySettings) => Promise<T>
-) {
-  const { model, usageEventId, telemetry } = await startAIUsageRequest(input);
-
-  try {
-    const result = await task(model, telemetry);
-    await finishAIUsageRequest({
-      usageEventId,
-      status: 'succeeded',
-      usage: result.usage,
-    });
-    return result;
-  } catch (error) {
-    await finishAIUsageRequest({
-      usageEventId,
-      status: 'failed',
-      errorCode: error instanceof Error ? error.message : 'ai_request_failed',
-    });
-    throw error;
-  }
-}
-
+/**
+ * Stage 1 of the pipeline: parse CV text via 5 parallel AI extractions.
+ * Each section (contact, work, education, skills, projects) gets its own
+ * focused prompt. Failures in one don't cascade to the others.
+ */
 export async function extractCVData(cvText: string): Promise<CVExtraction> {
-  const user = await getAuthenticatedUser();
-
-  const { object } = await runTrackedAIRequest(
-    {
-      route: 'actions.onboarding.extractCVData',
-      userId: user.id,
-      isPro: true,
-    },
-    (aiClient, telemetry) =>
-      generateObject({
-        model: aiClient,
-        experimental_telemetry: telemetry,
-        schema: z.object({ content: textImportSchema }),
-        system: `You are an expert CV parser. Extract ALL structured information from the provided CV text into the schema format.
-
-Be thorough:
-- Extract every work experience entry with company, position, dates, and all bullet points
-- Extract every education entry with school, degree, field, dates
-- Extract all skills, grouped by category (e.g. "Programming Languages", "Frameworks", "Tools")
-- Extract all projects with descriptions and technologies
-- Extract all contact information (name, email, phone, location, URLs)
-
-Preserve the original wording exactly. Do not rephrase, summarize, or embellish anything.`,
-        prompt: cvText,
-      })
-  );
-
-  return object.content;
+  return extractCVSectioned(cvText);
 }
 
 export async function completeOnboarding(
@@ -78,32 +23,60 @@ export async function completeOnboarding(
   targetRole: string
 ): Promise<{ profileId: string; resumeId: string }> {
   const user = await getAuthenticatedUser();
+  console.log('[completeOnboarding] start, targetRole:', targetRole);
 
-  const workExperience = (cvData?.work_experience ?? []) as WorkExperience[];
+  const rawWorkExperience = (cvData?.work_experience ?? []) as WorkExperience[];
   const education = (cvData?.education ?? []).map((e) => ({
     ...e,
     field: e.field ?? '',
     date: e.date ?? '',
   })) as Education[];
-  const skills = (cvData?.skills ?? []) as Skill[];
   const projects = (cvData?.projects ?? []) as Project[];
+  const cvSkills = (cvData?.skills ?? []) as Skill[];
 
-  const certifications = answers.certifications;
-  if (certifications && Array.isArray(certifications) && certifications.length > 0) {
-    skills.push({ category: 'Certifications', items: certifications });
+  // Build skills: start with CV-extracted, then merge form answers.
+  // Form answers WIN for their specific categories.
+  const formCategories: { category: string; key: keyof typeof answers; match: string[] }[] = [
+    { category: 'Programming Languages', key: 'programming_languages', match: ['language', 'programming'] },
+    { category: 'Frameworks & Methodologies', key: 'frameworks', match: ['framework', 'methodolog', 'standard', 'agile', 'scrum', 'librar'] },
+    { category: 'Tools & Software', key: 'tools_software', match: ['tool', 'software', 'platform', 'database', 'cloud', 'devops'] },
+    { category: 'Certifications', key: 'certifications', match: ['certif', 'license'] },
+  ];
+
+  const supersededKeywords = formCategories.flatMap((fc) => fc.match);
+  const baseSkills = cvSkills.filter((s) => {
+    const cat = s.category.toLowerCase();
+    return !supersededKeywords.some((kw) => cat.includes(kw));
+  });
+
+  const mergedSkills: Skill[] = [...baseSkills];
+  for (const { category, key } of formCategories) {
+    const val = answers[key];
+    if (Array.isArray(val) && val.length > 0) {
+      mergedSkills.push({ category, items: val });
+    }
   }
-  const tools = answers.tools_software;
-  if (tools && Array.isArray(tools) && tools.length > 0) {
-    skills.push({ category: 'Tools & Software', items: tools });
-  }
-  const frameworks = answers.frameworks;
-  if (frameworks && Array.isArray(frameworks) && frameworks.length > 0) {
-    skills.push({ category: 'Frameworks & Methodologies', items: frameworks });
-  }
-  const progLangs = answers.programming_languages;
-  if (progLangs && Array.isArray(progLangs) && progLangs.length > 0) {
-    skills.push({ category: 'Programming Languages', items: progLangs });
-  }
+
+  // ========================================================================
+  // Stage 2: ATS optimization pass
+  // Rewrite work bullets and reorganize skills using ATS science.
+  // If AI fails, original data is returned (already guaranteed by the helpers).
+  // ========================================================================
+  console.log('[completeOnboarding] running ATS optimization…');
+  const [atsWork, atsSkills] = await Promise.allSettled([
+    optimizeWorkForATS(rawWorkExperience, targetRole),
+    optimizeSkillsForATS(mergedSkills, targetRole),
+  ]);
+
+  const workExperience = atsWork.status === 'fulfilled' ? atsWork.value : rawWorkExperience;
+  const skills = atsSkills.status === 'fulfilled' ? atsSkills.value : mergedSkills;
+
+  console.log('[completeOnboarding] post-ATS counts:', {
+    work: workExperience.length,
+    edu: education.length,
+    skills: skills.length,
+    projects: projects.length,
+  });
 
   const profileData: Partial<Profile> = {
     first_name: (answers.first_name as string) || cvData?.first_name || null,
@@ -114,20 +87,48 @@ export async function completeOnboarding(
     website: (answers.website as string) || cvData?.website || null,
     linkedin_url: (answers.linkedin_url as string) || cvData?.linkedin_url || null,
     github_url: (answers.github_url as string) || cvData?.github_url || null,
+    professional_summary: cvData?.professional_summary || null,
     work_experience: workExperience,
     education: education,
     skills: skills,
     projects: projects,
   };
 
-  // Upsert profile — update if exists, create if not
+  // Upsert profile
   const existingProfile = await db.getProfileByUserId(user.id);
   const profile = existingProfile
-    ? await db.updateProfile(user.id, profileData).then(p => p!)
+    ? await db.updateProfile(user.id, profileData).then((p) => p!)
     : await db.createProfile(user.id, profileData);
 
-  // Also upsert the Master CV — update the existing base resume if any
+  // Upsert Master CV
   const existingBaseResumes = await db.getResumesByUserId(user.id, true);
+
+  const atsDocumentSettings = {
+    footer_width: 0,
+    show_ubc_footer: false,
+    document_font_size: 10.5,
+    document_line_height: 1.4,
+    header_name_size: 26,
+    header_name_bottom_spacing: 6,
+    document_margin_vertical: 36,
+    document_margin_horizontal: 40,
+    skills_margin_top: 8,
+    skills_margin_bottom: 4,
+    skills_margin_horizontal: 0,
+    skills_item_spacing: 3,
+    experience_margin_top: 8,
+    experience_margin_bottom: 4,
+    experience_margin_horizontal: 0,
+    experience_item_spacing: 6,
+    projects_margin_top: 8,
+    projects_margin_bottom: 4,
+    projects_margin_horizontal: 0,
+    projects_item_spacing: 6,
+    education_margin_top: 8,
+    education_margin_bottom: 4,
+    education_margin_horizontal: 0,
+    education_item_spacing: 4,
+  };
 
   const resume = existingBaseResumes.length > 0
     ? await db.updateResume(existingBaseResumes[0].id, user.id, {
@@ -140,62 +141,47 @@ export async function completeOnboarding(
         website: profileData.website ?? '',
         linkedin_url: profileData.linkedin_url ?? '',
         github_url: profileData.github_url ?? '',
+        professional_summary: profileData.professional_summary ?? null,
         work_experience: workExperience,
         education: education,
         skills: skills,
         projects: projects,
-      }).then(r => r!)
+        section_configs: {
+          work_experience: { visible: workExperience.length > 0 },
+          education: { visible: education.length > 0 },
+          skills: { visible: skills.length > 0 },
+          projects: { visible: projects.length > 0 },
+        },
+        document_settings: atsDocumentSettings,
+      }).then((r) => r!)
     : await db.insertResume({
-    user_id: user.id,
-    name: 'Master CV',
-    target_role: targetRole || 'General',
-    is_base_resume: true,
-    first_name: profileData.first_name ?? '',
-    last_name: profileData.last_name ?? '',
-    email: profileData.email ?? '',
-    phone_number: profileData.phone_number ?? '',
-    location: profileData.location ?? '',
-    website: profileData.website ?? '',
-    linkedin_url: profileData.linkedin_url ?? '',
-    github_url: profileData.github_url ?? '',
-    work_experience: workExperience,
-    education: education,
-    skills: skills,
-    projects: projects,
-    section_order: ['work_experience', 'education', 'skills', 'projects'],
-    section_configs: {
-      work_experience: { visible: workExperience.length > 0 },
-      education: { visible: education.length > 0 },
-      skills: { visible: skills.length > 0 },
-      projects: { visible: projects.length > 0 },
-    },
-    document_settings: {
-      footer_width: 0,
-      show_ubc_footer: false,
-      header_name_size: 24,
-      skills_margin_top: 0,
-      document_font_size: 10,
-      projects_margin_top: 0,
-      skills_item_spacing: 0,
-      document_line_height: 1.2,
-      education_margin_top: 0,
-      skills_margin_bottom: 2,
-      experience_margin_top: 2,
-      projects_item_spacing: 0,
-      education_item_spacing: 0,
-      projects_margin_bottom: 0,
-      education_margin_bottom: 0,
-      experience_item_spacing: 1,
-      document_margin_vertical: 20,
-      experience_margin_bottom: 0,
-      skills_margin_horizontal: 0,
-      document_margin_horizontal: 28,
-      header_name_bottom_spacing: 16,
-      projects_margin_horizontal: 0,
-      education_margin_horizontal: 0,
-      experience_margin_horizontal: 0,
-    },
-  });
+        user_id: user.id,
+        name: 'Master CV',
+        target_role: targetRole || 'General',
+        is_base_resume: true,
+        first_name: profileData.first_name ?? '',
+        last_name: profileData.last_name ?? '',
+        email: profileData.email ?? '',
+        phone_number: profileData.phone_number ?? '',
+        location: profileData.location ?? '',
+        website: profileData.website ?? '',
+        linkedin_url: profileData.linkedin_url ?? '',
+        github_url: profileData.github_url ?? '',
+        professional_summary: profileData.professional_summary ?? null,
+        work_experience: workExperience,
+        education: education,
+        skills: skills,
+        projects: projects,
+        section_order: ['summary', 'work_experience', 'education', 'skills', 'projects'],
+        section_configs: {
+          work_experience: { visible: workExperience.length > 0 },
+          education: { visible: education.length > 0 },
+          skills: { visible: skills.length > 0 },
+          projects: { visible: projects.length > 0 },
+        },
+        document_settings: atsDocumentSettings,
+      });
 
+  console.log('[completeOnboarding] saved profile + resume', { profile_id: profile.id, resume_id: resume.id });
   return { profileId: profile.id, resumeId: resume.id };
 }

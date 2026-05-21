@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { Profile, WorkExperience, Education, Skill, Project } from '@/lib/types';
 import { updateBasicInfo, updateWorkExperience, updateEducation, updateSkills, updateProjects } from '@/utils/actions/memory';
+import { resetMyData } from '@/utils/actions/reset';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { ChevronDown, ChevronUp, Check, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Plus, Trash2, AlertTriangle } from 'lucide-react';
 
 interface MemoryClientProps {
   profile: Profile;
@@ -384,6 +385,32 @@ export function MemoryClient({ profile: initialProfile }: MemoryClientProps) {
         </div>
         <SaveBar section="projects" onSave={saveProjects} />
       </SectionCard>
+
+      {/* Danger zone */}
+      <div className="mt-12 rounded-dia-sm border border-red-200 bg-red-50/40 p-6">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 space-y-2">
+            <h3 className="text-sm font-medium text-foreground">Reset all data</h3>
+            <p className="text-xs text-foreground/60">
+              Permanently deletes your profile and all generated CVs. You&apos;ll be sent back to onboarding to upload a fresh CV. Your Clerk account stays.
+            </p>
+            <form action={resetMyData}>
+              <button
+                type="submit"
+                onClick={(e) => {
+                  if (!confirm('Delete your profile and all CVs? This cannot be undone.')) {
+                    e.preventDefault();
+                  }
+                }}
+                className="mt-2 rounded-full bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-4 py-2 transition-colors"
+              >
+                Delete my data &amp; re-onboard
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

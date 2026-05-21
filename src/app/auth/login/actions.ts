@@ -1,95 +1,64 @@
 'use server'
 
 import { redirect } from "next/navigation";
-import { getAuthenticatedUser } from "@/utils/auth";
+import { auth } from "@clerk/nextjs/server";
 import { deleteProfileByUserId, deleteResumesByUserId } from "@/lib/db";
 import type { AuthFormState } from "@/components/auth/auth-form-state";
 
-interface AuthResult {
-  success: boolean;
-  error?: string;
+// Auth is now handled by Clerk. These exports are kept for any callers
+// that still import them — they redirect to Clerk's flows.
+
+export async function login() {
+  redirect('/sign-in');
 }
 
-// Login - CF Access handles authentication, just redirect home
-export async function login(): Promise<AuthResult> {
-  redirect('/')
-  return { success: true }
+export async function signup() {
+  redirect('/sign-up');
 }
 
-// Signup - CF Access handles authentication, just redirect home
-export async function signup(): Promise<AuthResult> {
-  redirect('/')
-  return { success: true }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function loginWithState(_previousState: AuthFormState, _formData: FormData): Promise<AuthFormState> {
-  redirect('/')
-  return { status: "success" };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function signupWithState(_previousState: AuthFormState, _formData: FormData): Promise<AuthFormState> {
-  redirect('/')
-  return { status: "success" };
-}
-
-// Logout - just redirect to home (CF Access handles session)
 export async function logout() {
-  redirect('/');
+  // Clerk's UserButton handles client-side sign-out. This server action is
+  // a fallback that redirects to the sign-in page.
+  redirect('/sign-in');
 }
 
-// Check if user is authenticated
+// Legacy stubs for old auth forms that haven't been removed yet.
+// They redirect to Clerk's hosted UI rather than attempt login themselves.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function loginWithState(_prev: AuthFormState, _data: FormData): Promise<AuthFormState> {
+  redirect('/sign-in');
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function signupWithState(_prev: AuthFormState, _data: FormData): Promise<AuthFormState> {
+  redirect('/sign-up');
+}
+
 export async function checkAuth(): Promise<{
   authenticated: boolean;
-  user?: { id: string; email?: string | null } | null
+  user?: { id: string; email?: string | null } | null;
 }> {
-  try {
-    const user = await getAuthenticatedUser();
-    return {
-      authenticated: true,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
-    };
-  } catch (error) {
-    console.error('Unexpected error during auth check:', error);
-    return { authenticated: false };
-  }
+  const { userId } = await auth();
+  return { authenticated: !!userId, user: userId ? { id: userId } : null };
 }
 
-// Get user ID if authenticated
 export async function getUserId(): Promise<string | null> {
-  try {
-    const user = await getAuthenticatedUser();
-    return user.id;
-  } catch (error) {
-    console.error('Error getting user ID:', error);
-    return null;
-  }
+  const { userId } = await auth();
+  return userId ?? null;
 }
 
 export async function deleteUserAccount(formData: FormData) {
-  'use server'
-
-  const confirmation = formData.get('confirm')
+  const confirmation = formData.get('confirm');
   if (confirmation !== 'DELETE') {
-    throw new Error('Invalid confirmation text')
+    throw new Error('Invalid confirmation text');
   }
 
-  try {
-    const user = await getAuthenticatedUser();
+  const { userId } = await auth();
+  if (!userId) throw new Error('UNAUTHENTICATED');
 
-    // Delete user data from profiles table
-    await deleteProfileByUserId(user.id);
+  await deleteProfileByUserId(userId);
+  await deleteResumesByUserId(userId);
 
-    // Delete user's resumes
-    await deleteResumesByUserId(user.id);
-  } catch (error) {
-    console.error('Account deletion failed:', error)
-    throw error
-  }
-
-  redirect('/')
+  // Note: the Clerk user account itself isn't deleted — user must do that
+  // separately from their account settings.
+  redirect('/');
 }

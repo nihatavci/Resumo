@@ -49,3 +49,6 @@ next-env.d.ts
 
 .__tests__
 /tests
+# Clerk + local env vars
+.env.local
+.dev.vars
