@@ -3,7 +3,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useRef, useState } from 'react';
-import { Send, Sparkles, Loader2, Wand2 } from 'lucide-react';
+import { Send, Sparkles, Loader2, Wand2, Copy, Check } from 'lucide-react';
 import type { Resume } from '@/lib/types';
 import type { ProposedChanges } from './types';
 import { parseMessageSegments } from './chat-message-parser';
@@ -184,6 +184,27 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady }: Ta
   );
 }
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copy message"
+      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-foreground/10 text-foreground/40 hover:text-foreground/70"
+    >
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
+  );
+}
+
 function MessageBubble({
   role,
   content,
@@ -199,13 +220,18 @@ function MessageBubble({
   const segments = isUser ? null : parseMessageSegments(content);
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`group flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       {isUser ? (
-        <div className="max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-foreground text-background">
-          <p className="whitespace-pre-wrap">{content}</p>
+        <div className="relative max-w-[85%]">
+          <div className="rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-foreground text-background">
+            <p className="whitespace-pre-wrap">{content}</p>
+          </div>
+          <div className="absolute -bottom-5 right-1 flex items-center">
+            <CopyButton text={content} />
+          </div>
         </div>
       ) : (
-        <div className="max-w-[88%] space-y-2">
+        <div className="relative max-w-[88%] space-y-2">
           {segments?.map((seg, i) =>
             seg.type === 'ats' ? (
               <AtsTipCard key={i} content={seg.content} />
@@ -221,6 +247,11 @@ function MessageBubble({
           {toolInvocations.map((inv, idx) => (
             <ToolInvocationView key={inv.toolCallId ?? idx} inv={inv} />
           ))}
+          {content && (
+            <div className="flex items-center">
+              <CopyButton text={content} />
+            </div>
+          )}
         </div>
       )}
     </div>
