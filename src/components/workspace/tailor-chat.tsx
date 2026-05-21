@@ -2,8 +2,8 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { useEffect, useRef } from 'react';
-import { Send, Sparkles, Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Send, Sparkles, Loader2, Wand2 } from 'lucide-react';
 import type { Resume } from '@/lib/types';
 import type { ProposedChanges } from './types';
 
@@ -22,35 +22,53 @@ interface ToolInvocation {
 }
 
 export function TailorChat({ masterResume, onProposedChanges, onApplyReady }: TailorChatProps) {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/tailor-chat',
     body: { masterResume },
+    onError: (err) => {
+      console.error('[tailor-chat client] error:', err);
+    },
+    onFinish: (msg) => {
+      console.log('[tailor-chat client] finished:', msg);
+    },
   });
 
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // The "Generate tailored CV" button is enabled once there's at least one
+  // assistant reply (meaning the AI has acknowledged a JD)
+  const hasContext = messages.some((m) => m.role === 'assistant' && m.content.length > 50);
+
+  async function handleGenerate() {
+    setGenerating(true);
+    setGenerateError(null);
+    try {
+      const res = await fetch('/api/tailor-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, masterResume }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+      const data = (await res.json()) as ProposedChanges & { proposed?: boolean };
+      if (!data.proposed) throw new Error('Invalid response');
+      onProposedChanges(data);
+      onApplyReady(true);
+    } catch (err) {
+      console.error('[tailor-generate] error:', err);
+      setGenerateError(err instanceof Error ? err.message : 'Generation failed');
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
-
-  // Forward the latest propose_changes tool result to the parent
-  useEffect(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const m = messages[i];
-      if (m.role !== 'assistant') continue;
-      const invocations = (m as unknown as { toolInvocations?: ToolInvocation[] }).toolInvocations ?? [];
-      for (const inv of invocations) {
-        if (inv.toolName === 'propose_changes' && inv.state === 'result') {
-          const r = inv.result as ProposedChanges & { proposed?: boolean };
-          if (r && r.proposed) {
-            onProposedChanges(r);
-            onApplyReady(true);
-            return;
-          }
-        }
-      }
-    }
-  }, [messages, onProposedChanges, onApplyReady]);
 
   return (
     <div className="h-full flex flex-col bg-dia-canvas">
@@ -97,37 +115,70 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady }: Ta
             Thinking…
           </div>
         )}
+
+        {error && (
+          <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-xs text-red-700">
+            <p className="font-medium mb-1">The assistant ran into an error</p>
+            <p className="text-red-600 leading-relaxed">{error.message}</p>
+            <p className="text-red-500/70 mt-2">Check browser DevTools console for details.</p>
+          </div>
+        )}
       </div>
 
-      {/* Input */}
-      <form
-        onSubmit={handleSubmit}
-        className="flex-shrink-0 px-6 py-4 border-t border-dia-divider bg-dia-canvas"
-      >
-        <div className="flex items-end gap-2">
-          <textarea
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e as unknown as React.FormEvent);
-              }
-            }}
-            placeholder="Paste a job URL, or chat with the assistant…"
-            rows={2}
-            className="flex-1 resize-none rounded-2xl border border-dia-divider bg-white px-4 py-2.5 text-sm text-foreground outline-none focus:border-foreground/40 transition-colors placeholder:text-foreground/30"
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="h-10 w-10 rounded-full bg-foreground text-background flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 transition-opacity flex-shrink-0"
-          >
-            <Send className="h-4 w-4" />
-          </button>
-        </div>
-      </form>
+      {/* Input + Generate button */}
+      <div className="flex-shrink-0 px-6 py-4 border-t border-dia-divider bg-dia-canvas space-y-2">
+        {generateError && (
+          <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+            {generateError}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="flex items-end gap-2">
+            <textarea
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e as unknown as React.FormEvent);
+                }
+              }}
+              placeholder="Paste a job URL or description, or chat with the assistant…"
+              rows={2}
+              className="flex-1 resize-none rounded-2xl border border-dia-divider bg-white px-4 py-2.5 text-sm text-foreground outline-none focus:border-foreground/40 transition-colors placeholder:text-foreground/30"
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="h-10 w-10 rounded-full bg-foreground text-background flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 transition-opacity flex-shrink-0"
+              title="Send message"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+        </form>
+
+        <button
+          onClick={handleGenerate}
+          disabled={!hasContext || generating || isLoading}
+          className="w-full flex items-center justify-center gap-2 rounded-2xl bg-foreground text-background text-sm font-medium py-2.5 disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+          title={!hasContext ? 'Discuss the job with the assistant first' : 'Generate the tailored CV'}
+        >
+          {generating ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Generating tailored CV…
+            </>
+          ) : (
+            <>
+              <Wand2 className="h-4 w-4" />
+              Generate tailored CV
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
@@ -176,22 +227,6 @@ function ToolInvocationView({ inv }: { inv: ToolInvocation }) {
       );
     }
     return <p className="text-xs text-amber-600 italic mt-1">⚠ {r.error}</p>;
-  }
-
-  if (inv.toolName === 'propose_changes') {
-    if (inv.state !== 'result') {
-      return <p className="text-xs text-foreground/40 italic mt-1">Drafting changes…</p>;
-    }
-    const r = inv.result as { rationale?: string };
-    return (
-      <div className="mt-2 rounded-xl bg-foreground/5 px-3 py-2 text-xs text-foreground/70">
-        <p className="font-medium text-foreground/90 mb-1">Proposed changes ready</p>
-        {r.rationale && <p className="leading-snug">{r.rationale}</p>}
-        <p className="text-foreground/50 mt-1.5">
-          Review the preview on the right, then click <strong>Apply</strong>.
-        </p>
-      </div>
-    );
   }
 
   return null;
