@@ -110,12 +110,19 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady }: Ta
           );
         })}
 
-        {isLoading && (
-          <div className="flex items-center gap-2 text-sm text-foreground/40">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            Thinking…
-          </div>
-        )}
+        {isLoading && (() => {
+          // If the last user message has a URL, we're pre-scraping server-side
+          const lastMsg = messages[messages.length - 1];
+          const hasUrl = lastMsg?.role === 'user' &&
+            typeof lastMsg.content === 'string' &&
+            /https?:\/\//.test(lastMsg.content);
+          return (
+            <div className="flex items-center gap-2 text-sm text-foreground/40">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              {hasUrl ? 'Fetching job posting…' : 'Thinking…'}
+            </div>
+          );
+        })()}
 
         {error && (
           <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-xs text-red-700">

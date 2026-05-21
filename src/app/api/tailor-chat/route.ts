@@ -1,6 +1,5 @@
 // src/app/api/tailor-chat/route.ts
-import { streamText, tool, convertToCoreMessages, type Message } from 'ai';
-import { z } from 'zod';
+import { streamText, convertToCoreMessages, type Message } from 'ai';
 import { auth } from '@clerk/nextjs/server';
 import { startAIUsageRequest, finishAIUsageRequest } from '@/lib/ai/usage-ledger';
 import { scrapeJobUrl } from '@/utils/actions/scrape';
@@ -9,16 +8,50 @@ import type { Resume } from '@/lib/types';
 /**
  * Streaming chat for the tailoring conversation.
  *
- * Architecture: this endpoint runs free-form chat (no structured tool calls).
- * Workers AI's tool-calling support over Vercel AI SDK is inconsistent, so
- * we keep the chat conversational. When the user clicks "Generate tailored
- * CV" the client calls a SEPARATE endpoint that uses generateObject (proven
- * reliable) to produce the structured changes.
- *
- * The only tool we provide is `scrape_job_url` because that's a deterministic
- * action — if the model decides to call it, fine; if not, the user can just
- * paste the JD text.
+ * Scraping is done SERVER-SIDE before the AI sees anything.
+ * The AI never makes tool calls — it just gets clean text.
+ * This eliminates all "tool call failed" errors from the AI.
  */
+
+const URL_REGEX = /https?:\/\/[^\s"'<>()]+/gi;
+
+/**
+ * Extract the first URL from a message string.
+ */
+function extractUrl(text: string): string | null {
+  const match = text.match(URL_REGEX);
+  return match?.[0] ?? null;
+}
+
+/**
+ * Pre-process the latest user message:
+ * - If it contains a URL, scrape it server-side and inject the result
+ * - Returns the enriched message content string
+ */
+async function enrichUserMessage(content: string): Promise<string> {
+  const url = extractUrl(content);
+  if (!url) return content; // No URL — return as-is
+
+  console.log('[tailor-chat] pre-scraping URL:', url);
+  const result = await scrapeJobUrl(url);
+
+  if (result.ok && result.text) {
+    // Replace the URL in the message with the scraped content
+    const withoutUrl = content.replace(url, '').trim();
+    const prefix = withoutUrl ? `${withoutUrl}\n\n` : '';
+    return `${prefix}[Job posting fetched from ${url}${result.title ? ` — ${result.title}` : ''}]\n\n${result.text}`;
+  }
+
+  // Scrape failed — remove the URL and tell the AI scraping failed
+  const withoutUrl = content.replace(url, '').trim();
+  if (withoutUrl.length > 100) {
+    // User also pasted text — just use that, ignore URL failure silently
+    return withoutUrl;
+  }
+
+  // No useful text — instruct AI to ask for paste
+  return `[URL provided: ${url} — scraping failed, site blocked]\n${withoutUrl}`;
+}
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -38,11 +71,23 @@ export async function POST(req: Request) {
     isPro: true,
   });
 
+  // Pre-process the latest user message to handle URLs server-side
+  const processedMessages = [...messages];
+  const lastUserIdx = [...processedMessages].map(m => m.role).lastIndexOf('user');
+  if (lastUserIdx !== -1) {
+    const lastUser = processedMessages[lastUserIdx];
+    const rawContent = typeof lastUser.content === 'string' ? lastUser.content : '';
+    if (rawContent && extractUrl(rawContent)) {
+      const enriched = await enrichUserMessage(rawContent);
+      processedMessages[lastUserIdx] = { ...lastUser, content: enriched };
+    }
+  }
+
   const systemPrompt = `You are a sharp resume strategist. You help candidates tailor their CV for a specific job.
 
 CONVERSATION STYLE:
 - Be direct and concise. No long paragraphs.
-- You can ask smart follow-up questions — max 1 at a time — to sharpen the tailoring. e.g. "Want me to lean into your B2B experience or your technical background?" or "Is this a senior IC or a management role?"
+- You can ask smart follow-up questions — max 1 at a time — to sharpen the tailoring.
 - After the user answers, update your plan accordingly and confirm.
 - Once you have enough context, end with: "Ready? Click **Generate tailored CV** when you want to apply these changes."
 
@@ -64,17 +109,18 @@ Then, if you have ATS-specific advice (keyword gaps, missing metrics, formatting
 Then ask your one follow-up question if you need to sharpen the plan.
 
 FOR FOLLOW-UP MESSAGES (after the initial analysis):
-- Respond conversationally and concisely — update the plan, answer questions, incorporate what the user tells you.
+- Respond conversationally and concisely — update the plan, answer questions.
 - Re-emit the :::ats block only if new ATS tips emerge.
 - Keep responses under 6 lines unless the user asks for detail.
+
+IMPORTANT — if you see "[URL provided: ... — scraping failed]" in the user message:
+- If there is no other text: reply with exactly one line: "I couldn't fetch that page. Please paste the job description text here and I'll analyse it instantly."
+- Never mention scraping, function calls, or technical errors.
 
 Rules:
 - Never use markdown headers (##, ###).
 - Never invent experience the candidate doesn't have.
-- If the user provides a URL, call scrape_job_url first, then respond in the format above.
-- If scrape_job_url fails AND the user has also pasted job description text in the same message, IGNORE the scraping error and analyse the pasted text directly — do not mention the failure.
-- If scrape_job_url fails AND there is no pasted text, say in one line: "I couldn't fetch that URL. Paste the job description text here and I'll analyse it." Then stop.
-- Never say the scraping "was not successful" — just ask for the text and move on.
+- Never mention tool calls, function calls, or scraping errors to the user.
 
 MASTER CV (for context — do not repeat this to the user):
 ${JSON.stringify(
@@ -98,21 +144,10 @@ ${JSON.stringify(
       model,
       messages: [
         { role: 'system', content: systemPrompt },
-        ...convertToCoreMessages(messages),
+        ...convertToCoreMessages(processedMessages),
       ],
-      tools: {
-        scrape_job_url: tool({
-          description:
-            'Fetch a public job posting from a URL and return its text. Use whenever the user provides a URL.',
-          parameters: z.object({
-            url: z.string().describe('The URL of the job posting'),
-          }),
-          execute: async ({ url }) => {
-            return await scrapeJobUrl(url);
-          },
-        }),
-      },
-      maxSteps: 3,
+      // No tools — scraping is handled server-side before the AI sees the message
+      maxSteps: 1,
       onFinish: async ({ usage, finishReason }) => {
         console.log('[tailor-chat] finished, reason:', finishReason);
         await finishAIUsageRequest({ usageEventId, status: 'succeeded', usage });
