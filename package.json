@@ -127,5 +127,10 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "zod-to-json-schema": "3.23.5"
+    }
   }
 }
