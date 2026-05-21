@@ -20,6 +20,9 @@ export type MessageSegment =
 export function parseMessageSegments(content: string): MessageSegment[] {
   const segments: MessageSegment[] = [];
   // Match :::ats\n...\n::: blocks (multiline, non-greedy)
+  // Regex is created inside the function (not module-level) so it starts with lastIndex=0 each call.
+  // We manually track position via content.slice(lastIndex, match.index), not via regex.lastIndex.
+  // If the AI emits an :::ats block without a closing :::, it silently becomes trailing text — acceptable fallback.
   const ATSFence = /:::ats\n([\s\S]*?)\n:::/g;
 
   let lastIndex = 0;
