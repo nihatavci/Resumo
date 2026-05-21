@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Send, Sparkles, Loader2, Wand2, Copy, Check } from 'lucide-react';
 import type { Resume } from '@/lib/types';
 import type { ProposedChanges } from './types';
-import { parseMessageSegments } from './chat-message-parser';
+import { parseMessageSegments, parseAnalysisLines } from './chat-message-parser';
 
 interface TailorChatProps {
   masterResume: Resume;
@@ -238,17 +238,12 @@ function MessageBubble({
           </div>
         </div>
       ) : (
-        <div className="relative max-w-[88%] space-y-2">
+        <div className="relative max-w-[92%] space-y-2">
           {segments?.map((seg, i) =>
             seg.type === 'ats' ? (
-              <AtsTipCard key={i} content={seg.content} />
+              <AtsTipBadges key={i} content={seg.content} />
             ) : (
-              <div
-                key={i}
-                className="rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-white border border-dia-divider text-foreground"
-              >
-                <p className="whitespace-pre-wrap">{seg.content}</p>
-              </div>
+              <AnalysisBubble key={i} content={seg.content} />
             )
           )}
           {toolInvocations.map((inv, idx) => (
@@ -265,18 +260,78 @@ function MessageBubble({
   );
 }
 
-function AtsTipCard({ content }: { content: string }) {
+/** Renders the structured 📋/🎯/✅/🔧/⚠️ analysis block with visual row treatment */
+function AnalysisBubble({ content }: { content: string }) {
+  const lines = parseAnalysisLines(content);
+  const hasStructured = lines.some((l) => !('raw' in l));
+
+  if (!hasStructured) {
+    // Plain conversational message
+    return (
+      <div className="rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-white border border-dia-divider text-foreground">
+        <p className="whitespace-pre-wrap">{content}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-dia-divider bg-white overflow-hidden text-sm">
+      {lines.map((line, i) => {
+        if ('raw' in line) {
+          if (!line.raw || line.raw.length === 0) return null;
+          return (
+            <p key={i} className="px-4 py-2.5 text-foreground/80 leading-relaxed border-t border-dia-divider/50 first:border-t-0">
+              {line.raw}
+            </p>
+          );
+        }
+        const rowStyle = getRowStyle(line.emoji);
+        return (
+          <div key={i} className={`flex items-start gap-3 px-4 py-2.5 border-t border-dia-divider/40 first:border-t-0 ${rowStyle.bg}`}>
+            <span className="text-base leading-tight mt-0.5 flex-shrink-0">{line.emoji}</span>
+            <div className="min-w-0">
+              <span className={`text-[10px] font-semibold tracking-wider uppercase ${rowStyle.label} block mb-0.5`}>
+                {line.label}
+              </span>
+              <span className="text-foreground leading-snug">{line.value}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function getRowStyle(emoji: string): { bg: string; label: string } {
+  switch (emoji) {
+    case '📋': return { bg: 'bg-foreground/[0.02]', label: 'text-foreground/50' };
+    case '🎯': return { bg: 'bg-blue-50/60',        label: 'text-blue-500' };
+    case '✅': return { bg: 'bg-emerald-50/60',      label: 'text-emerald-600' };
+    case '🔧': return { bg: 'bg-violet-50/60',       label: 'text-violet-500' };
+    case '⚠️':
+    case '⚠':  return { bg: 'bg-amber-50/60',        label: 'text-amber-600' };
+    default:   return { bg: '',                       label: 'text-foreground/50' };
+  }
+}
+
+/** ATS tips rendered as pill badges */
+function AtsTipBadges({ content }: { content: string }) {
   const tips = content.split('\n').filter((line) => line.trim().length > 0);
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 space-y-1.5">
+    <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 space-y-2.5">
       <p className="text-[10px] font-semibold tracking-widest uppercase text-amber-600">
         ATS Tips
       </p>
-      {tips.map((tip, i) => (
-        <p key={i} className="text-xs font-mono text-amber-800 leading-snug">
-          · {tip}
-        </p>
-      ))}
+      <div className="flex flex-wrap gap-1.5">
+        {tips.map((tip, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center rounded-full border border-amber-300 bg-white px-2.5 py-1 text-xs text-amber-800 leading-none"
+          >
+            {tip}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

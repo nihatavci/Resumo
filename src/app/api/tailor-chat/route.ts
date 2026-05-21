@@ -122,7 +122,7 @@ Rules:
 - Never invent experience the candidate doesn't have.
 - Never mention tool calls, function calls, or scraping errors to the user.
 
-MASTER CV (for context — do not repeat this to the user):
+MASTER CV (for context — do not repeat verbatim, but use specific facts and bullets in your suggestions):
 ${JSON.stringify(
   {
     professional_summary: masterResume.professional_summary,
@@ -130,9 +130,11 @@ ${JSON.stringify(
       company: w.company,
       position: w.position,
       date: w.date,
-      bullet_count: w.description?.length ?? 0,
+      location: w.location,
+      bullets: w.description ?? [],
+      technologies: w.technologies ?? [],
     })),
-    skills: masterResume.skills?.map((s) => s.category),
+    skills: masterResume.skills?.map((s) => ({ category: s.category, items: s.items })),
     education: masterResume.education?.map((e) => `${e.degree} ${e.field ?? ''} at ${e.school}`),
   },
   null,
