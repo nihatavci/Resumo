@@ -256,7 +256,8 @@ function ToolInvocationView({ inv }: { inv: ToolInvocation }) {
         </p>
       );
     }
-    return <p className="text-xs text-amber-600 italic mt-1">⚠ {r.error}</p>;
+    // Don't show a scary error — the AI will ask for pasted text instead
+    return null;
   }
 
   return null;

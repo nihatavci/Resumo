@@ -72,6 +72,9 @@ Rules:
 - Never use markdown headers (##, ###).
 - Never invent experience the candidate doesn't have.
 - If the user provides a URL, call scrape_job_url first, then respond in the format above.
+- If scrape_job_url fails AND the user has also pasted job description text in the same message, IGNORE the scraping error and analyse the pasted text directly — do not mention the failure.
+- If scrape_job_url fails AND there is no pasted text, say in one line: "I couldn't fetch that URL. Paste the job description text here and I'll analyse it." Then stop.
+- Never say the scraping "was not successful" — just ask for the text and move on.
 
 MASTER CV (for context — do not repeat this to the user):
 ${JSON.stringify(
