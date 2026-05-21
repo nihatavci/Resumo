@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Send, Sparkles, Loader2, Wand2 } from 'lucide-react';
 import type { Resume } from '@/lib/types';
 import type { ProposedChanges } from './types';
+import { parseMessageSegments } from './chat-message-parser';
 
 interface TailorChatProps {
   masterResume: Resume;
@@ -195,20 +196,49 @@ function MessageBubble({
   const isUser = role === 'user';
   if (role === 'system') return null;
 
+  const segments = isUser ? null : parseMessageSegments(content);
+
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-          isUser
-            ? 'bg-foreground text-background'
-            : 'bg-white border border-dia-divider text-foreground'
-        }`}
-      >
-        {content && <p className="whitespace-pre-wrap">{content}</p>}
-        {toolInvocations.map((inv, idx) => (
-          <ToolInvocationView key={inv.toolCallId ?? idx} inv={inv} />
-        ))}
-      </div>
+      {isUser ? (
+        <div className="max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-foreground text-background">
+          <p className="whitespace-pre-wrap">{content}</p>
+        </div>
+      ) : (
+        <div className="max-w-[88%] space-y-2">
+          {segments?.map((seg, i) =>
+            seg.type === 'ats' ? (
+              <AtsTipCard key={i} content={seg.content} />
+            ) : (
+              <div
+                key={i}
+                className="rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-white border border-dia-divider text-foreground"
+              >
+                <p className="whitespace-pre-wrap">{seg.content}</p>
+              </div>
+            )
+          )}
+          {toolInvocations.map((inv, idx) => (
+            <ToolInvocationView key={inv.toolCallId ?? idx} inv={inv} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AtsTipCard({ content }: { content: string }) {
+  const tips = content.split('\n').filter((line) => line.trim().length > 0);
+  return (
+    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 space-y-1.5">
+      <p className="text-[10px] font-semibold tracking-widest uppercase text-amber-600">
+        ATS Tips
+      </p>
+      {tips.map((tip, i) => (
+        <p key={i} className="text-xs font-mono text-amber-800 leading-snug">
+          · {tip}
+        </p>
+      ))}
     </div>
   );
 }
