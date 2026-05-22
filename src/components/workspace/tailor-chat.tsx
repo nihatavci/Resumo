@@ -53,7 +53,7 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
       const res = await fetch('/api/tailor-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages, masterResume }),
+        body: JSON.stringify({ messages, masterResume, memoryPoints }),
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };

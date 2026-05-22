@@ -45,8 +45,9 @@ export async function POST(req: Request) {
   const body = (await req.json()) as {
     messages: Message[];
     masterResume: Resume;
+    memoryPoints?: string[];
   };
-  const { messages, masterResume } = body;
+  const { messages, masterResume, memoryPoints } = body;
 
   console.log('[tailor-generate] start, chat history length:', messages.length);
 
@@ -65,15 +66,30 @@ export async function POST(req: Request) {
   const systemPrompt = `You are an ATS resume tailoring expert.
 Given (1) the candidate's MASTER CV, (2) a chat conversation where the user has discussed a target job and any preferences, produce the final tailored resume.
 
-CRITICAL RULES:
-1. PRESERVE ALL FACTS — every company, position, date, location, and metric must remain exactly as in the master. Never invent achievements.
-2. Return EXACTLY ${masterResume.work_experience?.length ?? 0} work_experience entries — the SAME number as the master. Never drop or merge jobs.
-3. For each work_experience entry:
-   - Keep company/position/date/location unchanged.
-   - REWRITE bullets to use action verbs and keywords from the job description (mentioned in the chat) WHERE THE CANDIDATE ACTUALLY DID THAT WORK.
-   - Reorder bullets so the most relevant ones come first.
-4. For skills: reorder so JD-relevant categories and items come first. May rename a category to match JD terminology. Never invent skills.
-5. Provide a rationale: 2-3 sentences plain English on what changed and why.`;
+CRITICAL RULES — THESE ARE ABSOLUTE AND NON-NEGOTIABLE:
+
+1. ZERO FABRICATION. Never add any concept, industry term, technology, platform, metric, responsibility, or context that does not already appear word-for-word (or by unmistakable implication) in the original bullet for that specific role. If the original bullet says nothing about E-Commerce, you cannot write E-Commerce. If the original says nothing about cloud, you cannot write cloud. This rule has no exceptions.
+
+2. PRESERVE ALL FACTS. Every company, position, date, location, and metric must remain exactly as in the master. Never invent achievements, numbers, or technologies.
+
+3. Return EXACTLY ${masterResume.work_experience?.length ?? 0} work_experience entries — the SAME number as the master. Never drop or merge jobs.
+
+4. For each bullet point, the ONLY allowed changes are:
+   a) Start with a stronger action verb (e.g. "Managed" → "Led").
+   b) Reorder clauses within the same bullet for better flow.
+   c) Make an existing metric more prominent.
+   d) Remove a weak filler phrase (e.g. "responsible for").
+   You CANNOT add new facts, skills, platforms, industries, or contexts.
+
+5. If a keyword from the job description does not already appear in the candidate's bullets for a given role — DO NOT add it to that role. Either skip it or surface it as a gap in the rationale. Never inject JD keywords into bullets where the candidate did not do that work.
+
+6. For skills: reorder so JD-relevant categories and items come first. You may rename a category to better match JD terminology only if the underlying skills are identical. Never invent skills not listed in the master.
+
+7. Provide a rationale: 2-3 sentences in plain English describing only the changes actually made (reordering, stronger verbs, etc.) and any keyword gaps that could not be addressed because the experience isn't there.
+${memoryPoints && memoryPoints.length > 0 ? `
+
+AGREED DECISIONS FROM CHAT (apply these specifically when tailoring):
+${memoryPoints.map((p) => `- ${p}`).join('\n')}` : ''}`;
 
   try {
     const { object, usage } = await generateObject({
@@ -95,7 +111,9 @@ ${JSON.stringify(
 CONVERSATION (most recent at the bottom):
 ${chatHistory}
 
-Produce the tailored version now. Return exactly ${masterResume.work_experience?.length ?? 0} work_experience entries.`,
+Produce the tailored version now. Return exactly ${masterResume.work_experience?.length ?? 0} work_experience entries.
+
+FINAL REMINDER BEFORE YOU OUTPUT: Read each bullet you are about to write and ask yourself — "Does this exact concept appear in the original bullet?" If NO, remove it. You are a copyeditor, not a ghostwriter. Strengthen what exists. Never invent.`,
     });
 
     await finishAIUsageRequest({ usageEventId, status: 'succeeded', usage });
