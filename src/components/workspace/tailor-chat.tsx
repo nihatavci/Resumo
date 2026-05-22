@@ -179,44 +179,7 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
         </p>
       </div>
 
-      {/* Memory rail — shown only when chips exist */}
-      {memoryPoints.length > 0 && (
-        <div className="flex-shrink-0 px-4 py-2 border-b border-dia-divider/60 bg-white/60">
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/30 flex-shrink-0 mr-1">
-              Plan
-            </span>
-            {memoryPoints.map((point, i) => {
-              const isGap = /^(flag|gap|⚠)/i.test(point);
-              return (
-                <span
-                  key={point}
-                  className={`inline-flex items-center gap-1.5 flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
-                    isGap
-                      ? 'border-amber-200 bg-amber-50 text-amber-800'
-                      : 'border-violet-200 bg-violet-50 text-violet-800'
-                  }`}
-                >
-                  <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${isGap ? 'bg-amber-400' : 'bg-violet-400'}`} />
-                  {point}
-                  <button
-                    onClick={() => {
-                      const label = point.toLowerCase().trim();
-                      dismissedPointsRef.current.add(label);
-                      setMemoryPoints((prev) => prev.filter((_, j) => j !== i));
-                    }}
-                    className="ml-0.5 opacity-50 hover:opacity-100 transition-opacity text-xs leading-none"
-                    title="Dismiss"
-                    aria-label="Dismiss"
-                  >
-                    ×
-                  </button>
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* no chip rail here — plan card lives above the input */}
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
@@ -302,6 +265,9 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
         )}
       </div>
 
+      {/* Change plan card — live summary of agreed changes, pinned above input */}
+      <ChangePlanCard points={memoryPoints} />
+
       {/* Input + Generate button */}
       <div className="flex-shrink-0 px-6 py-4 border-t border-dia-divider bg-dia-canvas space-y-2">
         {generateError && (
@@ -374,6 +340,60 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
           </span>
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Floating "Change plan" summary card — pinned between messages and input.
+ * Replaces itself smoothly as memory points update throughout the conversation.
+ * Shows nothing when there are no agreed changes yet.
+ */
+function ChangePlanCard({ points }: { points: string[] }) {
+  const [open, setOpen] = useState(true);
+
+  if (points.length === 0) return null;
+
+  const actions = points.filter((p) => !/^(flag|gap|⚠)/i.test(p));
+  const gaps = points.filter((p) => /^(flag|gap|⚠)/i.test(p));
+
+  return (
+    <div className="flex-shrink-0 mx-4 mb-2 rounded-2xl border border-foreground/8 bg-white shadow-sm overflow-hidden">
+      {/* Header row */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-foreground/[0.02] transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/35">
+            Change plan
+          </span>
+          {/* live badge */}
+          <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 text-violet-600 text-[10px] font-semibold px-1.5 py-0.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse" />
+            {points.length}
+          </span>
+        </div>
+        <span className="text-foreground/25 text-xs">{open ? '▾' : '▸'}</span>
+      </button>
+
+      {/* Body */}
+      {open && (
+        <div className="px-4 pb-3 space-y-1">
+          {actions.map((p, i) => (
+            <div key={i} className="flex items-start gap-2 text-[12px] text-foreground/70 leading-snug">
+              <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-violet-400 flex-shrink-0" />
+              <span>{p}</span>
+            </div>
+          ))}
+          {gaps.map((p, i) => (
+            <div key={i} className="flex items-start gap-2 text-[12px] text-amber-700 leading-snug">
+              <span className="mt-[3px] h-1.5 w-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+              <span>{p}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
