@@ -43,14 +43,26 @@ export function parseMessageSegments(content: string): MessageSegment[] {
     lastIndex = match.index + match[0].length;
   }
 
-  const tail = normalised.slice(lastIndex).trim();
+  // Grab remaining text after last fence, stripping any unclosed :::type markers
+  const rawTail = normalised.slice(lastIndex);
+  const tail = stripUnclosedFences(rawTail).trim();
   if (tail) segments.push({ type: 'text', content: tail });
 
   if (segments.length === 0 && normalised.trim()) {
-    segments.push({ type: 'text', content: normalised.trim() });
+    segments.push({ type: 'text', content: stripUnclosedFences(normalised).trim() });
   }
 
   return segments;
+}
+
+/**
+ * Remove any unclosed :::type...  fence markers from raw text.
+ * If the AI emits :::ats\nTip text without a closing \n::: the regex
+ * won't match, and the raw marker leaks into a text segment.
+ */
+function stripUnclosedFences(text: string): string {
+  // Remove any :::word that was NOT already consumed by the fence regex
+  return text.replace(/:::(?:ats|memory|match)[^\n]*/g, '').trim();
 }
 
 /** Emoji prefixes used in the structured analysis lines */

@@ -436,30 +436,35 @@ function MessageBubble({
   return (
     <div className={`group flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       {isUser ? (
-        <div className="relative max-w-[85%]">
-          <div className="rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-foreground text-background">
+        /* ── User bubble ── */
+        <div className="relative max-w-[80%]">
+          <div
+            className="px-4 py-2.5 text-dia-body-sm leading-relaxed text-background"
+            style={{ background: 'hsl(var(--foreground))', borderRadius: 20 }}
+          >
             <p className="whitespace-pre-wrap">{content}</p>
           </div>
-          <div className="absolute -bottom-5 right-1 flex items-center">
+          <div className="absolute -bottom-5 right-1">
             <CopyButton text={content} />
           </div>
         </div>
       ) : (
-        <div className="relative max-w-[92%] space-y-2">
+        /* ── Assistant message ── */
+        <div className="w-full space-y-2">
           {segments?.map((seg, i) =>
             seg.type === 'ats' ? (
-              <AtsTipBadges key={i} content={seg.content} />
+              <AtsTipList key={i} content={seg.content} />
             ) : seg.type === 'match' ? (
               <MatchMapCard key={i} content={seg.content} />
             ) : seg.type === 'memory' ? null : (
-              <AnalysisBubble key={i} content={seg.content} />
+              <AssistantBlock key={i} content={seg.content} />
             )
           )}
           {toolInvocations.map((inv, idx) => (
             <ToolInvocationView key={inv.toolCallId ?? idx} inv={inv} />
           ))}
           {content && (
-            <div className="flex items-center">
+            <div>
               <CopyButton text={content} />
             </div>
           )}
@@ -469,40 +474,49 @@ function MessageBubble({
   );
 }
 
-/** Renders the structured 📋/🎯/✅/🔧/⚠️ analysis block with visual row treatment */
-function AnalysisBubble({ content }: { content: string }) {
+/**
+ * Renders assistant text: either a structured analysis card (emoji rows)
+ * or plain conversational prose — no heavy background, uses Dia tokens.
+ */
+function AssistantBlock({ content }: { content: string }) {
   const lines = parseAnalysisLines(content);
   const hasStructured = lines.some((l) => !('raw' in l));
 
   if (!hasStructured) {
-    // Plain conversational message
     return (
-      <div className="rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-white border border-dia-divider text-foreground">
-        <p className="whitespace-pre-wrap">{content}</p>
-      </div>
+      <p className="text-dia-body-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">
+        {content}
+      </p>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-dia-divider bg-white overflow-hidden text-sm">
+    <div className="rounded-[16px] border border-dia-divider bg-white overflow-hidden">
       {lines.map((line, i) => {
         if ('raw' in line) {
-          if (!line.raw || line.raw.length === 0) return null;
+          if (!line.raw) return null;
           return (
-            <p key={i} className="px-4 py-2.5 text-foreground/80 leading-relaxed border-t border-dia-divider/50 first:border-t-0">
+            <p
+              key={i}
+              className="px-4 py-3 text-dia-body-sm text-foreground/75 leading-relaxed border-t border-dia-divider first:border-t-0"
+            >
               {line.raw}
             </p>
           );
         }
-        const rowStyle = getRowStyle(line.emoji);
         return (
-          <div key={i} className={`flex items-start gap-3 px-4 py-2.5 border-t border-dia-divider/40 first:border-t-0 ${rowStyle.bg}`}>
-            <span className="text-base leading-tight mt-0.5 flex-shrink-0">{line.emoji}</span>
-            <div className="min-w-0">
-              <span className={`text-[10px] font-semibold tracking-wider uppercase ${rowStyle.label} block mb-0.5`}>
+          <div
+            key={i}
+            className="flex items-start gap-3 px-4 py-3 border-t border-dia-divider first:border-t-0"
+          >
+            <span className="text-[15px] leading-tight mt-[1px] flex-shrink-0 w-5 text-center">
+              {line.emoji}
+            </span>
+            <div className="min-w-0 flex-1">
+              <span className="block text-dia-caption font-semibold tracking-widest uppercase text-dia-tertiary mb-0.5">
                 {line.label}
               </span>
-              <span className="text-foreground leading-snug">{line.value}</span>
+              <span className="text-dia-body-sm text-foreground leading-snug">{line.value}</span>
             </div>
           </div>
         );
@@ -511,42 +525,33 @@ function AnalysisBubble({ content }: { content: string }) {
   );
 }
 
-function getRowStyle(emoji: string): { bg: string; label: string } {
-  switch (emoji) {
-    case '📋': return { bg: 'bg-foreground/[0.02]', label: 'text-foreground/50' };
-    case '🎯': return { bg: 'bg-blue-50/60',        label: 'text-blue-500' };
-    case '✅': return { bg: 'bg-emerald-50/60',      label: 'text-emerald-600' };
-    case '🔧': return { bg: 'bg-violet-50/60',       label: 'text-violet-500' };
-    case '⚠️':
-    case '⚠':  return { bg: 'bg-amber-50/60',        label: 'text-amber-600' };
-    case '💼': return { bg: 'bg-sky-50/60',          label: 'text-sky-500' };
-    case '🌍': return { bg: 'bg-teal-50/60',         label: 'text-teal-600' };
-    default:   return { bg: '',                       label: 'text-foreground/50' };
-  }
-}
-
-/** ATS tips rendered as pill badges */
-function AtsTipBadges({ content }: { content: string }) {
-  const tips = content.split('\n').filter((line) => line.trim().length > 0);
+/** ATS tips — clean numbered list, no garish colors */
+function AtsTipList({ content }: { content: string }) {
+  const tips = content
+    .split('\n')
+    .map((l) => l.replace(/^[-–•*]\s*/, '').trim())
+    .filter(Boolean);
+  if (tips.length === 0) return null;
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 space-y-2.5">
-      <p className="text-[10px] font-semibold tracking-widest uppercase text-amber-600">
-        ATS Tips
-      </p>
-      <div className="flex flex-wrap gap-1.5">
-        {tips.map((tip, i) => (
-          <span
-            key={i}
-            className="inline-flex items-center rounded-full border border-amber-300 bg-white px-2.5 py-1 text-xs text-amber-800 leading-none"
-          >
-            {tip}
-          </span>
-        ))}
+    <div className="rounded-[16px] border border-dia-divider bg-white overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-dia-divider">
+        <span className="text-dia-caption font-semibold tracking-widest uppercase text-dia-tertiary">
+          ATS Tips
+        </span>
       </div>
+      <ul className="px-4 py-2 space-y-1.5">
+        {tips.map((tip, i) => (
+          <li key={i} className="flex items-start gap-2 text-dia-body-sm text-foreground/75 leading-snug py-0.5">
+            <span className="flex-shrink-0 mt-[3px] h-1.5 w-1.5 rounded-full bg-dia-steel" />
+            {tip}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
+/** Company intel card — Dia tokens, no sky-blue */
 function CompanyIntelCard({
   culture,
   employerRep,
@@ -556,61 +561,73 @@ function CompanyIntelCard({
   employerRep: string;
   hiringSignals: string;
 }) {
+  const rows = [
+    { label: 'Culture', value: culture },
+    { label: 'Employer rep', value: employerRep },
+    { label: 'What they value', value: hiringSignals },
+  ];
   return (
-    <div className="rounded-2xl border border-sky-200 bg-sky-50/80 overflow-hidden text-sm">
-      <div className="px-4 py-2.5 border-b border-sky-200/60">
-        <p className="text-[10px] font-semibold tracking-widest uppercase text-sky-600">
-          🏢 Company Intel
-        </p>
+    <div className="rounded-[16px] border border-dia-divider bg-white overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-dia-divider">
+        <span className="text-dia-caption font-semibold tracking-widest uppercase text-dia-tertiary">
+          Company intel
+        </span>
       </div>
-      {[
-        { icon: '🌍', label: 'Culture', value: culture },
-        { icon: '⭐', label: 'Employer rep', value: employerRep },
-        { icon: '💡', label: 'What they value', value: hiringSignals },
-      ].map(({ icon, label, value }) => (
-        <div key={label} className="flex items-start gap-3 px-4 py-2.5 border-t border-sky-200/40 first:border-t-0">
-          <span className="text-base flex-shrink-0 mt-0.5">{icon}</span>
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-500 mb-0.5">{label}</p>
-            <p className="text-xs text-foreground/80 leading-snug">{value}</p>
-          </div>
+      {rows.map(({ label, value }) => (
+        <div key={label} className="px-4 py-3 border-t border-dia-divider first:border-t-0">
+          <p className="text-dia-caption font-semibold tracking-widest uppercase text-dia-tertiary mb-1">
+            {label}
+          </p>
+          <p className="text-dia-body-sm text-foreground/80 leading-snug">{value}</p>
         </div>
       ))}
     </div>
   );
 }
 
-/** Renders :::match fence content as a two-column table card */
+/** Match map — Dia card, full requirement text (no truncation), accent left border */
 function MatchMapCard({ content }: { content: string }) {
   const lines = parseMatchLines(content);
   if (lines.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-dia-divider bg-white overflow-hidden text-sm">
-      <div className="px-4 py-2.5 border-b border-dia-divider/50 flex items-center gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
+    <div className="rounded-[16px] border border-dia-divider bg-white overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-dia-divider">
+        <span className="text-dia-caption font-semibold tracking-widest uppercase text-dia-tertiary">
           Match map
         </span>
       </div>
       {lines.map((line, i) => {
-        const bg =
-          line.marker === '✅' ? 'bg-emerald-50/60' :
-          line.marker === '⚡' ? 'bg-amber-50/60' :
-          'bg-red-50/40';
-        const markerColor =
+        const dotColor =
+          line.marker === '✅' ? 'bg-emerald-500' :
+          line.marker === '⚡' ? 'bg-amber-400' :
+          'bg-red-400';
+        const markerLabel =
+          line.marker === '✅' ? 'Match' :
+          line.marker === '⚡' ? 'Partial' : 'Gap';
+        const markerText =
           line.marker === '✅' ? 'text-emerald-600' :
-          line.marker === '⚡' ? 'text-amber-500' :
+          line.marker === '⚡' ? 'text-amber-600' :
           'text-red-500';
 
         return (
           <div
             key={i}
-            className={`flex items-start gap-3 px-4 py-2 border-t border-dia-divider/30 first:border-t-0 ${bg}`}
+            className="flex items-start gap-3 px-4 py-3 border-t border-dia-divider first:border-t-0"
           >
-            <span className={`text-base flex-shrink-0 mt-0.5 ${markerColor}`}>{line.marker}</span>
-            <div className="min-w-0 flex-1 grid grid-cols-[1fr_1.5fr] gap-2">
-              <span className="text-xs font-medium text-foreground truncate">{line.requirement}</span>
-              <span className="text-xs text-foreground/60 leading-snug">{line.explanation}</span>
+            {/* Status dot + label */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-1 pt-0.5 w-12">
+              <span className={`h-2 w-2 rounded-full ${dotColor}`} />
+              <span className={`text-[9px] font-semibold uppercase tracking-wider ${markerText}`}>
+                {markerLabel}
+              </span>
+            </div>
+            {/* Requirement + explanation */}
+            <div className="min-w-0 flex-1">
+              <p className="text-dia-body-sm font-medium text-foreground leading-snug mb-0.5">
+                {line.requirement}
+              </p>
+              <p className="text-dia-body-sm text-dia-body leading-snug">{line.explanation}</p>
             </div>
           </div>
         );
