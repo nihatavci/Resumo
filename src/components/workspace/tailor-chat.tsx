@@ -40,6 +40,7 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [memoryPoints, setMemoryPoints] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const dismissedPointsRef = useRef<Set<string>>(new Set());
 
   // The "Generate tailored CV" button is enabled once there's at least one
   // assistant reply (meaning the AI has acknowledged a JD)
@@ -85,6 +86,10 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
         }
       }
     }
+    // Filter out user-dismissed chips
+    accumulated = accumulated.filter(
+      (p) => !dismissedPointsRef.current.has(p.toLowerCase().trim())
+    );
     setMemoryPoints(accumulated);
     onMemoryPoints?.(accumulated);
   }, [messages]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -110,7 +115,7 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
               const isGap = /^(flag|gap|⚠)/i.test(point);
               return (
                 <span
-                  key={i}
+                  key={point}
                   className={`inline-flex items-center gap-1.5 flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
                     isGap
                       ? 'border-amber-200 bg-amber-50 text-amber-800'
@@ -120,9 +125,14 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
                   <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${isGap ? 'bg-amber-400' : 'bg-violet-400'}`} />
                   {point}
                   <button
-                    onClick={() => setMemoryPoints((prev) => prev.filter((_, j) => j !== i))}
+                    onClick={() => {
+                      const label = point.toLowerCase().trim();
+                      dismissedPointsRef.current.add(label);
+                      setMemoryPoints((prev) => prev.filter((_, j) => j !== i));
+                    }}
                     className="ml-0.5 opacity-50 hover:opacity-100 transition-opacity text-xs leading-none"
                     title="Dismiss"
+                    aria-label="Dismiss"
                   >
                     ×
                   </button>
