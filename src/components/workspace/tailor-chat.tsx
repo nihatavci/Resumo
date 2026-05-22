@@ -6,12 +6,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Send, Sparkles, Loader2, Wand2, Copy, Check } from 'lucide-react';
 import type { Resume } from '@/lib/types';
 import type { ProposedChanges } from './types';
-import { parseMessageSegments, parseAnalysisLines } from './chat-message-parser';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { parseMessageSegments, parseAnalysisLines, parseMatchLines, extractMemoryPoints } from './chat-message-parser';
 
 interface TailorChatProps {
   masterResume: Resume;
   onProposedChanges: (changes: ProposedChanges | null) => void;
   onApplyReady: (ready: boolean) => void;
+  onMemoryPoints?: (points: string[]) => void;
 }
 
 interface ToolInvocation {
@@ -22,7 +24,7 @@ interface ToolInvocation {
   result?: unknown;
 }
 
-export function TailorChat({ masterResume, onProposedChanges, onApplyReady }: TailorChatProps) {
+export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMemoryPoints }: TailorChatProps) {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/tailor-chat',
     body: { masterResume },
@@ -36,6 +38,7 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady }: Ta
 
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
+  const [memoryPoints, setMemoryPoints] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // The "Generate tailored CV" button is enabled once there's at least one
@@ -71,6 +74,21 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady }: Ta
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    let accumulated: string[] = [];
+    for (const m of messages) {
+      if (m.role !== 'assistant') continue;
+      const segs = parseMessageSegments(m.content);
+      for (const seg of segs) {
+        if (seg.type === 'memory') {
+          accumulated = extractMemoryPoints(accumulated, seg.points);
+        }
+      }
+    }
+    setMemoryPoints(accumulated);
+    onMemoryPoints?.(accumulated);
+  }, [messages]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="h-full flex flex-col bg-dia-canvas">
       {/* Header */}
@@ -80,6 +98,40 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady }: Ta
           Paste a job URL or description. Chat to refine. Click <strong>Apply</strong> when ready.
         </p>
       </div>
+
+      {/* Memory rail — shown only when chips exist */}
+      {memoryPoints.length > 0 && (
+        <div className="flex-shrink-0 px-4 py-2 border-b border-dia-divider/60 bg-white/60">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/30 flex-shrink-0 mr-1">
+              Plan
+            </span>
+            {memoryPoints.map((point, i) => {
+              const isGap = /^(flag|gap|⚠)/i.test(point);
+              return (
+                <span
+                  key={i}
+                  className={`inline-flex items-center gap-1.5 flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                    isGap
+                      ? 'border-amber-200 bg-amber-50 text-amber-800'
+                      : 'border-violet-200 bg-violet-50 text-violet-800'
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${isGap ? 'bg-amber-400' : 'bg-violet-400'}`} />
+                  {point}
+                  <button
+                    onClick={() => setMemoryPoints((prev) => prev.filter((_, j) => j !== i))}
+                    className="ml-0.5 opacity-50 hover:opacity-100 transition-opacity text-xs leading-none"
+                    title="Dismiss"
+                  >
+                    ×
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
