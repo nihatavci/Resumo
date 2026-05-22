@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Send, Sparkles, Loader2, Wand2, Copy, Check } from 'lucide-react';
 import type { Resume } from '@/lib/types';
 import type { ProposedChanges } from './types';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { parseMessageSegments, parseAnalysisLines, parseMatchLines, extractMemoryPoints } from './chat-message-parser';
 
 interface TailorChatProps {
@@ -14,6 +13,7 @@ interface TailorChatProps {
   onProposedChanges: (changes: ProposedChanges | null) => void;
   onApplyReady: (ready: boolean) => void;
   onMemoryPoints?: (points: string[]) => void;
+  onGenerating?: (generating: boolean, progress: number) => void;
 }
 
 interface ToolInvocation {
@@ -24,8 +24,9 @@ interface ToolInvocation {
   result?: unknown;
 }
 
-export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMemoryPoints }: TailorChatProps) {
+export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMemoryPoints, onGenerating }: TailorChatProps) {
   const [generating, setGenerating] = useState(false);
+  const [generateProgress, setGenerateProgress] = useState(0);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [memoryPoints, setMemoryPoints] = useState<string[]>([]);
   const [researching, setResearching] = useState(false);
@@ -73,6 +74,7 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
       }
       const data = (await res.json()) as ProposedChanges & { proposed?: boolean };
       if (!data.proposed) throw new Error('Invalid response');
+      setGenerateProgress(100);
       onProposedChanges(data);
       onApplyReady(true);
     } catch (err) {
@@ -80,6 +82,8 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
       setGenerateError(err instanceof Error ? err.message : 'Generation failed');
     } finally {
       setGenerating(false);
+      // Reset progress after the fill-to-100 transition plays out
+      setTimeout(() => setGenerateProgress(0), 600);
     }
   }
 
@@ -125,6 +129,26 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
+
+  // Propagate generating state + progress to parent (for skeleton overlay)
+  useEffect(() => {
+    onGenerating?.(generating, generateProgress);
+  }, [generating, generateProgress]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fake progress animation while generating
+  useEffect(() => {
+    if (!generating) return;
+    setGenerateProgress(0);
+    const interval = setInterval(() => {
+      setGenerateProgress((prev) => {
+        // Easing: rushes to ~60%, then crawls toward 90%, never reaches it
+        const remaining = 90 - prev;
+        const increment = Math.max(0.2, remaining * 0.06);
+        return Math.min(90, prev + increment);
+      });
+    }, 120);
+    return () => clearInterval(interval);
+  }, [generating]);
 
   useEffect(() => {
     let accumulated: string[] = [];
@@ -316,20 +340,38 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
         <button
           onClick={handleGenerate}
           disabled={!hasContext || generating || isLoading}
-          className="w-full flex items-center justify-center gap-2 rounded-2xl bg-foreground text-background text-sm font-medium py-2.5 disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+          className="relative w-full overflow-hidden rounded-2xl text-sm font-medium py-2.5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          style={{
+            background: generating ? 'hsl(var(--foreground) / 0.12)' : 'hsl(var(--foreground))',
+            color: 'hsl(var(--background))',
+          }}
           title={!hasContext ? 'Discuss the job with the assistant first' : 'Generate the tailored CV'}
         >
-          {generating ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Generating tailored CV…
-            </>
-          ) : (
-            <>
-              <Wand2 className="h-4 w-4" />
-              Generate tailored CV
-            </>
+          {/* Fill bar — grows from left as progress increases */}
+          {generating && (
+            <span
+              className="absolute inset-y-0 left-0 bg-foreground"
+              style={{
+                width: `${generateProgress}%`,
+                transition: 'width 0.15s ease-out',
+              }}
+            />
           )}
+
+          {/* Button label — always above the fill */}
+          <span className="relative z-10 flex items-center justify-center gap-2" style={{ color: 'hsl(var(--background))' }}>
+            {generating ? (
+              <>
+                <span className="tabular-nums font-semibold">{Math.round(generateProgress)}%</span>
+                <span className="font-normal opacity-80">— Generating tailored CV…</span>
+              </>
+            ) : (
+              <>
+                <Wand2 className="h-4 w-4" />
+                Generate tailored CV
+              </>
+            )}
+          </span>
         </button>
       </div>
     </div>

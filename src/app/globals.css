@@ -79,6 +79,52 @@ html {
   }
 }
 
+/* ── Skeleton shimmer animations ── */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+
+@keyframes skeleton-line-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.skeleton-line {
+  background: linear-gradient(
+    90deg,
+    #e8e8e8 0px,
+    #f2f2f2 80px,
+    #ffffff 160px,
+    #f2f2f2 240px,
+    #e8e8e8 320px
+  );
+  background-size: 600px 100%;
+  animation:
+    skeleton-shimmer 1.6s linear infinite,
+    skeleton-line-in 0.35s ease-out both;
+  border-radius: 4px;
+}
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #d9d9d9 transparent;
