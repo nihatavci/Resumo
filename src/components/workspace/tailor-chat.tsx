@@ -242,7 +242,7 @@ function MessageBubble({
           {segments?.map((seg, i) =>
             seg.type === 'ats' ? (
               <AtsTipBadges key={i} content={seg.content} />
-            ) : (
+            ) : seg.type === 'memory' || seg.type === 'match' ? null : (
               <AnalysisBubble key={i} content={seg.content} />
             )
           )}
