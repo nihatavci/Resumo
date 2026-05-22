@@ -57,12 +57,13 @@ export function parseMessageSegments(content: string): MessageSegment[] {
 
 /**
  * Remove any unclosed :::type...  fence markers from raw text.
- * If the AI emits :::ats\nTip text without a closing \n::: the regex
- * won't match, and the raw marker leaks into a text segment.
+ * An unclosed fence always appears at the tail (still streaming), so we
+ * strip from the first unclosed marker to end-of-string — this hides both
+ * the marker AND any partial tip/memory content that would otherwise leak
+ * as raw plain text in the message bubble.
  */
 function stripUnclosedFences(text: string): string {
-  // Remove any :::word that was NOT already consumed by the fence regex
-  return text.replace(/:::(?:ats|memory|match)[^\n]*/g, '').trim();
+  return text.replace(/\n?:::(ats|memory|match)\b[\s\S]*$/g, '').trim();
 }
 
 /** Emoji prefixes used in the structured analysis lines */

@@ -51,3 +51,26 @@ describe('extractMemoryPoints', () => {
     assert.deepEqual(result, ['Emphasise HubSpot CRM', 'Flag German gap']);
   });
 });
+
+describe('parseMessageSegments — unclosed fence stripping', () => {
+  it('hides :::ats marker AND its content when fence is unclosed (streaming)', () => {
+    // Simulates mid-stream state: :::ats opened but no closing :::
+    const input = 'Suggestions here\n\n:::ats\nUse keyword X\nInclude metric';
+    const segs = parseMessageSegments(input);
+    assert.equal(segs.length, 1);
+    assert.equal(segs[0].type, 'text');
+    const content = (segs[0] as { type: 'text'; content: string }).content;
+    assert.ok(!content.includes(':::ats'), 'raw :::ats marker must not leak');
+    assert.ok(!content.includes('Use keyword X'), 'partial tip content must not leak');
+    assert.ok(content.includes('Suggestions here'), 'text before fence must be preserved');
+  });
+
+  it('strips partial :::memory at end of streaming message', () => {
+    const input = ':::match\n✅ Google Ads | Used at FACTUREE\n:::\n\nSome text\n\n:::memory\nPartial point';
+    const segs = parseMessageSegments(input);
+    const hasMemoryLeak = segs.some(
+      (s) => 'content' in s && typeof s.content === 'string' && s.content.includes(':::memory')
+    );
+    assert.ok(!hasMemoryLeak, ':::memory marker must not leak as text');
+  });
+});
