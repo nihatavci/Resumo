@@ -60,8 +60,9 @@ export async function POST(req: Request) {
   const body = (await req.json()) as {
     messages: Message[];
     masterResume: Resume;
+    companyIntel?: string;
   };
-  const { messages, masterResume } = body;
+  const { messages, masterResume, companyIntel } = body;
 
   console.log('[tailor-chat] start, messages:', messages.length);
 
@@ -80,6 +81,18 @@ export async function POST(req: Request) {
     if (rawContent && extractUrl(rawContent)) {
       const enriched = await enrichUserMessage(rawContent);
       processedMessages[lastUserIdx] = { ...lastUser, content: enriched };
+    }
+  }
+
+  // Inject company intel into last user message if provided (and not already there)
+  if (companyIntel && lastUserIdx !== -1) {
+    const existing = processedMessages[lastUserIdx];
+    const content = typeof existing.content === 'string' ? existing.content : '';
+    if (!content.includes('[Company intel:')) {
+      processedMessages[lastUserIdx] = {
+        ...existing,
+        content: `[Company intel: ${companyIntel}]\n\n${content}`,
+      };
     }
   }
 

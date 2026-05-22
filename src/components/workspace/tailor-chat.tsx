@@ -25,9 +25,27 @@ interface ToolInvocation {
 }
 
 export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMemoryPoints }: TailorChatProps) {
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [memoryPoints, setMemoryPoints] = useState<string[]>([]);
+  const [researching, setResearching] = useState(false);
+  const [companyIntel, setCompanyIntel] = useState<{
+    culture: string;
+    employerRep: string;
+    hiringSignals: string;
+  } | null>(null);
+  const [researchError, setResearchError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const dismissedPointsRef = useRef<Set<string>>(new Set());
+
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/tailor-chat',
-    body: { masterResume },
+    body: {
+      masterResume,
+      companyIntel: companyIntel
+        ? `Culture: ${companyIntel.culture} | Employer rep: ${companyIntel.employerRep} | Hiring signals: ${companyIntel.hiringSignals}`
+        : undefined,
+    },
     onError: (err) => {
       console.error('[tailor-chat client] error:', err);
     },
@@ -35,12 +53,6 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
       console.log('[tailor-chat client] finished:', msg);
     },
   });
-
-  const [generating, setGenerating] = useState(false);
-  const [generateError, setGenerateError] = useState<string | null>(null);
-  const [memoryPoints, setMemoryPoints] = useState<string[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const dismissedPointsRef = useRef<Set<string>>(new Set());
 
   // The "Generate tailored CV" button is enabled once there's at least one
   // assistant reply (meaning the AI has acknowledged a JD)
@@ -68,6 +80,45 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
       setGenerateError(err instanceof Error ? err.message : 'Generation failed');
     } finally {
       setGenerating(false);
+    }
+  }
+
+  function extractCompanyFromMessages(): string | null {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m.role !== 'assistant') continue;
+      const match = m.content.match(/📋\s*Role\s*:\s*([^\n]+)/);
+      if (match) {
+        const roleText = match[1].trim();
+        const companyMatch = roleText.match(/^([A-Za-zÀ-ÿ0-9\s&.'-]+?)(?:\s+(?:Digital|Marketing|Software|Lead|Manager|Engineer|Head|Senior|Junior|–|-|at|\|))/i);
+        return companyMatch?.[1]?.trim() ?? roleText.split(' ').slice(0, 2).join(' ');
+      }
+    }
+    return null;
+  }
+
+  async function handleResearch() {
+    const companyName = extractCompanyFromMessages();
+    if (!companyName) return;
+
+    setResearching(true);
+    setResearchError(null);
+    try {
+      const res = await fetch('/api/tailor-research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyName }),
+      });
+      const data = (await res.json()) as
+        | { ok: true; culture: string; employerRep: string; hiringSignals: string }
+        | { ok: false; error: string };
+
+      if (!data.ok) throw new Error(data.error);
+      setCompanyIntel({ culture: data.culture, employerRep: data.employerRep, hiringSignals: data.hiringSignals });
+    } catch (err) {
+      setResearchError(err instanceof Error ? err.message : 'Research failed');
+    } finally {
+      setResearching(false);
     }
   }
 
@@ -185,6 +236,38 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
             </div>
           );
         })()}
+
+        {/* Research button — shown after first JD analysis, before company intel loads */}
+        {!companyIntel && messages.some((m) => m.role === 'assistant' && m.content.includes('📋')) && !isLoading && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleResearch}
+              disabled={researching}
+              className="flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 text-sky-700 text-xs font-medium px-3 py-1.5 hover:bg-sky-100 transition-colors disabled:opacity-50"
+            >
+              {researching ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Researching…
+                </>
+              ) : (
+                <>🔍 Research company</>
+              )}
+            </button>
+            {researchError && (
+              <p className="text-xs text-red-500">{researchError}</p>
+            )}
+          </div>
+        )}
+
+        {/* Company intel card */}
+        {companyIntel && (
+          <div className="flex justify-start">
+            <div className="max-w-[92%]">
+              <CompanyIntelCard {...companyIntel} />
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-xs text-red-700">
@@ -398,6 +481,39 @@ function AtsTipBadges({ content }: { content: string }) {
           </span>
         ))}
       </div>
+    </div>
+  );
+}
+
+function CompanyIntelCard({
+  culture,
+  employerRep,
+  hiringSignals,
+}: {
+  culture: string;
+  employerRep: string;
+  hiringSignals: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-sky-200 bg-sky-50/80 overflow-hidden text-sm">
+      <div className="px-4 py-2.5 border-b border-sky-200/60">
+        <p className="text-[10px] font-semibold tracking-widest uppercase text-sky-600">
+          🏢 Company Intel
+        </p>
+      </div>
+      {[
+        { icon: '🌍', label: 'Culture', value: culture },
+        { icon: '⭐', label: 'Employer rep', value: employerRep },
+        { icon: '💡', label: 'What they value', value: hiringSignals },
+      ].map(({ icon, label, value }) => (
+        <div key={label} className="flex items-start gap-3 px-4 py-2.5 border-t border-sky-200/40 first:border-t-0">
+          <span className="text-base flex-shrink-0 mt-0.5">{icon}</span>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-500 mb-0.5">{label}</p>
+            <p className="text-xs text-foreground/80 leading-snug">{value}</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
