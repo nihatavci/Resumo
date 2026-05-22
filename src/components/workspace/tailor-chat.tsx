@@ -304,7 +304,9 @@ function MessageBubble({
           {segments?.map((seg, i) =>
             seg.type === 'ats' ? (
               <AtsTipBadges key={i} content={seg.content} />
-            ) : seg.type === 'memory' || seg.type === 'match' ? null : (
+            ) : seg.type === 'match' ? (
+              <MatchMapCard key={i} content={seg.content} />
+            ) : seg.type === 'memory' ? null : (
               <AnalysisBubble key={i} content={seg.content} />
             )
           )}
@@ -372,6 +374,8 @@ function getRowStyle(emoji: string): { bg: string; label: string } {
     case '🔧': return { bg: 'bg-violet-50/60',       label: 'text-violet-500' };
     case '⚠️':
     case '⚠':  return { bg: 'bg-amber-50/60',        label: 'text-amber-600' };
+    case '💼': return { bg: 'bg-sky-50/60',          label: 'text-sky-500' };
+    case '🌍': return { bg: 'bg-teal-50/60',         label: 'text-teal-600' };
     default:   return { bg: '',                       label: 'text-foreground/50' };
   }
 }
@@ -394,6 +398,45 @@ function AtsTipBadges({ content }: { content: string }) {
           </span>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** Renders :::match fence content as a two-column table card */
+function MatchMapCard({ content }: { content: string }) {
+  const lines = parseMatchLines(content);
+  if (lines.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-dia-divider bg-white overflow-hidden text-sm">
+      <div className="px-4 py-2.5 border-b border-dia-divider/50 flex items-center gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
+          Match map
+        </span>
+      </div>
+      {lines.map((line, i) => {
+        const bg =
+          line.marker === '✅' ? 'bg-emerald-50/60' :
+          line.marker === '⚡' ? 'bg-amber-50/60' :
+          'bg-red-50/40';
+        const markerColor =
+          line.marker === '✅' ? 'text-emerald-600' :
+          line.marker === '⚡' ? 'text-amber-500' :
+          'text-red-500';
+
+        return (
+          <div
+            key={i}
+            className={`flex items-start gap-3 px-4 py-2 border-t border-dia-divider/30 first:border-t-0 ${bg}`}
+          >
+            <span className={`text-base flex-shrink-0 mt-0.5 ${markerColor}`}>{line.marker}</span>
+            <div className="min-w-0 flex-1 grid grid-cols-[1fr_1.5fr] gap-2">
+              <span className="text-xs font-medium text-foreground truncate">{line.requirement}</span>
+              <span className="text-xs text-foreground/60 leading-snug">{line.explanation}</span>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
