@@ -370,7 +370,7 @@ function createResumeStyles(
       paddingBottom: 10,
       marginBottom: 6,
       borderBottomWidth: theme.headerDivider?.width ?? 0,
-      borderBottomColor: theme.headerDivider?.color ?? '#ffffff',
+      borderBottomColor: theme.headerDivider?.color ?? 'transparent',
       borderBottomStyle: 'solid',
     },
     name: {
@@ -403,10 +403,10 @@ function createResumeStyles(
       paddingTop: theme.sectionTitlePaddingV ?? 0,
       paddingBottom: theme.sectionTitlePaddingV ?? 0,
       borderBottomWidth: theme.sectionDivider?.width ?? 0,
-      borderBottomColor: theme.sectionDivider?.color ?? '#ffffff',
+      borderBottomColor: theme.sectionDivider?.color ?? 'transparent',
       borderBottomStyle: 'solid',
       borderLeftWidth: theme.sectionAccentLeft?.width ?? 0,
-      borderLeftColor: theme.sectionAccentLeft?.color ?? '#ffffff',
+      borderLeftColor: theme.sectionAccentLeft?.color ?? 'transparent',
       borderLeftStyle: 'solid',
     },
     summarySection: {
