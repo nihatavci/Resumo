@@ -10,9 +10,9 @@ import { type ResumeTheme, CLASSIC_THEME } from '@/lib/resume-themes';
 const textProcessingCache = new Map<string, ReactNode[]>();
 
 // Memoized text processing function
-function useTextProcessor() {
+function useTextProcessor(fontFamilyBold: string) {
   const processText = useCallback((text: string, ignoreMarkdown = false) => {
-    const cacheKey = `${text}-${ignoreMarkdown}`;
+    const cacheKey = `${text}-${ignoreMarkdown}-${fontFamilyBold}`;
     if (textProcessingCache.has(cacheKey)) {
       return textProcessingCache.get(cacheKey);
     }
@@ -27,7 +27,7 @@ function useTextProcessor() {
     const parts = text.split(/(\*\*.*?\*\*)/g);
     const processed = parts.map((part, index) => {
       if (part.startsWith('**') && part.endsWith('**')) {
-        return <Text key={index} style={{ fontFamily: 'Helvetica-Bold' }}>{part.slice(2, -2)}</Text>;
+        return <Text key={index} style={{ fontFamily: fontFamilyBold }}>{part.slice(2, -2)}</Text>;
       }
       return <Text key={index}>{part}</Text>;
     });
@@ -151,7 +151,7 @@ const ExperienceSection = memo(function ExperienceSection({
   experiences: Resume['work_experience'];
   styles: Styles;
 }) {
-  const processText = useTextProcessor();
+  const processText = useTextProcessor(styles.fontFamilyBold ?? 'Helvetica-Bold');
   if (!experiences?.length) return null;
 
   return (
@@ -197,7 +197,7 @@ const ProjectsSection = memo(function ProjectsSection({
   projects: Resume['projects'];
   styles: Styles;
 }) {
-  const processText = useTextProcessor();
+  const processText = useTextProcessor(styles.fontFamilyBold ?? 'Helvetica-Bold');
   if (!projects?.length) return null;
 
   return (
@@ -257,7 +257,7 @@ const EducationSection = memo(function EducationSection({
   education: Resume['education'];
   styles: Styles;
 }) {
-  const processText = useTextProcessor();
+  const processText = useTextProcessor(styles.fontFamilyBold ?? 'Helvetica-Bold');
   if (!education?.length) return null;
 
   return (
@@ -597,7 +597,7 @@ function createResumeStyles(
     },
   });
 
-  return Object.assign(pdfStyles, { bulletChar: theme.bulletChar });
+  return Object.assign(pdfStyles, { bulletChar: theme.bulletChar, fontFamilyBold: theme.fontFamilyBold });
 }
 
 interface ResumePDFDocumentProps {
