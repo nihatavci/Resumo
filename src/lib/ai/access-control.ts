@@ -56,7 +56,7 @@ export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIReques
     };
   }
 
-  // Fallback for any non-workersai provider (should not happen with current config)
+  // DeepSeek and other external providers — prefer server-side key, then user key.
   const envKey = provider.envKey ? process.env[provider.envKey] : undefined;
   if (envKey) {
     return {
@@ -69,15 +69,24 @@ export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIReques
   }
 
   const userApiKey = input.apiKeys.find((k) => k.service === model.provider)?.key;
-  if (!userApiKey) {
-    throw new Error(`${provider.name} API key not found in user configuration`);
+  if (userApiKey) {
+    return {
+      providerId: model.provider,
+      modelId: model.id,
+      apiKey: userApiKey,
+      usedServerKey: false,
+      requiresRateLimit: false,
+    };
   }
 
+  // If no API key is available for an external provider, fall back to Workers AI Llama
+  // so the app keeps working while the key is being configured.
+  console.warn(`[access-control] No API key for provider "${model.provider}" — falling back to Workers AI`);
   return {
-    providerId: model.provider,
-    modelId: model.id,
-    apiKey: userApiKey,
-    usedServerKey: false,
-    requiresRateLimit: false,
+    providerId: 'workersai' as import('@/lib/types').ServiceName,
+    modelId: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+    apiKey: '',
+    usedServerKey: true,
+    requiresRateLimit: true,
   };
 }

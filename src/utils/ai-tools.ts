@@ -1,4 +1,5 @@
 import { createWorkersAI } from 'workers-ai-provider';
+import { createDeepSeek } from '@ai-sdk/deepseek';
 import { LanguageModelV1 } from 'ai';
 import { type AIConfig } from '@/lib/ai-models';
 import { resolveAIRequest, type ResolvedAIRequest } from '@/lib/ai/access-control';
@@ -20,7 +21,12 @@ export function createAIClientFromResolvedRequest(
   resolved: ResolvedAIRequest,
   useThinking?: boolean
 ) {
-  void useThinking; // Keep for future use
+  void useThinking;
+
+  if (resolved.providerId === 'deepseek') {
+    const deepseek = createDeepSeek({ apiKey: resolved.apiKey });
+    return deepseek(resolved.modelId) as LanguageModelV1;
+  }
 
   const workersai = createWorkersAI({ binding: getAIBinding() });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

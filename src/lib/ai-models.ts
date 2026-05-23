@@ -69,6 +69,13 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
     envKey: '',
     sdkInitializer: 'workersai',
   },
+  deepseek: {
+    id: 'deepseek' as ServiceName,
+    name: 'DeepSeek',
+    apiLink: 'https://api-docs.deepseek.com/',
+    envKey: 'DEEPSEEK_API_KEY',
+    sdkInitializer: 'deepseek',
+  },
 }
 
 // ========================
@@ -138,6 +145,31 @@ export const AI_MODELS: AIModel[] = [
     },
     availability: { requiresApiKey: false, requiresPro: false },
   },
+  // ── DeepSeek ──────────────────────────────────────────────────────────
+  {
+    id: 'deepseek-chat',
+    name: 'DeepSeek V4 Flash',
+    provider: 'deepseek' as ServiceName,
+    features: {
+      isRecommended: true,
+      maxTokens: 8192,
+      supportsTools: true,
+      isPro: true,
+    },
+    availability: { requiresApiKey: true, requiresPro: false },
+  },
+  {
+    id: 'deepseek-reasoner',
+    name: 'DeepSeek V4 Pro (Thinking)',
+    provider: 'deepseek' as ServiceName,
+    features: {
+      isRecommended: false,
+      maxTokens: 8192,
+      supportsTools: false,
+      isPro: true,
+    },
+    availability: { requiresApiKey: true, requiresPro: false },
+  },
 ]
 
 // ========================
@@ -152,8 +184,8 @@ const MODEL_ALIASES: Record<string, string> = {}
 // ========================
 
 export const DEFAULT_MODELS = {
-  PRO_USER: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
-  FREE_USER: '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+  PRO_USER: 'deepseek-chat',
+  FREE_USER: 'deepseek-chat',
 } as const
 
 // ========================
@@ -162,39 +194,39 @@ export const DEFAULT_MODELS = {
 
 /**
  * Designated models for specific use cases throughout the application.
- * 70B for quality tasks, 8B for fast tasks.
+ * DeepSeek V4 Flash as the primary; Workers AI Llama as free fallback.
  */
 export const MODEL_DESIGNATIONS = {
   // Fast & cheap model for parsing, simple tasks, quick analysis
-  FAST_CHEAP: '@cf/meta/llama-3.1-8b-instruct-fast',
-  // Alternative fast & cheap option (free for all users)
+  FAST_CHEAP: 'deepseek-chat',
+  // Free fallback (no API key required)
   FAST_CHEAP_FREE: '@cf/meta/llama-3.1-8b-instruct-fast',
   // Structured extraction, parsing, and data normalization
-  STRUCTURED_EXTRACTION: '@cf/meta/llama-3.1-8b-instruct-fast',
+  STRUCTURED_EXTRACTION: 'deepseek-chat',
   // Resume scoring and analysis
-  RESUME_SCORING: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  RESUME_SCORING: 'deepseek-chat',
   // Single-item rewrites and lightweight editing
-  SIMPLE_REWRITE: '@cf/meta/llama-3.1-8b-instruct-fast',
+  SIMPLE_REWRITE: 'deepseek-chat',
   // Multi-bullet and polished content generation
-  CONTENT_GENERATION: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  CONTENT_GENERATION: 'deepseek-chat',
   // Cover letter generation
-  COVER_LETTER: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  COVER_LETTER: 'deepseek-chat',
   // Full resume tailoring by plan
-  JOB_TAILORING_FREE: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
-  JOB_TAILORING_PRO: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  JOB_TAILORING_FREE: 'deepseek-chat',
+  JOB_TAILORING_PRO: 'deepseek-chat',
   // Interactive assistant by plan
-  CHAT_ASSISTANT_FREE: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
-  CHAT_ASSISTANT_PRO: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  CHAT_ASSISTANT_FREE: 'deepseek-chat',
+  CHAT_ASSISTANT_PRO: 'deepseek-chat',
   // Frontier model for complex tasks, deep analysis, best quality
-  FRONTIER: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
-  // Alternative frontier model
-  FRONTIER_ALT: '@cf/mistralai/mistral-small-3.1-24b-instruct',
-  // Balanced model - good quality but faster/cheaper than frontier
-  BALANCED: '@cf/meta/llama-3.1-8b-instruct-fast',
-  // Vision-capable model for image analysis
+  FRONTIER: 'deepseek-chat',
+  // Alternative frontier model (free, no API key)
+  FRONTIER_ALT: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  // Balanced model
+  BALANCED: 'deepseek-chat',
+  // Vision-capable model for image analysis (DeepSeek is text-only; keep Workers AI for vision)
   VISION: '@cf/meta/llama-4-scout-17b-16e-instruct',
   // Default models by user type
-  DEFAULT_PRO: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  DEFAULT_PRO: 'deepseek-chat',
   DEFAULT_FREE: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
 } as const
 
