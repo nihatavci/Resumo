@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Resume } from '@/lib/types';
 import { applyTailoring } from '@/utils/actions/workspace';
 import { ResumePreview } from '@/components/resume/editor/preview/resume-preview';
@@ -11,10 +11,13 @@ import { pdf } from '@react-pdf/renderer';
 import { TailorChat } from './tailor-chat';
 import { TailoredDiffView } from './tailored-diff-view';
 import { GeneratingSkeleton } from './generating-skeleton';
+import { ConversationHeader } from './conversation-header';
+import { useConversations, type CompanyIntel } from '@/hooks/use-conversations';
 import { toast } from 'sonner';
 import { Download, RotateCcw, Check, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ProposedChanges } from './types';
+import type { Message } from '@ai-sdk/react';
 import { getThemeById, type ResumeTheme } from '@/lib/resume-themes';
 import { ThemePicker } from './theme-picker';
 
@@ -35,6 +38,47 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
     if (typeof window === 'undefined') return 'classic';
     return localStorage.getItem('resumo_theme') ?? 'classic';
   });
+
+  // Conversation persistence
+  const {
+    conversations,
+    activeId,
+    activeConversation,
+    createConversation,
+    saveConversation,
+    deleteConversation,
+    selectConversation,
+  } = useConversations(masterResume.id);
+
+  // Ensure there's always at least one conversation
+  const effectiveConvoId = activeId ?? (() => {
+    // This path shouldn't normally be reached — useConversations auto-selects
+    return 'default';
+  })();
+
+  const handleConversationChange = useCallback(
+    (patch: { messages?: Message[]; companyIntel?: CompanyIntel | null; memoryPoints?: string[] }) => {
+      if (!activeId) return;
+      saveConversation(activeId, patch);
+    },
+    [activeId, saveConversation],
+  );
+
+  function handleCreateConversation() {
+    // Reset pending changes when starting a new conversation
+    setPendingChanges(null);
+    setApplyReady(false);
+    setViewMode('original');
+    createConversation();
+  }
+
+  function handleSelectConversation(id: string) {
+    // Reset pending changes when switching conversations
+    setPendingChanges(null);
+    setApplyReady(false);
+    setViewMode('original');
+    selectConversation(id);
+  }
 
   const selectedTheme: ResumeTheme = getThemeById(selectedThemeId);
 
@@ -110,12 +154,25 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
       <ResizablePanels
         isBaseResume={!pendingChanges}
         editorPanel={
-          <TailorChat
-            masterResume={masterResume}
-            onProposedChanges={handleProposedChanges}
-            onApplyReady={setApplyReady}
-            onGenerating={(g, p) => { setGenerating(g); setGenerateProgress(p); }}
-          />
+          <div className="h-full flex flex-col">
+            <ConversationHeader
+              conversations={conversations}
+              activeId={activeId}
+              onSelect={handleSelectConversation}
+              onCreate={handleCreateConversation}
+              onDelete={deleteConversation}
+            />
+            <TailorChat
+              key={effectiveConvoId}
+              masterResume={masterResume}
+              initialMessages={activeConversation?.messages}
+              initialCompanyIntel={activeConversation?.companyIntel}
+              onProposedChanges={handleProposedChanges}
+              onApplyReady={setApplyReady}
+              onGenerating={(g, p) => { setGenerating(g); setGenerateProgress(p); }}
+              onConversationChange={handleConversationChange}
+            />
+          </div>
         }
         previewPanel={(width) => (
           <div className="relative h-full flex flex-col">

@@ -4,16 +4,26 @@
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useRef, useState } from 'react';
 import { Send, Sparkles, Loader2, Wand2, Copy, Check } from 'lucide-react';
+import type { Message } from '@ai-sdk/react';
 import type { Resume } from '@/lib/types';
 import type { ProposedChanges } from './types';
+import type { CompanyIntel } from '@/hooks/use-conversations';
 import { parseMessageSegments, parseAnalysisLines, parseMatchLines, extractMemoryPoints } from './chat-message-parser';
 
 interface TailorChatProps {
   masterResume: Resume;
+  initialMessages?: Message[];
+  initialCompanyIntel?: CompanyIntel | null;
   onProposedChanges: (changes: ProposedChanges | null) => void;
   onApplyReady: (ready: boolean) => void;
   onMemoryPoints?: (points: string[]) => void;
   onGenerating?: (generating: boolean, progress: number) => void;
+  /** Called whenever messages/intel/memoryPoints change so the parent can persist */
+  onConversationChange?: (patch: {
+    messages?: Message[];
+    companyIntel?: CompanyIntel | null;
+    memoryPoints?: string[];
+  }) => void;
 }
 
 interface ToolInvocation {
@@ -24,23 +34,29 @@ interface ToolInvocation {
   result?: unknown;
 }
 
-export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMemoryPoints, onGenerating }: TailorChatProps) {
+export function TailorChat({
+  masterResume,
+  initialMessages,
+  initialCompanyIntel,
+  onProposedChanges,
+  onApplyReady,
+  onMemoryPoints,
+  onGenerating,
+  onConversationChange,
+}: TailorChatProps) {
   const [generating, setGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState(0);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [memoryPoints, setMemoryPoints] = useState<string[]>([]);
   const [researching, setResearching] = useState(false);
-  const [companyIntel, setCompanyIntel] = useState<{
-    culture: string;
-    employerRep: string;
-    hiringSignals: string;
-  } | null>(null);
+  const [companyIntel, setCompanyIntel] = useState<CompanyIntel | null>(initialCompanyIntel ?? null);
   const [researchError, setResearchError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const dismissedPointsRef = useRef<Set<string>>(new Set());
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/tailor-chat',
+    initialMessages: initialMessages ?? [],
     body: {
       masterResume,
       companyIntel: companyIntel
@@ -130,6 +146,18 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
+  // Auto-save messages to conversation store whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      onConversationChange?.({ messages });
+    }
+  }, [messages]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-save company intel when it changes
+  useEffect(() => {
+    onConversationChange?.({ companyIntel });
+  }, [companyIntel]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Propagate generating state + progress to parent (for skeleton overlay)
   useEffect(() => {
     onGenerating?.(generating, generateProgress);
@@ -167,18 +195,11 @@ export function TailorChat({ masterResume, onProposedChanges, onApplyReady, onMe
     );
     setMemoryPoints(accumulated);
     onMemoryPoints?.(accumulated);
+    onConversationChange?.({ memoryPoints: accumulated });
   }, [messages]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="h-full flex flex-col bg-dia-canvas">
-      {/* Header */}
-      <div className="px-6 pt-6 pb-3 flex-shrink-0 border-b border-dia-divider">
-        <h2 className="text-dia-heading-sm font-light text-foreground mb-1">Tailor with AI</h2>
-        <p className="text-sm text-dia-muted">
-          Paste a job URL or description. Chat to refine. Click <strong>Apply</strong> when ready.
-        </p>
-      </div>
-
       {/* no chip rail here — plan card lives above the input */}
 
       {/* Messages */}
