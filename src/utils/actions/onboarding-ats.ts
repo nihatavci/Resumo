@@ -6,6 +6,7 @@ import { generateObject, type LanguageModelV1, type TelemetrySettings } from 'ai
 import { startAIUsageRequest, finishAIUsageRequest } from '@/lib/ai/usage-ledger';
 import { getAuthenticatedUser } from '@/utils/auth';
 import type { WorkExperience, Skill } from '@/lib/types';
+import { HUMANIZATION_INSTRUCTIONS } from '@/lib/ai/humanization';
 
 // Schema for ATS-optimized bullet rewrite
 const atsWorkSchema = z.object({
@@ -34,11 +35,11 @@ const ATS_WORK_PROMPT = `You are an ATS resume specialist. Rewrite the candidate
 
 CRITICAL ATS RULES:
 1. PRESERVE ALL FACTS — numbers, percentages, dollar amounts, dates, company names, achievements. NEVER invent or inflate.
-2. LEAD with strong action verbs (Achieved, Led, Built, Designed, Reduced, Increased, Launched, Developed, Optimized, Managed, Spearheaded, Orchestrated).
+2. LEAD with strong action verbs (Achieved, Led, Built, Designed, Reduced, Increased, Launched, Developed, Drove, Managed, Shipped, Grew).
 3. QUANTIFY where possible (use the candidate's original numbers — do NOT make up new ones).
 4. KEYWORD MATCH the target role — naturally incorporate relevant industry terms IF they correspond to what the candidate actually did.
 5. CONCISE — one strong line per bullet (max ~25 words). Cut filler words.
-6. PARALLEL structure — every bullet starts with an action verb in past tense (or present tense for current role).
+6. VARIED structure — most bullets start with an action verb, but vary the pattern: some lead with the result, some use a two-part structure. See writing style rules below.
 7. RESULT-ORIENTED — what was achieved, not just what was done.
 
 DO NOT:
@@ -49,7 +50,9 @@ DO NOT:
 
 INPUT: candidate's existing work experience.
 OUTPUT: the same work experience entries with description bullets rewritten to ATS standards.
-Keep company/position/date/location identical. Only the description bullets get rewritten.`;
+Keep company/position/date/location identical. Only the description bullets get rewritten.
+
+${HUMANIZATION_INSTRUCTIONS}`;
 
 const ATS_SKILLS_PROMPT = `You are an ATS resume specialist. Reorganize the candidate's skills into ATS-friendly categories and order.
 
