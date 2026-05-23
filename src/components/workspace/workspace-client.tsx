@@ -15,6 +15,8 @@ import { toast } from 'sonner';
 import { Download, RotateCcw, Check, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ProposedChanges } from './types';
+import { getThemeById, type ResumeTheme } from '@/lib/resume-themes';
+import { ThemePicker } from './theme-picker';
 
 interface WorkspaceClientProps {
   masterResume: Resume;
@@ -29,6 +31,19 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
   const [applying, setApplying] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState(0);
+  const [selectedThemeId, setSelectedThemeId] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'classic';
+    return localStorage.getItem('resumo_theme') ?? 'classic';
+  });
+
+  const selectedTheme: ResumeTheme = getThemeById(selectedThemeId);
+
+  function handleThemeChange(id: string) {
+    setSelectedThemeId(id);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('resumo_theme', id);
+    }
+  }
 
   function handleProposedChanges(changes: ProposedChanges | null) {
     setPendingChanges(changes);
@@ -73,7 +88,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
 
   async function handleDownload() {
     try {
-      const blob = await pdf(<ResumePDFDocument resume={displayResume} />).toBlob();
+      const blob = await pdf(<ResumePDFDocument resume={displayResume} theme={selectedTheme} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -153,6 +168,10 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
 
               {/* Right: actions */}
               <div className="flex items-center gap-2">
+                <ThemePicker
+                  selectedThemeId={selectedThemeId}
+                  onChange={handleThemeChange}
+                />
                 <button
                   onClick={handleDownload}
                   className="flex items-center gap-1.5 rounded-full bg-white border border-dia-divider text-foreground text-xs font-medium px-3 py-1.5 shadow-sm hover:bg-foreground/5 transition-all"
@@ -228,6 +247,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
                   <ResumePreview
                     resume={viewMode === 'original' ? masterResume : tailoredResume}
                     containerWidth={width}
+                    theme={selectedTheme}
                   />
                 </ScrollArea>
               )}
