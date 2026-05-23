@@ -6,8 +6,8 @@ describe("HUMANIZATION_INSTRUCTIONS", () => {
   it("is a non-empty string of substantial length", () => {
     assert.equal(typeof HUMANIZATION_INSTRUCTIONS, "string");
     assert.ok(
-      HUMANIZATION_INSTRUCTIONS.length > 500,
-      `expected >500 chars, got ${HUMANIZATION_INSTRUCTIONS.length}`,
+      HUMANIZATION_INSTRUCTIONS.length > 2500,
+      `expected >2500 chars, got ${HUMANIZATION_INSTRUCTIONS.length}`,
     );
   });
 
@@ -68,5 +68,22 @@ describe("HUMANIZATION_INSTRUCTIONS", () => {
       HUMANIZATION_INSTRUCTIONS.includes("PROFESSIONAL SUMMARY"),
       "missing professional summary rules",
     );
+  });
+
+  it("contains key forbidden qualifiers", () => {
+    const required = [
+      "significantly",
+      "successfully",
+      "effectively",
+      "various",
+      "numerous",
+      "unique",
+    ];
+    for (const word of required) {
+      assert.ok(
+        HUMANIZATION_INSTRUCTIONS.includes(word),
+        `missing forbidden qualifier: ${word}`,
+      );
+    }
   });
 });
