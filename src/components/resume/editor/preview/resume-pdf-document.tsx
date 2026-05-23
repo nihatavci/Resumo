@@ -4,22 +4,7 @@ import { Resume } from "@/lib/types";
 import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, Link, Image } from '@react-pdf/renderer';
 import { memo, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
-
-// Base styles that don't depend on resume settings
-const baseStyles = {
-  link: {
-    color: '#2563eb',
-    textDecoration: 'none',
-  },
-  bulletSeparator: {
-    color: '#4b5563',
-    marginHorizontal: 2,
-  },
-  bulletDot: {
-    width: 8,
-    marginRight: 4,
-  },
-} as const;
+import { type ResumeTheme, CLASSIC_THEME } from '@/lib/resume-themes';
 
 // Create a cache outside of components to persist between renders
 const textProcessingCache = new Map<string, ReactNode[]>();
@@ -27,13 +12,11 @@ const textProcessingCache = new Map<string, ReactNode[]>();
 // Memoized text processing function
 function useTextProcessor() {
   const processText = useCallback((text: string, ignoreMarkdown = false) => {
-    // Check cache first
     const cacheKey = `${text}-${ignoreMarkdown}`;
     if (textProcessingCache.has(cacheKey)) {
       return textProcessingCache.get(cacheKey);
     }
 
-    // If ignoring markdown, extract content between asterisks or return plain text
     if (ignoreMarkdown) {
       const content = text.match(/\*\*(.*?)\*\*/)?.[1] || text;
       const processed = [<Text key={0}>{content}</Text>];
@@ -41,7 +24,6 @@ function useTextProcessor() {
       return processed;
     }
 
-    // Process text if not in cache
     const parts = text.split(/(\*\*.*?\*\*)/g);
     const processed = parts.map((part, index) => {
       if (part.startsWith('**') && part.endsWith('**')) {
@@ -50,7 +32,6 @@ function useTextProcessor() {
       return <Text key={index}>{part}</Text>;
     });
 
-    // Store in cache
     textProcessingCache.set(cacheKey, processed);
     return processed;
   }, []);
@@ -58,13 +39,14 @@ function useTextProcessor() {
   return processText;
 }
 
-// Memoized section components
-const HeaderSection = memo(function HeaderSection({ 
-  resume, 
-  styles 
-}: { 
-  resume: Resume; 
-  styles: ReturnType<typeof createResumeStyles>;
+type Styles = ReturnType<typeof createResumeStyles>;
+
+const HeaderSection = memo(function HeaderSection({
+  resume,
+  styles,
+}: {
+  resume: Resume;
+  styles: Styles;
 }) {
   return (
     <View style={styles.header}>
@@ -127,7 +109,7 @@ const SummarySection = memo(function SummarySection({
   styles,
 }: {
   summary: string | null | undefined;
-  styles: ReturnType<typeof createResumeStyles>;
+  styles: Styles;
 }) {
   if (!summary || !summary.trim()) return null;
   return (
@@ -139,14 +121,14 @@ const SummarySection = memo(function SummarySection({
 });
 
 const SkillsSection = memo(function SkillsSection({
-  skills, 
-  styles 
-}: { 
-  skills: Resume['skills']; 
-  styles: ReturnType<typeof createResumeStyles>;
+  skills,
+  styles,
+}: {
+  skills: Resume['skills'];
+  styles: Styles;
 }) {
   if (!skills?.length) return null;
-  
+
   return (
     <View style={styles.skillsSection}>
       <Text style={styles.sectionTitle}>Skills</Text>
@@ -162,12 +144,12 @@ const SkillsSection = memo(function SkillsSection({
   );
 });
 
-const ExperienceSection = memo(function ExperienceSection({ 
-  experiences, 
-  styles 
-}: { 
-  experiences: Resume['work_experience']; 
-  styles: ReturnType<typeof createResumeStyles>;
+const ExperienceSection = memo(function ExperienceSection({
+  experiences,
+  styles,
+}: {
+  experiences: Resume['work_experience'];
+  styles: Styles;
 }) {
   const processText = useTextProcessor();
   if (!experiences?.length) return null;
@@ -194,7 +176,7 @@ const ExperienceSection = memo(function ExperienceSection({
           </View>
           {experience.description.map((bullet, bulletIndex) => (
             <View key={bulletIndex} style={styles.bulletPoint}>
-              <Text style={styles.bulletDot}>•</Text>
+              <Text style={styles.bulletDot}>{styles.bulletChar}</Text>
               <View style={styles.bulletText}>
                 <Text style={styles.bulletTextContent}>
                   {processText(bullet)}
@@ -208,12 +190,12 @@ const ExperienceSection = memo(function ExperienceSection({
   );
 });
 
-const ProjectsSection = memo(function ProjectsSection({ 
-  projects, 
-  styles 
-}: { 
-  projects: Resume['projects']; 
-  styles: ReturnType<typeof createResumeStyles>;
+const ProjectsSection = memo(function ProjectsSection({
+  projects,
+  styles,
+}: {
+  projects: Resume['projects'];
+  styles: Styles;
 }) {
   const processText = useTextProcessor();
   if (!projects?.length) return null;
@@ -251,10 +233,10 @@ const ProjectsSection = memo(function ProjectsSection({
               </Text>
             )}
           </View>
-          
+
           {project.description.map((bullet, bulletIndex) => (
             <View key={bulletIndex} style={styles.bulletPoint}>
-              <Text style={styles.bulletDot}>•</Text>
+              <Text style={styles.bulletDot}>{styles.bulletChar}</Text>
               <View style={styles.bulletText}>
                 <Text style={styles.bulletTextContent}>
                   {processText(bullet)}
@@ -268,12 +250,12 @@ const ProjectsSection = memo(function ProjectsSection({
   );
 });
 
-const EducationSection = memo(function EducationSection({ 
-  education, 
-  styles 
-}: { 
-  education: Resume['education']; 
-  styles: ReturnType<typeof createResumeStyles>;
+const EducationSection = memo(function EducationSection({
+  education,
+  styles,
+}: {
+  education: Resume['education'];
+  styles: Styles;
 }) {
   const processText = useTextProcessor();
   if (!education?.length) return null;
@@ -292,7 +274,7 @@ const EducationSection = memo(function EducationSection({
           </View>
           {edu.achievements && edu.achievements.map((achievement, bulletIndex) => (
             <View key={bulletIndex} style={styles.bulletPoint}>
-              <Text style={styles.bulletDot}>•</Text>
+              <Text style={styles.bulletDot}>{styles.bulletChar}</Text>
               <View style={styles.bulletText}>
                 {processText(achievement)}
               </View>
@@ -304,32 +286,34 @@ const EducationSection = memo(function EducationSection({
   );
 });
 
-// Style factory function
-function createResumeStyles(settings: Resume['document_settings'] = {
-  document_font_size: 10,
-  document_line_height: 1.5,
-  document_margin_vertical: 36,
-  document_margin_horizontal: 36,
-  header_name_size: 24,
-  header_name_bottom_spacing: 24,
-  skills_margin_top: 2,
-  skills_margin_bottom: 2,
-  skills_margin_horizontal: 0,
-  skills_item_spacing: 2,
-  experience_margin_top: 2,
-  experience_margin_bottom: 2,
-  experience_margin_horizontal: 0,
-  experience_item_spacing: 4,
-  projects_margin_top: 2,
-  projects_margin_bottom: 2,
-  projects_margin_horizontal: 0,
-  projects_item_spacing: 4,
-  education_margin_top: 2,
-  education_margin_bottom: 2,
-  education_margin_horizontal: 0,
-  education_item_spacing: 4,
-  footer_width: 80,
-}) {
+function createResumeStyles(
+  settings: Resume['document_settings'] = {
+    document_font_size: 10,
+    document_line_height: 1.5,
+    document_margin_vertical: 36,
+    document_margin_horizontal: 36,
+    header_name_size: 24,
+    header_name_bottom_spacing: 24,
+    skills_margin_top: 2,
+    skills_margin_bottom: 2,
+    skills_margin_horizontal: 0,
+    skills_item_spacing: 2,
+    experience_margin_top: 2,
+    experience_margin_bottom: 2,
+    experience_margin_horizontal: 0,
+    experience_item_spacing: 4,
+    projects_margin_top: 2,
+    projects_margin_bottom: 2,
+    projects_margin_horizontal: 0,
+    projects_item_spacing: 4,
+    education_margin_top: 2,
+    education_margin_bottom: 2,
+    education_margin_horizontal: 0,
+    education_item_spacing: 4,
+    footer_width: 80,
+  },
+  theme: ResumeTheme = CLASSIC_THEME,
+) {
   const {
     document_font_size = 10,
     document_line_height = 1.5,
@@ -354,67 +338,88 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     education_margin_horizontal = 0,
     education_item_spacing = 4,
     footer_width = 95,
-  } = settings;
+  } = settings ?? {};
 
-  return StyleSheet.create({
-    ...baseStyles,
-    // Base page configuration
+  const pdfStyles = StyleSheet.create({
+    link: {
+      color: theme.linkColor,
+      textDecoration: 'none',
+    },
+    bulletSeparator: {
+      color: theme.mutedColor,
+      marginHorizontal: 2,
+    },
+    bulletDot: {
+      width: 8,
+      marginRight: 4,
+      color: theme.bodyColor,
+    },
     page: {
       paddingTop: document_margin_vertical,
       paddingBottom: document_margin_vertical + 28,
       paddingLeft: document_margin_horizontal,
       paddingRight: document_margin_horizontal,
-      fontFamily: 'Helvetica',
-      color: '#111827',
+      fontFamily: theme.fontFamily,
+      color: theme.bodyColor,
       fontSize: document_font_size,
       lineHeight: document_line_height,
       position: 'relative',
-      // backgroundColor: '#32a852',  // Bright green color that should be very visible for testing
     },
     header: {
-      alignItems: 'center',
+      alignItems: theme.headerAlign === 'left' ? 'flex-start' : 'center',
       paddingBottom: 10,
       marginBottom: 6,
-      borderBottom: '0.5pt solid #d1d5db',
+      borderBottomWidth: theme.headerDivider?.width ?? 0,
+      borderBottomColor: theme.headerDivider?.color ?? '#ffffff',
+      borderBottomStyle: 'solid',
     },
     name: {
       fontSize: header_name_size,
-      fontFamily: 'Helvetica-Bold',
+      fontFamily: theme.nameFontFamily,
       marginTop: 4,
       marginBottom: header_name_bottom_spacing,
-      color: '#111827',
-      textAlign: 'center',
-      letterSpacing: 0.5,
+      color: theme.nameColor,
+      textAlign: theme.headerAlign === 'left' ? 'left' : 'center',
+      letterSpacing: theme.nameLetterSpacing ?? 0.5,
     },
     contactInfo: {
       fontSize: document_font_size - 0.5,
-      color: '#4b5563',
+      color: theme.mutedColor,
       flexDirection: 'row',
-      justifyContent: 'center',
+      justifyContent: theme.headerAlign === 'left' ? 'flex-start' : 'center',
       flexWrap: 'wrap',
       gap: 4,
     },
     sectionTitle: {
       fontSize: document_font_size,
-      fontFamily: 'Helvetica-Bold',
+      fontFamily: theme.fontFamilyBold,
       marginBottom: 4,
-      color: '#111827',
-      textTransform: 'uppercase',
-      borderBottom: '0.5pt solid #e5e7eb',
-      paddingBottom: 0,
+      color: theme.sectionTitleColor,
+      backgroundColor: theme.sectionTitleBg ?? 'transparent',
+      textTransform: theme.sectionTitleTextTransform === 'none' ? undefined : (theme.sectionTitleTextTransform ?? 'uppercase'),
+      letterSpacing: theme.sectionTitleLetterSpacing ?? 0,
+      paddingLeft: theme.sectionAccentLeft?.paddingLeft ?? (theme.sectionTitlePaddingH ?? 0),
+      paddingRight: theme.sectionTitlePaddingH ?? 0,
+      paddingTop: theme.sectionTitlePaddingV ?? 0,
+      paddingBottom: theme.sectionTitlePaddingV ?? 0,
+      borderBottomWidth: theme.sectionDivider?.width ?? 0,
+      borderBottomColor: theme.sectionDivider?.color ?? '#ffffff',
+      borderBottomStyle: 'solid',
+      borderLeftWidth: theme.sectionAccentLeft?.width ?? 0,
+      borderLeftColor: theme.sectionAccentLeft?.color ?? '#ffffff',
+      borderLeftStyle: 'solid',
     },
-    // Summary section
     summarySection: {
       marginTop: 8,
       marginBottom: 4,
     },
     summaryText: {
       fontSize: document_font_size,
-      color: '#1f2937',
+      color: theme.bodyColor,
       lineHeight: document_line_height,
       marginTop: 4,
+      fontFamily: theme.fontFamily,
     },
-    // Skills section
     skillsSection: {
       marginTop: skills_margin_top,
       marginBottom: skills_margin_bottom,
@@ -433,19 +438,19 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     skillCategoryTitle: {
       fontSize: document_font_size,
-      fontFamily: 'Helvetica-Bold',
-      color: '#111827',
+      fontFamily: theme.fontFamilyBold,
+      color: theme.bodyColor,
       marginRight: 4,
       width: 'auto',
     },
     skillItem: {
       fontSize: document_font_size,
-      color: '#374151',
+      color: theme.bodyColor,
+      fontFamily: theme.fontFamily,
       flexGrow: 1,
       flexBasis: 0,
       flexWrap: 'wrap',
     },
-    // Experience section
     experienceSection: {
       marginTop: experience_margin_top,
       marginBottom: experience_margin_bottom,
@@ -463,12 +468,13 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     companyName: {
       fontSize: document_font_size,
-      fontFamily: 'Helvetica-Bold',
-      color: '#111827',
+      fontFamily: theme.fontFamilyBold,
+      color: theme.bodyColor,
     },
     jobTitle: {
       fontSize: document_font_size,
-      color: '#111827',
+      color: theme.bodyColor,
+      fontFamily: theme.fontFamily,
     },
     companyLocationRow: {
       flexDirection: 'row',
@@ -477,17 +483,19 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     locationText: {
       fontSize: document_font_size,
-      color: '#374151',
+      color: theme.mutedColor,
+      fontFamily: theme.fontFamily,
     },
     dateRange: {
       fontSize: document_font_size,
-      color: '#111827',
+      color: theme.mutedColor,
       textAlign: 'right',
+      fontFamily: theme.fontFamily,
     },
     bulletPoint: {
       fontSize: document_font_size,
       marginBottom: experience_item_spacing,
-      color: '#111827',
+      color: theme.bodyColor,
       marginLeft: 8,
       paddingLeft: 8,
       flexDirection: 'row',
@@ -500,8 +508,9 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     bulletTextContent: {
       flex: 1,
+      fontFamily: theme.fontFamily,
+      color: theme.bodyColor,
     },
-    // Projects section
     projectsSection: {
       marginTop: projects_margin_top,
       marginBottom: projects_margin_bottom,
@@ -527,25 +536,26 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     projectTitle: {
       fontSize: document_font_size,
-      fontFamily: 'Helvetica-Bold',
-      color: '#111827',
+      fontFamily: theme.fontFamilyBold,
+      color: theme.bodyColor,
     },
     projectTechnologies: {
       fontSize: document_font_size,
-      color: '#374151',
-      fontFamily: 'Helvetica-Bold',
+      color: theme.mutedColor,
+      fontFamily: theme.fontFamilyBold,
       marginBottom: 0,
     },
     projectDescription: {
       fontSize: document_font_size,
-      color: '#111827',
+      color: theme.bodyColor,
+      fontFamily: theme.fontFamily,
     },
     projectLinks: {
       fontSize: document_font_size,
-      color: '#374151',
+      color: theme.mutedColor,
       textAlign: 'right',
+      fontFamily: theme.fontFamily,
     },
-    // Education section
     educationSection: {
       marginTop: education_margin_top,
       marginBottom: education_margin_bottom,
@@ -563,12 +573,13 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     schoolName: {
       fontSize: document_font_size,
-      fontFamily: 'Helvetica-Bold',
-      color: '#111827',
+      fontFamily: theme.fontFamilyBold,
+      color: theme.bodyColor,
     },
     degree: {
       fontSize: document_font_size,
-      color: '#111827',
+      color: theme.bodyColor,
+      fontFamily: theme.fontFamily,
     },
     footer: {
       position: 'absolute',
@@ -585,16 +596,21 @@ function createResumeStyles(settings: Resume['document_settings'] = {
       height: 'auto',
     },
   });
+
+  return Object.assign(pdfStyles, { bulletChar: theme.bulletChar });
 }
 
 interface ResumePDFDocumentProps {
   resume: Resume;
   variant?: 'base' | 'tailored';
+  theme?: ResumeTheme;
 }
 
-export const ResumePDFDocument = memo(function ResumePDFDocument({ resume }: ResumePDFDocumentProps) {
-  // Memoize styles based on document settings
-  const styles = useMemo(() => createResumeStyles(resume.document_settings), [resume.document_settings]);
+export const ResumePDFDocument = memo(function ResumePDFDocument({ resume, theme }: ResumePDFDocumentProps) {
+  const styles = useMemo(
+    () => createResumeStyles(resume.document_settings, theme ?? CLASSIC_THEME),
+    [resume.document_settings, theme],
+  );
 
   return (
     <PDFDocument>
@@ -605,12 +621,11 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume }: Res
         <EducationSection education={resume.education} styles={styles} />
         <SkillsSection skills={resume.skills} styles={styles} />
         <ProjectsSection projects={resume.projects} styles={styles} />
-        
+
         {resume.document_settings?.show_ubc_footer && (
           <View style={styles.footer}>
-            {/* React PDF Image does not support alt text, so disable lint here */}
             {/* eslint-disable-next-line jsx-a11y/alt-text */}
-            <Image 
+            <Image
               src="/images/ubc-science-footer.png"
               style={styles.footerImage}
             />
@@ -620,9 +635,9 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume }: Res
     </PDFDocument>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison function
   return (
     prevProps.resume === nextProps.resume &&
-    prevProps.variant === nextProps.variant
+    prevProps.variant === nextProps.variant &&
+    prevProps.theme === nextProps.theme
   );
-}); 
+});
