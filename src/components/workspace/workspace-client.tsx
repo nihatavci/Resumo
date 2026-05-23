@@ -120,7 +120,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
         previewPanel={(width) => (
           <div className="relative h-full flex flex-col">
             {/* ── Top action bar ── */}
-            <div className="flex-shrink-0 flex items-center justify-between gap-2 px-4 py-3 border-b border-dia-divider bg-dia-canvas/80 backdrop-blur-sm z-10">
+            <div className="flex-shrink-0 flex items-center justify-between gap-2 px-4 py-3 border-b border-dia-divider bg-dia-canvas/80 backdrop-blur-sm z-50">
 
               {/* Left: view mode toggle (only when pending exists) */}
               <AnimatePresence mode="wait">
