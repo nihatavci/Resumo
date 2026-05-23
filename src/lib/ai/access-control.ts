@@ -33,6 +33,24 @@ function getKnownModel(modelId: string): HiddenModel | undefined {
   return getModelById(modelId) ?? HIDDEN_MODELS[modelId];
 }
 
+/**
+ * Read an env var from the Cloudflare Workers env binding first,
+ * then fall back to process.env (local dev / Node runtimes).
+ * CF secrets are on `env.*`, NOT on process.env in Workers runtime.
+ */
+function getCFEnvOrProcessEnv(key: string): string | undefined {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCloudflareContext } = require('@opennextjs/cloudflare');
+    const cfEnv = getCloudflareContext().env as Record<string, string | undefined>;
+    const cfVal = cfEnv[key];
+    if (cfVal) return cfVal;
+  } catch {
+    // not running in CF Workers context — fall through to process.env
+  }
+  return process.env[key];
+}
+
 export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIRequest {
   const model = getKnownModel(input.requestedModel);
 
@@ -57,7 +75,9 @@ export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIReques
   }
 
   // DeepSeek and other external providers — prefer server-side key, then user key.
-  const envKey = provider.envKey ? process.env[provider.envKey] : undefined;
+  // In Cloudflare Workers, secrets live on the `env` binding object, not process.env.
+  // Try the CF context first, then fall back to process.env (for local dev / other runtimes).
+  const envKey = provider.envKey ? getCFEnvOrProcessEnv(provider.envKey) : undefined;
   if (envKey) {
     return {
       providerId: model.provider,

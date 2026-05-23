@@ -66,11 +66,12 @@ export async function POST(req: Request) {
 
   console.log('[tailor-chat] start, messages:', messages.length);
 
-  const { model, usageEventId } = await startAIUsageRequest({
+  const { model, usageEventId, resolved } = await startAIUsageRequest({
     route: 'api.tailor-chat',
     userId,
     isPro: true,
   });
+  console.log('[tailor-chat] model:', resolved.modelId, '| provider:', resolved.providerId);
 
   // Pre-process the latest user message to handle URLs server-side
   const processedMessages = [...messages];

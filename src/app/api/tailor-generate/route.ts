@@ -51,11 +51,12 @@ export async function POST(req: Request) {
 
   console.log('[tailor-generate] start, chat history length:', messages.length);
 
-  const { model, usageEventId, telemetry } = await startAIUsageRequest({
+  const { model, usageEventId, telemetry, resolved } = await startAIUsageRequest({
     route: 'api.tailor-generate',
     userId,
     isPro: true,
   });
+  console.log('[tailor-generate] model:', resolved.modelId, '| provider:', resolved.providerId);
 
   // Distill the chat into a single text block for the AI
   const chatHistory = messages
