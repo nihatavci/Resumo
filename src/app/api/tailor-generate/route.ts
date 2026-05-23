@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
 import { startAIUsageRequest, finishAIUsageRequest } from '@/lib/ai/usage-ledger';
 import type { Resume } from '@/lib/types';
+import { HUMANIZATION_INSTRUCTIONS } from '@/lib/ai/humanization';
 
 /**
  * Takes the chat conversation + master CV and produces the structured
@@ -90,7 +91,9 @@ CRITICAL RULES — THESE ARE ABSOLUTE AND NON-NEGOTIABLE:
 ${memoryPoints && memoryPoints.length > 0 ? `
 
 AGREED DECISIONS FROM CHAT (apply these specifically when tailoring):
-${memoryPoints.map((p) => `- ${p}`).join('\n')}` : ''}`;
+${memoryPoints.map((p) => `- ${p}`).join('\n')}` : ''}
+
+${HUMANIZATION_INSTRUCTIONS}`;
 
   try {
     const { object, usage } = await generateObject({
