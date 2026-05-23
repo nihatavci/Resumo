@@ -9,6 +9,7 @@
 "use client";
 
 import { Resume } from "@/lib/types";
+import { type ResumeTheme } from '@/lib/resume-themes';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { useState, useEffect, memo, useMemo, useCallback } from 'react';
 import { pdf } from '@react-pdf/renderer';
@@ -100,6 +101,7 @@ interface ResumePreviewProps {
   resume: Resume;
   variant?: 'base' | 'tailored';
   containerWidth: number;  // This is now expected to be a percentage (0-100)
+  theme?: ResumeTheme;
 }
 
 /**
@@ -108,7 +110,7 @@ interface ResumePreviewProps {
  * Displays a PDF preview of the resume using react-pdf.
  * Handles PDF generation and responsive display.
  */
-export const ResumePreview = memo(function ResumePreview({ resume, variant = 'base', containerWidth }: ResumePreviewProps) {
+export const ResumePreview = memo(function ResumePreview({ resume, variant = 'base', containerWidth, theme }: ResumePreviewProps) {
   const [url, setUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const debouncedWidth = useDebouncedValue(containerWidth, 100);
@@ -123,7 +125,10 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   }, [debouncedWidth]);
 
   // Generate resume hash for caching
-  const resumeHash = useMemo(() => generateResumeHash(resume), [resume]);
+  const resumeHash = useMemo(
+    () => generateResumeHash(resume) + (theme?.id ?? 'classic'),
+    [resume, theme],
+  );
 
   // Add styles to document head
   useEffect(() => {
@@ -149,7 +154,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
       }
 
       // Generate new PDF if not in cache
-      const blob = await pdf(<ResumePDFDocument resume={resume} variant={variant} />).toBlob();
+      const blob = await pdf(<ResumePDFDocument resume={resume} variant={variant} theme={theme} />).toBlob();
       const newUrl = URL.createObjectURL(blob);
       currentUrl = newUrl;
       
@@ -338,6 +343,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   return (
     prevProps.resume === nextProps.resume &&
     prevProps.variant === nextProps.variant &&
-    prevProps.containerWidth === nextProps.containerWidth
+    prevProps.containerWidth === nextProps.containerWidth &&
+    prevProps.theme === nextProps.theme
   );
 }); 
