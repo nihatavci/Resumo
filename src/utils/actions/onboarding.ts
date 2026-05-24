@@ -109,7 +109,7 @@ export async function completeOnboarding(
     document_font_size: 10.5,
     document_line_height: 1.4,
     header_name_size: 26,
-    header_name_bottom_spacing: 6,
+    header_name_bottom_spacing: 16,
     document_margin_vertical: 36,
     document_margin_horizontal: 40,
     skills_margin_top: 8,

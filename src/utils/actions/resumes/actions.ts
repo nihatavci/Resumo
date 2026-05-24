@@ -205,7 +205,7 @@ export async function createBaseResume(
       experience_margin_bottom: 0,
       skills_margin_horizontal: 0,
       document_margin_horizontal: 28,
-      header_name_bottom_spacing: 16,
+      header_name_bottom_spacing: 20,
       projects_margin_horizontal: 0,
       education_margin_horizontal: 0,
       experience_margin_horizontal: 0
