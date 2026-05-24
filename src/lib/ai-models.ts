@@ -214,9 +214,9 @@ export const MODEL_DESIGNATIONS = {
   // Full resume tailoring by plan
   JOB_TAILORING_FREE: 'deepseek-chat',
   JOB_TAILORING_PRO: 'deepseek-chat',
-  // Interactive assistant by plan
+  // Interactive assistant by plan — PRO uses DeepSeek R1 (reasoning model) for more considered replies
   CHAT_ASSISTANT_FREE: 'deepseek-chat',
-  CHAT_ASSISTANT_PRO: 'deepseek-chat',
+  CHAT_ASSISTANT_PRO: 'deepseek-reasoner',
   // Frontier model for complex tasks, deep analysis, best quality
   FRONTIER: 'deepseek-chat',
   // Alternative frontier model (free, no API key)
