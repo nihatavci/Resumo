@@ -4,10 +4,12 @@ import { SecurityForm } from "./security-form"
 import { ApiKeysForm } from "./api-keys-form"
 import { DangerZone } from "./danger-zone"
 import { AiPromptsForm } from "./ai-prompts-form"
+import { LanguageForm } from "./language-form"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 const sections = [
+  { id: "language", title: "Language", description: "Set the AI response language", icon: "🌐" },
   { id: "security", title: "Security", description: "Manage your email and password settings", icon: "🔒" },
   { id: "api-keys", title: "API Keys", description: "Manage your API keys for different AI providers", icon: "🔑" },
   { id: "ai-prompts", title: "AI Prompts", description: "Customize AI system prompts for different actions", icon: "🤖" },
@@ -89,6 +91,17 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
       {/* Content */}
       <div className="flex-1 space-y-8">
+        {/* Language */}
+        <Card id="language" className="border-dia-divider shadow-dia bg-white/90 backdrop-blur-[24px] rounded-dia-sm">
+          <CardHeader>
+            <CardTitle className="text-xl font-light">Language</CardTitle>
+            <CardDescription>AI assistant and generated content always use this language</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LanguageForm />
+          </CardContent>
+        </Card>
+
         {/* Security Settings */}
         <Card id="security" className="border-dia-divider shadow-dia bg-white/90 backdrop-blur-[24px] rounded-dia-sm">
           <CardHeader>

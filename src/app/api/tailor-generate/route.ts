@@ -47,8 +47,9 @@ export async function POST(req: Request) {
     messages: Message[];
     masterResume: Resume;
     memoryPoints?: string[];
+    responseLanguage?: string;
   };
-  const { messages, masterResume, memoryPoints } = body;
+  const { messages, masterResume, memoryPoints, responseLanguage } = body;
 
   console.log('[tailor-generate] start, chat history length:', messages.length);
 
@@ -65,7 +66,11 @@ export async function POST(req: Request) {
     .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
     .join('\n\n');
 
-  const systemPrompt = `You are an ATS resume tailoring expert.
+  const languageInstruction = responseLanguage
+    ? `\nLANGUAGE — ABSOLUTE: Write every word of every bullet, summary, category name, and rationale in ${responseLanguage === 'en' ? 'English' : responseLanguage === 'de' ? 'German (Deutsch)' : responseLanguage === 'fr' ? 'French (Français)' : responseLanguage === 'es' ? 'Spanish (Español)' : responseLanguage === 'it' ? 'Italian (Italiano)' : responseLanguage === 'pt' ? 'Portuguese (Português)' : responseLanguage === 'nl' ? 'Dutch (Nederlands)' : responseLanguage === 'tr' ? 'Turkish (Türkçe)' : responseLanguage}. Never mix languages.\n`
+    : '';
+
+  const systemPrompt = `You are an ATS resume tailoring expert.${languageInstruction}
 Given (1) the candidate's MASTER CV, (2) a chat conversation where the user has discussed a target job and any preferences, produce the final tailored resume.
 
 CRITICAL RULES — THESE ARE ABSOLUTE AND NON-NEGOTIABLE:

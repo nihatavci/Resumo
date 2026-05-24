@@ -20,6 +20,7 @@ import type { ProposedChanges } from './types';
 import type { Message } from '@ai-sdk/react';
 import { getThemeById, type ResumeTheme } from '@/lib/resume-themes';
 import { ThemePicker } from './theme-picker';
+import { getStoredLanguage, type LanguageCode } from '@/components/settings/language-form';
 
 interface WorkspaceClientProps {
   masterResume: Resume;
@@ -38,6 +39,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
     if (typeof window === 'undefined') return 'classic';
     return localStorage.getItem('resumo_theme') ?? 'classic';
   });
+  const [responseLanguage] = useState<LanguageCode | null>(() => getStoredLanguage());
 
   // Conversation persistence
   const {
@@ -167,6 +169,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
               masterResume={masterResume}
               initialMessages={activeConversation?.messages}
               initialCompanyIntel={activeConversation?.companyIntel}
+              responseLanguage={responseLanguage ?? undefined}
               onProposedChanges={handleProposedChanges}
               onApplyReady={setApplyReady}
               onGenerating={(g, p) => { setGenerating(g); setGenerateProgress(p); }}

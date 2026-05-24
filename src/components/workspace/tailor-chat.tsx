@@ -14,6 +14,8 @@ interface TailorChatProps {
   masterResume: Resume;
   initialMessages?: Message[];
   initialCompanyIntel?: CompanyIntel | null;
+  /** ISO 639-1 language code — forces all AI replies to this language */
+  responseLanguage?: string;
   onProposedChanges: (changes: ProposedChanges | null) => void;
   onApplyReady: (ready: boolean) => void;
   onMemoryPoints?: (points: string[]) => void;
@@ -38,6 +40,7 @@ export function TailorChat({
   masterResume,
   initialMessages,
   initialCompanyIntel,
+  responseLanguage,
   onProposedChanges,
   onApplyReady,
   onMemoryPoints,
@@ -64,6 +67,7 @@ export function TailorChat({
       companyIntel: companyIntel
         ? `Culture: ${companyIntel.culture} | Employer rep: ${companyIntel.employerRep} | Hiring signals: ${companyIntel.hiringSignals}`
         : undefined,
+      responseLanguage,
     },
     onError: (err) => {
       console.error('[tailor-chat client] error:', err);
@@ -84,7 +88,7 @@ export function TailorChat({
       const res = await fetch('/api/tailor-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages, masterResume, memoryPoints }),
+        body: JSON.stringify({ messages, masterResume, memoryPoints, ...(responseLanguage ? { responseLanguage } : {}) }),
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };

@@ -61,8 +61,9 @@ export async function POST(req: Request) {
     messages: Message[];
     masterResume: Resume;
     companyIntel?: string;
+    responseLanguage?: string;
   };
-  const { messages, masterResume, companyIntel } = body;
+  const { messages, masterResume, companyIntel, responseLanguage } = body;
 
   console.log('[tailor-chat] start, messages:', messages.length);
 
@@ -97,12 +98,19 @@ export async function POST(req: Request) {
     }
   }
 
+  const languageRule = responseLanguage
+    ? `LANGUAGE RULE — ABSOLUTE:
+You MUST write every single word of every reply in ${responseLanguage === 'en' ? 'English' : responseLanguage === 'de' ? 'German (Deutsch)' : responseLanguage === 'fr' ? 'French (Français)' : responseLanguage === 'es' ? 'Spanish (Español)' : responseLanguage === 'it' ? 'Italian (Italiano)' : responseLanguage === 'pt' ? 'Portuguese (Português)' : responseLanguage === 'nl' ? 'Dutch (Nederlands)' : responseLanguage === 'tr' ? 'Turkish (Türkçe)' : responseLanguage}.
+This applies regardless of what language the job description is written in, or what language the user types in.
+Never switch languages mid-reply. Never borrow words from the job description's language. Translate any key terms if needed.`
+    : `LANGUAGE RULE — ABSOLUTE:
+Always respond in the same language as the MASTER CV, regardless of what language the job description is written in.
+Detect the master CV language from the text below and use that language for every word you write.
+Never mix languages.`;
+
   const systemPrompt = `You are a sharp resume strategist. You help candidates tailor their CV for a specific job.
 
-LANGUAGE RULE — ABSOLUTE:
-- Always respond in the same language as the MASTER CV, regardless of what language the job description or the user's message is written in.
-- Detect the master CV language from the text below and use that language for every word you write — analysis, plan, ATS tips, follow-up questions, everything.
-- Never mix languages. If the CV is in English, reply in English even if the JD is in German, French, etc.
+${languageRule}
 
 IF NO JOB HAS BEEN SHARED YET — ABSOLUTE RULE:
 - If the user's message does NOT contain a job description, job title, company name, required skills list, or a URL — do NOT produce any analysis, match map, or plan.
