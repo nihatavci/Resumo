@@ -9,6 +9,21 @@ export interface CompanyIntel {
   hiringSignals: string;
 }
 
+/** Mirrors ProposedChanges — defined here to avoid circular imports */
+export interface GeneratedCV {
+  professional_summary?: string;
+  work_experience: {
+    company: string;
+    position: string;
+    date: string;
+    location?: string;
+    description: string[];
+    technologies?: string[];
+  }[];
+  skills: { category: string; items: string[] }[];
+  rationale: string;
+}
+
 export interface Conversation {
   id: string;
   resumeId: string;
@@ -17,6 +32,8 @@ export interface Conversation {
   messages: Message[];
   companyIntel: CompanyIntel | null;
   memoryPoints: string[];
+  /** Generated CV associated with this conversation, if any */
+  generatedCV: GeneratedCV | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -95,6 +112,7 @@ export function useConversations(resumeId: string) {
       messages: [],
       companyIntel: null,
       memoryPoints: [],
+      generatedCV: null,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -107,21 +125,45 @@ export function useConversations(resumeId: string) {
     return newConvo.id;
   }, [resumeId]);
 
-  /** Upsert the active conversation's messages/intel/memoryPoints */
+  /** Upsert the active conversation's messages/intel/memoryPoints/generatedCV */
   const saveConversation = useCallback(
-    (id: string, patch: Partial<Pick<Conversation, 'messages' | 'companyIntel' | 'memoryPoints'>>) => {
+    (
+      id: string,
+      patch: Partial<Pick<Conversation, 'messages' | 'companyIntel' | 'memoryPoints' | 'generatedCV'>>,
+    ) => {
       setConversations((prev) => {
         const idx = prev.findIndex((c) => c.id === id);
         if (idx === -1) return prev;
         const updated = { ...prev[idx], ...patch, updatedAt: Date.now() };
-        // Re-derive title once we have messages
+        // Re-derive title once we have messages (but not if user has manually renamed)
         if (patch.messages && patch.messages.length > 0) {
-          updated.title = deriveTitle(patch.messages);
+          const derived = deriveTitle(patch.messages);
+          // Only auto-update title if it's still a default title
+          if (prev[idx].title === 'New conversation' || prev[idx].title === updated.title) {
+            updated.title = derived;
+          }
         }
         const next = [...prev];
         next[idx] = updated;
         // Re-sort: updated conversation goes to top
         next.sort((a, b) => b.updatedAt - a.updatedAt);
+        saveAll(resumeId, next);
+        return next;
+      });
+    },
+    [resumeId],
+  );
+
+  /** Rename a conversation to a custom title */
+  const renameConversation = useCallback(
+    (id: string, title: string) => {
+      const trimmed = title.trim();
+      if (!trimmed) return;
+      setConversations((prev) => {
+        const idx = prev.findIndex((c) => c.id === id);
+        if (idx === -1) return prev;
+        const next = [...prev];
+        next[idx] = { ...next[idx], title: trimmed, updatedAt: Date.now() };
         saveAll(resumeId, next);
         return next;
       });
@@ -156,6 +198,7 @@ export function useConversations(resumeId: string) {
     activeConversation,
     createConversation,
     saveConversation,
+    renameConversation,
     deleteConversation,
     selectConversation,
   };

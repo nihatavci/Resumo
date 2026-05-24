@@ -11,8 +11,8 @@ import { pdf } from '@react-pdf/renderer';
 import { TailorChat } from './tailor-chat';
 import { TailoredDiffView } from './tailored-diff-view';
 import { GeneratingSkeleton } from './generating-skeleton';
-import { ConversationHeader } from './conversation-header';
-import { useConversations, type CompanyIntel } from '@/hooks/use-conversations';
+import { ConversationSidebar } from './conversation-sidebar';
+import { useConversations, type CompanyIntel, type GeneratedCV } from '@/hooks/use-conversations';
 import { toast } from 'sonner';
 import { Download, RotateCcw, Check, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -49,15 +49,12 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
     activeConversation,
     createConversation,
     saveConversation,
+    renameConversation,
     deleteConversation,
     selectConversation,
   } = useConversations(masterResume.id);
 
-  // Ensure there's always at least one conversation
-  const effectiveConvoId = activeId ?? (() => {
-    // This path shouldn't normally be reached — useConversations auto-selects
-    return 'default';
-  })();
+  const effectiveConvoId = activeId ?? 'default';
 
   const handleConversationChange = useCallback(
     (patch: { messages?: Message[]; companyIntel?: CompanyIntel | null; memoryPoints?: string[] }) => {
@@ -68,19 +65,25 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
   );
 
   function handleCreateConversation() {
-    // Reset pending changes when starting a new conversation
     setPendingChanges(null);
     setApplyReady(false);
     setViewMode('original');
     createConversation();
   }
 
-  function handleSelectConversation(id: string) {
-    // Reset pending changes when switching conversations
-    setPendingChanges(null);
-    setApplyReady(false);
-    setViewMode('original');
+  /** Select a conversation and restore its generated CV if present */
+  function handleSelectConversation(id: string, generatedCV: GeneratedCV | null) {
     selectConversation(id);
+    if (generatedCV) {
+      // Cast is safe — GeneratedCV mirrors ProposedChanges exactly
+      setPendingChanges(generatedCV as unknown as ProposedChanges);
+      setApplyReady(true);
+      setViewMode('diff');
+    } else {
+      setPendingChanges(null);
+      setApplyReady(false);
+      setViewMode('original');
+    }
   }
 
   const selectedTheme: ResumeTheme = getThemeById(selectedThemeId);
@@ -94,7 +97,15 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
 
   function handleProposedChanges(changes: ProposedChanges | null) {
     setPendingChanges(changes);
-    if (changes) setViewMode('diff');
+    if (changes) {
+      setViewMode('diff');
+      // Persist the generated CV in the conversation so it survives page refresh
+      if (activeId) {
+        saveConversation(activeId, { generatedCV: changes as unknown as GeneratedCV });
+      }
+    } else if (activeId) {
+      saveConversation(activeId, { generatedCV: null });
+    }
   }
 
   // Compose the resume shown in PDF preview
@@ -119,6 +130,8 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
       setPendingChanges(null);
       setApplyReady(false);
       setViewMode('original');
+      // Clear the stored CV from the conversation after applying
+      if (activeId) saveConversation(activeId, { generatedCV: null });
     } catch (err) {
       console.error('Apply failed:', err);
       toast.error('Failed to save tailored CV');
@@ -131,6 +144,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
     setPendingChanges(null);
     setApplyReady(false);
     setViewMode('original');
+    if (activeId) saveConversation(activeId, { generatedCV: null });
   }
 
   async function handleDownload() {
@@ -157,25 +171,31 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
       <ResizablePanels
         isBaseResume={!pendingChanges}
         editorPanel={
-          <div className="h-full flex flex-col">
-            <ConversationHeader
+          <div className="h-full flex overflow-hidden">
+            {/* ── Conversation sidebar ── */}
+            <ConversationSidebar
               conversations={conversations}
               activeId={activeId}
               onSelect={handleSelectConversation}
               onCreate={handleCreateConversation}
               onDelete={deleteConversation}
+              onRename={renameConversation}
             />
-            <TailorChat
-              key={effectiveConvoId}
-              masterResume={masterResume}
-              initialMessages={activeConversation?.messages}
-              initialCompanyIntel={activeConversation?.companyIntel}
-              responseLanguage={responseLanguage ?? undefined}
-              onProposedChanges={handleProposedChanges}
-              onApplyReady={setApplyReady}
-              onGenerating={(g, p) => { setGenerating(g); setGenerateProgress(p); }}
-              onConversationChange={handleConversationChange}
-            />
+
+            {/* ── Chat area ── */}
+            <div className="flex-1 min-w-0 flex flex-col">
+              <TailorChat
+                key={effectiveConvoId}
+                masterResume={masterResume}
+                initialMessages={activeConversation?.messages}
+                initialCompanyIntel={activeConversation?.companyIntel}
+                responseLanguage={responseLanguage ?? undefined}
+                onProposedChanges={handleProposedChanges}
+                onApplyReady={setApplyReady}
+                onGenerating={(g, p) => { setGenerating(g); setGenerateProgress(p); }}
+                onConversationChange={handleConversationChange}
+              />
+            </div>
           </div>
         }
         previewPanel={(width) => (
