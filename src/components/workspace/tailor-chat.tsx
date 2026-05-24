@@ -51,6 +51,8 @@ export function TailorChat({
   const [researching, setResearching] = useState(false);
   const [companyIntel, setCompanyIntel] = useState<CompanyIntel | null>(initialCompanyIntel ?? null);
   const [researchError, setResearchError] = useState<string | null>(null);
+  const [showPasteArea, setShowPasteArea] = useState(false);
+  const [pastedAboutText, setPastedAboutText] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const dismissedPointsRef = useRef<Set<string>>(new Set());
 
@@ -117,7 +119,7 @@ export function TailorChat({
     return null;
   }
 
-  async function handleResearch() {
+  async function handleResearch(aboutPageText?: string) {
     const companyName = extractCompanyFromMessages();
     if (!companyName) return;
 
@@ -127,7 +129,7 @@ export function TailorChat({
       const res = await fetch('/api/tailor-research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companyName }),
+        body: JSON.stringify({ companyName, ...(aboutPageText ? { aboutPageText } : {}) }),
       });
       const data = (await res.json()) as
         | { ok: true; culture: string; employerRep: string; hiringSignals: string }
@@ -135,8 +137,11 @@ export function TailorChat({
 
       if (!data.ok) throw new Error(data.error);
       setCompanyIntel({ culture: data.culture, employerRep: data.employerRep, hiringSignals: data.hiringSignals });
+      setShowPasteArea(false);
+      setPastedAboutText('');
     } catch (err) {
       setResearchError(err instanceof Error ? err.message : 'Research failed');
+      setShowPasteArea(true);
     } finally {
       setResearching(false);
     }
@@ -247,23 +252,55 @@ export function TailorChat({
 
         {/* Research button — shown after first JD analysis, before company intel loads */}
         {!companyIntel && messages.some((m) => m.role === 'assistant' && m.content.includes('📋')) && !isLoading && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleResearch}
-              disabled={researching}
-              className="flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 text-sky-700 text-xs font-medium px-3 py-1.5 hover:bg-sky-100 transition-colors disabled:opacity-50"
-            >
-              {researching ? (
-                <>
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Researching…
-                </>
-              ) : (
-                <>🔍 Research company</>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleResearch()}
+                disabled={researching}
+                className="flex items-center gap-1.5 rounded-full border border-dia-divider bg-white text-foreground/70 text-xs font-medium px-3 py-1.5 hover:bg-foreground/5 transition-colors disabled:opacity-50"
+              >
+                {researching ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Researching…
+                  </>
+                ) : (
+                  <>🔍 Research company</>
+                )}
+              </button>
+              {researchError && !showPasteArea && (
+                <p className="text-xs text-foreground/50">{researchError}</p>
               )}
-            </button>
-            {researchError && (
-              <p className="text-xs text-red-500">{researchError}</p>
+            </div>
+
+            {/* Paste fallback — shown when automatic research fails */}
+            {showPasteArea && (
+              <div className="rounded-2xl border border-dia-divider bg-white p-3 space-y-2">
+                <p className="text-xs text-foreground/50 leading-snug">
+                  Paste their About page text below and we&apos;ll extract company intel from it.
+                </p>
+                <textarea
+                  value={pastedAboutText}
+                  onChange={(e) => setPastedAboutText(e.target.value)}
+                  placeholder="Paste company About page content here…"
+                  rows={4}
+                  className="w-full resize-none rounded-xl border border-dia-divider bg-foreground/[0.02] px-3 py-2 text-xs text-foreground outline-none focus:border-foreground/30 transition-colors placeholder:text-foreground/30"
+                />
+                <button
+                  onClick={() => handleResearch(pastedAboutText)}
+                  disabled={researching || pastedAboutText.trim().length < 20}
+                  className="flex items-center gap-1.5 rounded-full bg-foreground text-background text-xs font-medium px-3 py-1.5 hover:opacity-80 disabled:opacity-30 transition-all"
+                >
+                  {researching ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Extracting intel…
+                    </>
+                  ) : (
+                    <>Extract company intel</>
+                  )}
+                </button>
+              </div>
             )}
           </div>
         )}
