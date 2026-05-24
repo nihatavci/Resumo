@@ -7,15 +7,21 @@ import { RESUME_THEMES, type ResumeTheme } from '@/lib/resume-themes';
 interface ThemePickerProps {
   selectedThemeId: string;
   onChange: (themeId: string) => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function ThemePicker({ selectedThemeId, onChange }: ThemePickerProps) {
+export function ThemePicker({ selectedThemeId, onChange, onOpenChange }: ThemePickerProps) {
   const [open, setOpen] = useState(false);
+
+  function toggle(value: boolean) {
+    setOpen(value);
+    onOpenChange?.(value);
+  }
 
   return (
     <div className="relative">
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={() => toggle(!open)}
         className={`flex items-center gap-1.5 rounded-full bg-white border text-foreground text-xs font-medium px-3 py-1.5 shadow-sm transition-all ${
           open ? 'border-foreground/30 bg-foreground/5' : 'border-dia-divider hover:bg-foreground/5'
         }`}
@@ -30,7 +36,7 @@ export function ThemePicker({ selectedThemeId, onChange }: ThemePickerProps) {
           {/* Click-outside backdrop */}
           <div
             className="fixed inset-0 z-40"
-            onClick={() => setOpen(false)}
+            onClick={() => toggle(false)}
           />
           {/* Popover */}
           <div className="absolute right-0 top-9 z-50 bg-white rounded-2xl shadow-2xl border border-dia-divider p-4 min-w-[340px]">
@@ -45,7 +51,7 @@ export function ThemePicker({ selectedThemeId, onChange }: ThemePickerProps) {
                   selected={theme.id === selectedThemeId}
                   onSelect={() => {
                     onChange(theme.id);
-                    setOpen(false);
+                    toggle(false);
                   }}
                 />
               ))}

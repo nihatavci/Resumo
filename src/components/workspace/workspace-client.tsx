@@ -40,6 +40,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
     return localStorage.getItem('resumo_theme') ?? 'classic';
   });
   const [responseLanguage] = useState<LanguageCode | null>(() => getStoredLanguage());
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
 
   // Conversation persistence
   const {
@@ -231,6 +232,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
                 <ThemePicker
                   selectedThemeId={selectedThemeId}
                   onChange={handleThemeChange}
+                  onOpenChange={setThemePickerOpen}
                 />
                 <button
                   onClick={handleDownload}
@@ -276,7 +278,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
             </div>
 
             {/* ── Content area ── */}
-            <div className="flex-1 min-h-0 relative">
+            <div className={`flex-1 min-h-0 relative${themePickerOpen ? ' pointer-events-none' : ''}`}>
               {/* Shimmer skeleton overlay while generating */}
               <AnimatePresence>
                 {generating && (
