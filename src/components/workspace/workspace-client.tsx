@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { ProposedChanges } from './types';
 import type { Message } from '@ai-sdk/react';
 import { getThemeById, type ResumeTheme } from '@/lib/resume-themes';
+import { getFontById } from '@/lib/resume-fonts';
 import { ThemePicker } from './theme-picker';
 import { getStoredLanguage, type LanguageCode } from '@/components/settings/language-form';
 
@@ -38,6 +39,10 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
   const [selectedThemeId, setSelectedThemeId] = useState<string>(() => {
     if (typeof window === 'undefined') return 'classic';
     return localStorage.getItem('resumo_theme') ?? 'classic';
+  });
+  const [selectedFontId, setSelectedFontId] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'default';
+    return localStorage.getItem('resumo_font') ?? 'default';
   });
   const [responseLanguage] = useState<LanguageCode | null>(() => getStoredLanguage());
   const [themePickerOpen, setThemePickerOpen] = useState(false);
@@ -95,6 +100,28 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
     }
   }
 
+  function handleFontChange(id: string) {
+    setSelectedFontId(id);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('resumo_font', id);
+    }
+  }
+
+  // Merge selected font override into the theme (keeps theme colours, overrides typography)
+  const effectiveTheme: ResumeTheme = (() => {
+    if (!selectedFontId || selectedFontId === 'default') return selectedTheme;
+    const font = getFontById(selectedFontId);
+    if (!font || !font.pdfFamily) return selectedTheme;
+    return {
+      ...selectedTheme,
+      // Encode font into the id so the PDF cache invalidates on font change
+      id: `${selectedTheme.id}-${selectedFontId}`,
+      fontFamily: font.pdfFamily,
+      fontFamilyBold: font.pdfFamilyBold,
+      nameFontFamily: font.pdfFamilyBold,
+    };
+  })();
+
   function handleProposedChanges(changes: ProposedChanges | null) {
     setPendingChanges(changes);
     if (changes) {
@@ -149,7 +176,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
 
   async function handleDownload() {
     try {
-      const blob = await pdf(<ResumePDFDocument resume={displayResume} theme={selectedTheme} />).toBlob();
+      const blob = await pdf(<ResumePDFDocument resume={displayResume} theme={effectiveTheme} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -252,6 +279,8 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
                 <ThemePicker
                   selectedThemeId={selectedThemeId}
                   onChange={handleThemeChange}
+                  selectedFontId={selectedFontId}
+                  onFontChange={handleFontChange}
                   onOpenChange={setThemePickerOpen}
                 />
                 <button
@@ -329,7 +358,7 @@ export function WorkspaceClient({ masterResume }: WorkspaceClientProps) {
                   <ResumePreview
                     resume={viewMode === 'original' ? masterResume : tailoredResume}
                     containerWidth={width}
-                    theme={selectedTheme}
+                    theme={effectiveTheme}
                   />
                 </ScrollArea>
               )}
