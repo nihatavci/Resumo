@@ -359,8 +359,8 @@ function createResumeStyles(
       color: theme.bodyColor,
     },
     page: {
-      paddingTop: Math.max(document_margin_vertical, 32),
-      paddingBottom: Math.max(document_margin_vertical, 32) + 28,
+      paddingTop: Math.max(document_margin_vertical, 48),
+      paddingBottom: Math.max(document_margin_vertical, 48) + 28,
       paddingLeft: document_margin_horizontal,
       paddingRight: document_margin_horizontal,
       fontFamily: theme.fontFamily,

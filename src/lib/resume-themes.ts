@@ -92,7 +92,7 @@ export const RESUME_THEMES: ResumeTheme[] = [
     nameFontFamily: 'Helvetica-Bold',
     sectionTitleTextTransform: 'uppercase',
     headerAlign: 'left',
-    bulletChar: '▸',
+    bulletChar: '›',
   },
   {
     id: 'elegant',

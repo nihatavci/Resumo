@@ -154,13 +154,17 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
       }
 
       // Generate new PDF if not in cache
-      const blob = await pdf(<ResumePDFDocument resume={resume} variant={variant} theme={theme} />).toBlob();
-      const newUrl = URL.createObjectURL(blob);
-      currentUrl = newUrl;
-      
-      // Store in cache with timestamp
-      pdfCache.set(resumeHash, { url: newUrl, timestamp: Date.now() });
-      setUrl(newUrl);
+      try {
+        const blob = await pdf(<ResumePDFDocument resume={resume} variant={variant} theme={theme} />).toBlob();
+        const newUrl = URL.createObjectURL(blob);
+        currentUrl = newUrl;
+        // Store in cache with timestamp
+        pdfCache.set(resumeHash, { url: newUrl, timestamp: Date.now() });
+        setUrl(newUrl);
+      } catch (err) {
+        console.error('[ResumePreview] PDF generation failed:', err);
+        // Don't cache failures — allow retry on next render
+      }
     }
 
     generatePDF();
@@ -171,7 +175,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
         URL.revokeObjectURL(currentUrl);
       }
     };
-  }, [resumeHash, variant, resume]);
+  }, [resumeHash, variant, resume, theme]);
 
   // Cleanup on component unmount
   useEffect(() => {
