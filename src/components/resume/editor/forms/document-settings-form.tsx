@@ -346,7 +346,7 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
                 projects_margin_bottom: 0,
                 education_margin_bottom: 0,
                 experience_item_spacing: 1,
-                document_margin_vertical: 20,
+                document_margin_vertical: 32,
                 experience_margin_bottom: 0,
                 skills_margin_horizontal: 0,
                 document_margin_horizontal: 28,
