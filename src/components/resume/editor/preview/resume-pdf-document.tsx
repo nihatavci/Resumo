@@ -393,6 +393,7 @@ function createResumeStyles(
       justifyContent: theme.headerAlign === 'left' ? 'flex-start' : 'center',
       flexWrap: 'wrap',
       gap: 4,
+      width: '100%',
     },
     sectionTitle: {
       fontSize: document_font_size,
