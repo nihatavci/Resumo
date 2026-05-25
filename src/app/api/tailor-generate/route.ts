@@ -82,7 +82,7 @@ CRITICAL RULES — THESE ARE ABSOLUTE AND NON-NEGOTIABLE:
 3. Return EXACTLY ${masterResume.work_experience?.length ?? 0} work_experience entries — the SAME number as the master. Never drop or merge jobs.
 
 4. For each bullet point, the ONLY allowed changes are:
-   a) Start with a stronger action verb (e.g. "Managed" → "Led").
+   a) Strengthen the bullet opening — use a stronger verb OR vary the structure (result-first, two-part, short punchy). Do NOT default every bullet to a past-tense verb opening. See writing style rules below.
    b) Reorder clauses within the same bullet for better flow.
    c) Make an existing metric more prominent.
    d) Remove a weak filler phrase (e.g. "responsible for").
@@ -122,7 +122,7 @@ ${chatHistory}
 
 Produce the tailored version now. Return exactly ${masterResume.work_experience?.length ?? 0} work_experience entries.
 
-FINAL REMINDER BEFORE YOU OUTPUT: Read each bullet you are about to write and ask yourself — "Does this exact concept appear in the original bullet?" If NO, remove it. You are a copyeditor, not a ghostwriter. Strengthen what exists. Never invent.`,
+FINAL REMINDER BEFORE YOU OUTPUT: (1) Read each bullet — "Does this exact concept appear in the original?" If NO, remove it. You are a copyeditor, not a ghostwriter. (2) Scan all bullets for a role — do they all start with a past-tense verb? If yes, rewrite 2–3 to open differently (result-first, context-first, two-part). Uniform verb openers are the clearest AI signal. Break the pattern.`,
     });
 
     await finishAIUsageRequest({ usageEventId, status: 'succeeded', usage });

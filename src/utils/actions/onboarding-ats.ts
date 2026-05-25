@@ -35,12 +35,11 @@ const ATS_WORK_PROMPT = `You are an ATS resume specialist. Rewrite the candidate
 
 CRITICAL ATS RULES:
 1. PRESERVE ALL FACTS — numbers, percentages, dollar amounts, dates, company names, achievements. NEVER invent or inflate.
-2. LEAD with strong action verbs (Achieved, Led, Built, Designed, Reduced, Increased, Launched, Developed, Drove, Managed, Shipped, Grew).
-3. QUANTIFY where possible (use the candidate's original numbers — do NOT make up new ones).
-4. KEYWORD MATCH the target role — naturally incorporate relevant industry terms IF they correspond to what the candidate actually did.
+2. VARY STRUCTURE — Do NOT start every bullet with a past-tense verb. That is the single strongest AI signal. Rotate deliberately: some bullets lead with a result ("Cut deploy time 40% by switching to…"), some open with context ("After the team scaled to 500k users, rebuilt…"), some are short punchy statements ("Shipped the redesigned flow in two sprints."), some use a two-part structure ("Designed the API; the mobile team adopted it without changes."). Aim for roughly 1 in 3 bullets to open in a non-verb way.
+3. QUANTIFY where possible — use the candidate's original numbers only. Do NOT invent metrics.
+4. KEYWORD MATCH the target role — naturally incorporate relevant terms IF they correspond to what the candidate actually did.
 5. CONCISE — one strong line per bullet (max ~25 words). Cut filler words.
-6. VARIED structure — most bullets start with an action verb, but vary the pattern: some lead with the result, some use a two-part structure. See writing style rules below.
-7. RESULT-ORIENTED — what was achieved, not just what was done.
+6. RESULT-ORIENTED — what was achieved, not just what was done.
 
 DO NOT:
 - Invent achievements or skills the candidate doesn't have
@@ -57,16 +56,16 @@ ${HUMANIZATION_INSTRUCTIONS}`;
 const ATS_SKILLS_PROMPT = `You are an ATS resume specialist. Reorganize the candidate's skills into ATS-friendly categories and order.
 
 RULES:
-1. Use industry-standard category names. Examples by field:
-   - Software engineering: "Programming Languages", "Frameworks & Libraries", "Tools & Platforms", "Cloud & DevOps", "Databases"
-   - Marketing: "Marketing Channels", "Analytics & Reporting", "Marketing Tools", "Campaign Management"
-   - Design: "Design Tools", "Design Systems", "Research Methods"
-   - Data: "Programming Languages", "Data Tools", "Visualization", "Databases", "Statistics & ML"
+1. PRESERVE ORIGINAL CATEGORY NAMES unless they are genuinely ambiguous (e.g. a single "Skills" bucket with 20 mixed items). If the input says "Digital Marketing Tools", keep "Digital Marketing Tools". If it says "SEO & Content", keep "SEO & Content". Only rename when the name would confuse an ATS or hiring manager.
 2. Group skills logically — don't dump everything under one category.
 3. PRESERVE all skills from the input. Do NOT add new skills.
 4. Within each category, order by relevance to the target role (most relevant first).
-5. Use the candidate's terminology (e.g. if they say "Google Ads", use that, not "AdWords").
-6. Skills that are clearly the candidate's strong suit (mentioned multiple times in their experience) should be in their own category if there are 5+.`;
+5. Use the candidate's exact terminology (e.g. if they say "Google Ads", use that, not "AdWords").
+6. Skills that are clearly the candidate's strong suit (mentioned multiple times in their experience) should be in their own category if there are 5+.
+7. Do NOT assume the candidate is a software engineer. Keep domain-specific categories intact:
+   - Marketing: "SEO & SEM", "Analytics & Reporting", "Paid Campaigns", "Marketing Tools"
+   - Design: "Design Tools", "Design Systems", "Research Methods"
+   - Data: "Programming Languages", "Data Tools", "Visualization", "Databases"`;
 
 async function runATSCall<S extends z.ZodTypeAny>(
   route: string,
