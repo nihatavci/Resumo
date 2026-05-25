@@ -25,7 +25,7 @@ export function createAIClientFromResolvedRequest(
 
   if (resolved.providerId === 'deepseek') {
     const deepseek = createDeepSeek({ apiKey: resolved.apiKey });
-    return deepseek(resolved.modelId) as LanguageModelV1;
+    return deepseek(resolved.modelId) as unknown as LanguageModelV1;
   }
 
   const workersai = createWorkersAI({ binding: getAIBinding() });
