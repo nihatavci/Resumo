@@ -18,29 +18,22 @@ export interface ResumeFont {
   googleFontsUrl?: string;
 }
 
-// ── Font CDN URLs (Latin subset, gstatic.com) ──────────────────────────────
+// ── Font URLs (self-hosted in /public/fonts, served via Cloudflare CDN) ────
 
-// Inter — variable font, same file serves all weights
-const INTER_URL =
-  'https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2';
+const INTER_400_URL = '/fonts/inter-400.woff2';
+const INTER_700_URL = '/fonts/inter-700.woff2';
 
-// Lato — separate static files per weight
-const LATO_400_URL =
-  'https://fonts.gstatic.com/s/lato/v25/S6uyw4BMUTPHjx4wXiWtFCc.woff2';
-const LATO_700_URL =
-  'https://fonts.gstatic.com/s/lato/v25/S6u9w4BMUTPHh6UVSwiPGQ3q5d0.woff2';
+const LATO_400_URL = '/fonts/lato-400.woff2';
+const LATO_700_URL = '/fonts/lato-700.woff2';
 
-// Source Sans 3 — variable font
-const SOURCE_SANS_URL =
-  'https://fonts.gstatic.com/s/sourcesans3/v19/nwpStKy2OAdR1K-IwhWudF-R3w8aZejf5Hc.woff2';
+const SOURCE_SANS_400_URL = '/fonts/source-sans-400.woff2';
+const SOURCE_SANS_700_URL = '/fonts/source-sans-700.woff2';
 
-// EB Garamond — classic serif, variable font
-const GARAMOND_URL =
-  'https://fonts.gstatic.com/s/ebgaramond/v32/SlGUmQSNjdsmc35JDF1K5GR1SDk_YAPI.woff2';
+const GARAMOND_400_URL = '/fonts/garamond-400.woff2';
+const GARAMOND_700_URL = '/fonts/garamond-700.woff2';
 
-// Playfair Display — stylish editorial serif, variable font
-const PLAYFAIR_URL =
-  'https://fonts.gstatic.com/s/playfairdisplay/v40/nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgEM86xQ.woff2';
+const PLAYFAIR_400_URL = '/fonts/playfair-400.woff2';
+const PLAYFAIR_700_URL = '/fonts/playfair-700.woff2';
 
 // ── Registration ───────────────────────────────────────────────────────────
 
@@ -56,24 +49,24 @@ export function registerResumeFonts() {
   fontsRegistered = true;
 
   // Inter
-  Font.register({ family: 'Inter', src: INTER_URL, fontWeight: 400 });
-  Font.register({ family: 'Inter-Bold', src: INTER_URL, fontWeight: 700 });
+  Font.register({ family: 'Inter', src: INTER_400_URL });
+  Font.register({ family: 'Inter-Bold', src: INTER_700_URL });
 
-  // Lato (separate files per weight)
+  // Lato
   Font.register({ family: 'Lato', src: LATO_400_URL });
   Font.register({ family: 'Lato-Bold', src: LATO_700_URL });
 
   // Source Sans 3
-  Font.register({ family: 'SourceSans3', src: SOURCE_SANS_URL, fontWeight: 400 });
-  Font.register({ family: 'SourceSans3-Bold', src: SOURCE_SANS_URL, fontWeight: 700 });
+  Font.register({ family: 'SourceSans3', src: SOURCE_SANS_400_URL });
+  Font.register({ family: 'SourceSans3-Bold', src: SOURCE_SANS_700_URL });
 
   // EB Garamond
-  Font.register({ family: 'EBGaramond', src: GARAMOND_URL, fontWeight: 400 });
-  Font.register({ family: 'EBGaramond-Bold', src: GARAMOND_URL, fontWeight: 700 });
+  Font.register({ family: 'EBGaramond', src: GARAMOND_400_URL });
+  Font.register({ family: 'EBGaramond-Bold', src: GARAMOND_700_URL });
 
   // Playfair Display
-  Font.register({ family: 'PlayfairDisplay', src: PLAYFAIR_URL, fontWeight: 400 });
-  Font.register({ family: 'PlayfairDisplay-Bold', src: PLAYFAIR_URL, fontWeight: 700 });
+  Font.register({ family: 'PlayfairDisplay', src: PLAYFAIR_400_URL });
+  Font.register({ family: 'PlayfairDisplay-Bold', src: PLAYFAIR_700_URL });
 }
 
 // ── Font catalogue ─────────────────────────────────────────────────────────
