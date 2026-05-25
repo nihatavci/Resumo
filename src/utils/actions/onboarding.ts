@@ -43,18 +43,23 @@ export async function completeOnboarding(
     { category: 'Certifications', key: 'certifications', match: ['certif', 'license'] },
   ];
 
-  const supersededKeywords = formCategories.flatMap((fc) => fc.match);
+  // Only supersede a CV skill category when the form actually provided a replacement.
+  // If the user skipped a form field (or we have no form data), keep the CV's original category.
+  const filledFormCategories = formCategories.filter(({ key }) => {
+    const val = answers[key];
+    return Array.isArray(val) && val.length > 0;
+  });
+
+  const supersededKeywords = filledFormCategories.flatMap((fc) => fc.match);
   const baseSkills = cvSkills.filter((s) => {
     const cat = s.category.toLowerCase();
     return !supersededKeywords.some((kw) => cat.includes(kw));
   });
 
   const mergedSkills: Skill[] = [...baseSkills];
-  for (const { category, key } of formCategories) {
+  for (const { category, key } of filledFormCategories) {
     const val = answers[key];
-    if (Array.isArray(val) && val.length > 0) {
-      mergedSkills.push({ category, items: val });
-    }
+    mergedSkills.push({ category, items: val as string[] });
   }
 
   // ========================================================================
