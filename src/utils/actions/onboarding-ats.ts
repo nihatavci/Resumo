@@ -62,7 +62,7 @@ RULES:
 4. Within each category, order by relevance to the target role (most relevant first).
 5. Use the candidate's exact terminology (e.g. if they say "Google Ads", use that, not "AdWords").
 6. Skills that are clearly the candidate's strong suit (mentioned multiple times in their experience) should be in their own category if there are 5+.
-7. Do NOT assume the candidate is a software engineer. Keep domain-specific categories intact:
+7. Do NOT assume the candidate is a software engineer. Keep domain-specific categories intact (examples only — always prefer the candidate's own label over these):
    - Marketing: "SEO & SEM", "Analytics & Reporting", "Paid Campaigns", "Marketing Tools"
    - Design: "Design Tools", "Design Systems", "Research Methods"
    - Data: "Programming Languages", "Data Tools", "Visualization", "Databases"`;
