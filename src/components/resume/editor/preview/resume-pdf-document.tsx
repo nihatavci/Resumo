@@ -5,6 +5,10 @@ import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, Link,
 import { memo, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { type ResumeTheme, CLASSIC_THEME } from '@/lib/resume-themes';
+import { registerResumeFonts } from '@/lib/resume-fonts';
+
+// Register custom fonts once at module load (client-side only)
+registerResumeFonts();
 
 // Create a cache outside of components to persist between renders
 const textProcessingCache = new Map<string, ReactNode[]>();
@@ -355,8 +359,8 @@ function createResumeStyles(
       color: theme.bodyColor,
     },
     page: {
-      paddingTop: document_margin_vertical,
-      paddingBottom: document_margin_vertical + 28,
+      paddingTop: Math.max(document_margin_vertical, 32),
+      paddingBottom: Math.max(document_margin_vertical, 32) + 28,
       paddingLeft: document_margin_horizontal,
       paddingRight: document_margin_horizontal,
       fontFamily: theme.fontFamily,
@@ -367,8 +371,8 @@ function createResumeStyles(
     },
     header: {
       alignItems: theme.headerAlign === 'left' ? 'flex-start' : 'center',
-      paddingBottom: 10,
-      marginBottom: 6,
+      paddingBottom: 14,
+      marginBottom: 10,
       borderBottomWidth: theme.headerDivider?.width ?? 0,
       borderBottomColor: theme.headerDivider?.color ?? 'transparent',
       borderBottomStyle: 'solid',
@@ -377,7 +381,7 @@ function createResumeStyles(
       fontSize: header_name_size,
       fontFamily: theme.nameFontFamily,
       marginTop: 4,
-      marginBottom: Math.max(header_name_bottom_spacing, 14),
+      marginBottom: Math.max(header_name_bottom_spacing, 16),
       color: theme.nameColor,
       textAlign: theme.headerAlign === 'left' ? 'left' : 'center',
       letterSpacing: theme.nameLetterSpacing ?? 0.5,
