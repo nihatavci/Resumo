@@ -48,25 +48,29 @@ export function registerResumeFonts() {
   if (fontsRegistered || typeof window === 'undefined') return;
   fontsRegistered = true;
 
+  // Build absolute URLs so react-pdf can fetch them regardless of context
+  const origin = window.location.origin;
+  const abs = (path: string) => `${origin}${path}`;
+
   // Inter
-  Font.register({ family: 'Inter', src: INTER_400_URL });
-  Font.register({ family: 'Inter-Bold', src: INTER_700_URL });
+  Font.register({ family: 'Inter', src: abs(INTER_400_URL) });
+  Font.register({ family: 'Inter-Bold', src: abs(INTER_700_URL) });
 
   // Lato
-  Font.register({ family: 'Lato', src: LATO_400_URL });
-  Font.register({ family: 'Lato-Bold', src: LATO_700_URL });
+  Font.register({ family: 'Lato', src: abs(LATO_400_URL) });
+  Font.register({ family: 'Lato-Bold', src: abs(LATO_700_URL) });
 
   // Source Sans 3
-  Font.register({ family: 'SourceSans3', src: SOURCE_SANS_400_URL });
-  Font.register({ family: 'SourceSans3-Bold', src: SOURCE_SANS_700_URL });
+  Font.register({ family: 'SourceSans3', src: abs(SOURCE_SANS_400_URL) });
+  Font.register({ family: 'SourceSans3-Bold', src: abs(SOURCE_SANS_700_URL) });
 
   // EB Garamond
-  Font.register({ family: 'EBGaramond', src: GARAMOND_400_URL });
-  Font.register({ family: 'EBGaramond-Bold', src: GARAMOND_700_URL });
+  Font.register({ family: 'EBGaramond', src: abs(GARAMOND_400_URL) });
+  Font.register({ family: 'EBGaramond-Bold', src: abs(GARAMOND_700_URL) });
 
   // Playfair Display
-  Font.register({ family: 'PlayfairDisplay', src: PLAYFAIR_400_URL });
-  Font.register({ family: 'PlayfairDisplay-Bold', src: PLAYFAIR_700_URL });
+  Font.register({ family: 'PlayfairDisplay', src: abs(PLAYFAIR_400_URL) });
+  Font.register({ family: 'PlayfairDisplay-Bold', src: abs(PLAYFAIR_700_URL) });
 }
 
 // ── Font catalogue ─────────────────────────────────────────────────────────
