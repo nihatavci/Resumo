@@ -381,7 +381,7 @@ function createResumeStyles(
       fontSize: header_name_size,
       fontFamily: theme.nameFontFamily,
       marginTop: 4,
-      marginBottom: Math.max(header_name_bottom_spacing, 16),
+      marginBottom: Math.max(header_name_bottom_spacing, 32),
       color: theme.nameColor,
       textAlign: theme.headerAlign === 'left' ? 'left' : 'center',
       letterSpacing: theme.nameLetterSpacing ?? 0.5,
