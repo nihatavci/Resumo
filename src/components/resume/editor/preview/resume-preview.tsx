@@ -112,6 +112,7 @@ interface ResumePreviewProps {
  */
 export const ResumePreview = memo(function ResumePreview({ resume, variant = 'base', containerWidth, theme }: ResumePreviewProps) {
   const [url, setUrl] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const debouncedWidth = useDebouncedValue(containerWidth, 100);
   
@@ -163,6 +164,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
         setUrl(newUrl);
       } catch (err) {
         console.error('[ResumePreview] PDF generation failed:', err);
+        setPdfError(err instanceof Error ? err.message : String(err));
         // Don't cache failures — allow retry on next render
       }
     }
@@ -197,10 +199,23 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
     setTimeout(() => setShouldRenderTextLayer(true), 1000);
   }
 
-  // Disable text layer during updates
+  // Disable text layer during updates, clear error on new generation
   useEffect(() => {
     setShouldRenderTextLayer(false);
+    setPdfError(null);
   }, [resumeHash, variant]);
+
+  // Show error state
+  if (pdfError) {
+    return (
+      <div className="w-full aspect-[8.5/11] bg-white shadow-lg flex items-center justify-center p-8">
+        <div className="text-center space-y-2">
+          <p className="text-sm font-medium text-red-600">PDF generation failed</p>
+          <p className="text-xs text-gray-500 font-mono break-all max-w-xs">{pdfError}</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while PDF is being generated
   if (!url) {

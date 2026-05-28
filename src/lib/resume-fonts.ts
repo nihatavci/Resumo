@@ -18,22 +18,22 @@ export interface ResumeFont {
   googleFontsUrl?: string;
 }
 
-// ── Font URLs (self-hosted in /public/fonts, served via Cloudflare CDN) ────
+// ── Font URLs (self-hosted in /public/fonts, .woff for max fontkit compat) ─
 
-const INTER_400_URL = '/fonts/inter-400.woff2';
-const INTER_700_URL = '/fonts/inter-700.woff2';
+const INTER_400_URL = '/fonts/inter-400.woff';
+const INTER_700_URL = '/fonts/inter-700.woff';
 
-const LATO_400_URL = '/fonts/lato-400.woff2';
-const LATO_700_URL = '/fonts/lato-700.woff2';
+const LATO_400_URL = '/fonts/lato-400.woff';
+const LATO_700_URL = '/fonts/lato-700.woff';
 
-const SOURCE_SANS_400_URL = '/fonts/source-sans-400.woff2';
-const SOURCE_SANS_700_URL = '/fonts/source-sans-700.woff2';
+const SOURCE_SANS_400_URL = '/fonts/source-sans-400.woff';
+const SOURCE_SANS_700_URL = '/fonts/source-sans-700.woff';
 
-const GARAMOND_400_URL = '/fonts/garamond-400.woff2';
-const GARAMOND_700_URL = '/fonts/garamond-700.woff2';
+const GARAMOND_400_URL = '/fonts/garamond-400.woff';
+const GARAMOND_700_URL = '/fonts/garamond-700.woff';
 
-const PLAYFAIR_400_URL = '/fonts/playfair-400.woff2';
-const PLAYFAIR_700_URL = '/fonts/playfair-700.woff2';
+const PLAYFAIR_400_URL = '/fonts/playfair-400.woff';
+const PLAYFAIR_700_URL = '/fonts/playfair-700.woff';
 
 // ── Registration ───────────────────────────────────────────────────────────
 
